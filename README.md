@@ -2,7 +2,9 @@
 
 
 #### 介绍
-Subversion的web管理界面, 搭建svn服务器的神器.
+svnWebUI是一款svn服务端web图形化管理工具, 是一个搭建svn服务器的神器.
+
+github: https://github.com/cym1102/svnWebUI
 
 #### 功能说明
 
