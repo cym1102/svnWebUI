@@ -1,0 +1,37 @@
+.red{
+	color: red;
+}
+
+.green{
+	color: green;
+}
+
+.blue{
+	color: blue;
+}
+.gray{
+	color: gray;
+}
+
+
+.ck-editor {
+   width: 100% !important;
+}
+.ck-content {
+   height: 400px;
+}
+
+.img{
+	height: 80px;
+}
+
+.layui-layout-admin .layui-body {
+	bottom: 0px;
+}
+
+.redPoint{
+	color: red;
+	font-weight:bolder;
+	display: inline-block;
+	margin-left: 10px;
+}

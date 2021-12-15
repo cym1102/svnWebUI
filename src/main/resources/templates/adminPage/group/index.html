@@ -1,0 +1,134 @@
+<!DOCTYPE HTML>
+<html>
+<head>
+<#include "/adminPage/common.html"/>
+<style type="text/css">
+</style>
+</head>
+<body class="layui-layout-body">
+	<div class="layui-layout layui-layout-admin">
+
+		<#include "/adminPage/header.html"/>
+		<#include "/adminPage/menu.html"/>
+
+		<div class="layui-body">
+			<!-- 内容主体区域 -->
+			<div style="padding: 15px">
+				<fieldset class="layui-elem-field layui-field-title">
+					<legend>小组管理</legend>
+				</fieldset>
+
+				<form action="${ctx}/adminPage/group" id="searchForm" method="post">
+					<div class="layui-form search">
+						<button type="button" class="layui-btn layui-btn-normal" onclick="add()">添加小组</button>
+						<button type="button" class="layui-btn layui-btn-normal" onclick="importGroup()">导入小组</button>
+
+						<div class="layui-inline">
+							<label class="layui-form-label">关键字</label>
+						</div>
+						<div class="layui-inline">
+							<input type="text" name="keywords" class="layui-input" value="${keywords}">
+						</div>
+
+						<div class="layui-inline">
+							<button type="button" class="layui-btn" onclick="search()">搜索</button>
+						</div>
+					</div>
+
+
+
+					<input type="hidden" name="curr" value="${page.curr}"> <input type="hidden" name="limit" value="${page.limit}">
+
+				</form>
+
+				<table class="layui-table">
+					<thead>
+						<tr>
+							<th>小组名</th>
+							<th>成员</th>
+							<th>操作</th>
+						</tr>
+					</thead>
+					<tbody>
+						<#list page.records as groupExt>
+						<tr>
+							<td>${groupExt.name}</td>
+							<td><#list groupExt.userList as user> ${user.trueName} </#list></td>
+							<td>
+								<button class="layui-btn layui-btn-sm" onclick="edit('${groupExt.id}')">编辑</button>
+
+								<button class="layui-btn layui-btn-danger layui-btn-sm" onclick="del('${groupExt.id}')">删除</button>
+
+							</td>
+						</tr>
+						</#list>
+					</tbody>
+				</table>
+
+				<div id="pageInfo"></div>
+			</div>
+		</div>
+	</div>
+
+	<div style="height: 0px; width: 0px; overflow: hidden;">
+		<!-- 弹出框 -->
+		<div class="layui-form" id="windowDiv" style="padding: 15px; display: none">
+			<form id="addForm">
+				<input type="hidden" name="id" id="id">
+
+				<div class="layui-form-item">
+					<label class="layui-form-label">小组名<span class="red">*</span></label>
+					<div class="layui-input-block">
+						<input type="text" name="name" id="name" class="layui-input">
+					</div>
+				</div>
+
+				<div class="layui-form-item">
+					<label class="layui-form-label">包含用户</label>
+					<div class="layui-input-block">
+						<div id="userIds"></div>
+					</div>
+				</div>
+
+				<div class="layui-form-item" style="text-align: center;">
+					<button type="button" class="layui-btn layui-btn-normal" onclick="addOver()">提交</button>
+					<button type="button" class="layui-btn" onclick="layer.closeAll()">关闭</button>
+				</div>
+			</form>
+		</div>
+
+
+		<div class="layui-form" id="importDiv" style="padding: 15px; display: none">
+			<form id="importForm">
+				<div id="zipDiv">
+					<div class="layui-form-item">
+						<label class="layui-form-label">选择文件</label>
+						<div class="layui-input-inline" style="width: auto;">
+							<button type="button" class="layui-btn" id="upload">选择文件</button>
+						</div>
+						<div class="layui-form-mid layui-word-aux" id="fileName"></div>
+						<input type="hidden" name="dirTemp" id="dirTemp">
+
+					</div>
+
+					<div class="layui-form-item">
+						<label class="layui-form-label">&nbsp;</label>
+						<div class="layui-form-mid layui-word-aux" style="width: 300px;">请选择原有服务器上的authz文件</div>
+					</div>
+				</div>
+
+				<div class="layui-form-item" style="text-align: center;">
+					<button type="button" class="layui-btn layui-btn-normal" onclick="importOver()">提交</button>
+					<button type="button" class="layui-btn" onclick="layer.closeAll()">关闭</button>
+				</div>
+			</form>
+		</div>
+
+
+	</div>
+	
+	<script src="${ctx}/js/adminPage/group/index.js?v=${jsrandom}" type="text/javascript"></script>
+</body>
+
+
+</html>

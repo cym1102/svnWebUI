@@ -1,0 +1,61 @@
+<!DOCTYPE HTML>
+<html>
+<head>
+<#include "/adminPage/common.html"/>
+
+</head>
+<body class="layui-layout-body">
+	<div class="layui-layout layui-layout-admin">
+
+		<#include "/adminPage/header.html"/>
+		<#include "/adminPage/menu.html"/>
+
+		<div class="layui-body">
+			<!-- 内容主体区域 -->
+			<div style="padding: 15px">
+				<fieldset class="layui-elem-field layui-field-title">
+					<legend>服务管理</legend>
+				</fieldset>
+
+				<#if hasSvnserve>
+				<div class="layui-form">
+					<div class="layui-inline">
+						<button type="button" class="layui-btn" onclick="start()">启动Svnserve</button>
+					</div>
+					<div class="layui-inline">
+						<button type="button" class="layui-btn" onclick="stop()">停止Svnserve</button>
+					</div>
+					<div class="layui-inline">
+						&nbsp;&nbsp;&nbsp;&nbsp;svn端口: 
+					</div>
+					<div class="layui-inline">
+						<input type="number" class="layui-input" style="width: 100px;" id="port" value="${port}" >
+					</div>
+
+					<div class="layui-inline">
+						&nbsp;&nbsp;&nbsp;&nbsp;Svnserve 运行状态：<span id='status'> </span>
+					</div>
+				</div>
+				</#if>
+
+
+				<#if !hasSvnserve> 
+				<div style="color: gray;padding-left: 30px;">
+					<h3>你还没有安装Subversion, 请先进行安装</h3>
+					<br>
+					<h3>Ubuntu: apt install subversion</h3>
+					<br>
+					<h3>Centos: yum install subversion</h3>
+					<br>
+					<h3>Windows: 下载链接 https://www.visualsvn.com/server/download/</h3>
+				</div>
+				</#if>
+			</div>
+		</div>
+	</div>
+
+	<script src="${ctx}/js/adminPage/config/index.js?v=${jsrandom}" type="text/javascript"></script>
+</body>
+
+
+</html>

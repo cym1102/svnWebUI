@@ -1,0 +1,159 @@
+<!DOCTYPE HTML>
+<html>
+<head>
+<#include "/adminPage/common.html"/>
+<style type="text/css">
+.disabled {
+	background-color: #efefef;
+}
+</style>
+</head>
+<body class="layui-layout-body">
+	<div class="layui-layout layui-layout-admin">
+
+		<#include "/adminPage/header.html"/>
+		<#include "/adminPage/menu.html"/>
+
+		<div class="layui-body">
+			<!-- 内容主体区域 -->
+			<div style="padding: 15px">
+				<fieldset class="layui-elem-field layui-field-title">
+					<legend>仓库管理</legend>
+				</fieldset>
+
+				<form action="${ctx}/adminPage/repository" id="searchForm" method="post">
+					<div class="layui-form search">
+						<button type="button" class="layui-btn layui-btn-normal" onclick="add()">添加仓库</button>
+
+						<div class="layui-inline">
+							<label class="layui-form-label">仓库名</label>
+						</div>
+						<div class="layui-inline">
+							<input type="text" name="keywords" class="layui-input" value="${keywords}">
+						</div>
+
+						<div class="layui-inline">
+							<button type="button" class="layui-btn" onclick="search()">搜索</button>
+						</div>
+					</div>
+
+
+
+					<input type="hidden" name="curr" value="${page.curr}"> 
+					<input type="hidden" name="limit" value="${page.limit}">
+
+				</form>
+
+				<table class="layui-table">
+					<thead>
+						<tr>
+							<th>仓库名</th>
+							<th>url</th>
+							<th>授权</th>
+							<th>操作</th>
+						</tr>
+					</thead>
+					<tbody>
+						<#list page.records as repositoryExt>
+						<tr>
+							<td>${repositoryExt.name}</td>
+							<td>
+							${repositoryExt.url}
+							&nbsp;&nbsp; <a style="color: blue;" href="javascript:copyToClipboard('${repositoryExt.url}')">复制</a>
+							</td>
+							<td>
+								<button class="layui-btn layui-btn-sm" onclick="userPermission('${repositoryExt.id}','${repositoryExt.name}')">用户授权</button>
+								<button class="layui-btn layui-btn-sm" onclick="groupPermission('${repositoryExt.id}','${repositoryExt.name}')">小组授权</button>
+							</td>
+							<td>	
+								<button class="layui-btn layui-btn-sm" onclick="seeFile('${repositoryExt.id}')">查看文件</button>
+								<button class="layui-btn layui-btn-sm layui-btn-normal" onclick="loadBak('${repositoryExt.id}', '${repositoryExt.name}')">导入备份</button>
+								<button class="layui-btn layui-btn-sm layui-btn-normal" onclick="dumpBak('${repositoryExt.id}')">导出备份</button>
+								<button class="layui-btn layui-btn-danger layui-btn-sm" onclick="del('${repositoryExt.id}')">删除</button>
+								
+							</td>
+						</tr>
+						</#list>
+					</tbody>
+				</table>
+
+				<div id="pageInfo"></div>
+			</div>
+		</div>
+	</div>
+
+	<div style="height: 0px; width: 0px; overflow: hidden;">
+		<!-- 弹出框 -->
+		<div class="layui-form" id="windowDiv" style="padding: 15px; display: none">
+			<form id="addForm">
+				<input type="hidden" name="id" id="id">
+
+				<div class="layui-form-item">
+					<label class="layui-form-label">仓库名<span class="red">*</span></label>
+					<div class="layui-input-block">
+						<input type="text" name="name" id="name" class="layui-input">
+					</div>
+				</div>
+
+				<div class="layui-form-item" style="text-align: center;">
+					<button type="button" class="layui-btn layui-btn-normal" onclick="addOver()">提交</button>
+					<button type="button" class="layui-btn" onclick="layer.closeAll()">关闭</button>
+				</div>
+			</form>
+		</div>
+		
+		<div class="layui-form" id="loadDiv" style="padding: 15px; display: none">
+			<form id="loadForm">
+				<input type="hidden" name="id" id="loadId">
+
+				<div class="layui-form-item">
+					<label class="layui-form-label">仓库名</label>
+					<div class="layui-form-mid layui-word-aux" style="width: 300px;" id="repoName">
+						
+					</div>
+				</div>
+				
+				<div id="zipDiv">
+					<div class="layui-form-item">
+						<label class="layui-form-label">选择文件</label>
+						<div class="layui-input-inline" style="width: auto;">
+							<button type="button" class="layui-btn" id="upload">选择文件</button>
+						</div>
+						<div class="layui-form-mid layui-word-aux" id="fileName"></div>
+						<input type="hidden" name="dirTemp" id="dirTemp" >
+					
+					</div>
+	
+					<div class="layui-form-item">
+						<label class="layui-form-label">&nbsp;</label>
+						<div class="layui-form-mid layui-word-aux" style="width: 300px;">请在原有svn服务器上使用svnadmin dump命令导出仓库备份文件</div>
+					</div>
+				</div>
+
+				<div class="layui-form-item" style="text-align: center;">
+					<button type="button" class="layui-btn layui-btn-normal" onclick="loadOver()">提交</button>
+					<button type="button" class="layui-btn" onclick="layer.closeAll()">关闭</button>
+				</div>
+			</form>
+		</div>
+		
+		<div style="height: 0px; width: 0px; overflow: hidden;">
+			<!-- 弹出框 -->
+			<div class="layui-form" id="rootSelectDiv" style="padding: 15px; display: none">
+				<ul id="rootSelect" class="ztree" style="height: 460px;overflow: auto;"></ul>
+				
+				<input type="hidden" id="repositoryId">
+				<div class="layui-form-item" style="text-align: center;margin-top: 20px;">
+					<button type="button" class="layui-btn layui-btn-sm" onclick="see()">查看</button>
+					<button type="button" class="layui-btn layui-btn-sm layui-btn-normal" onclick="layer.closeAll()">关闭</button>
+				</div>
+			</div>
+		</div>
+
+	</div>
+
+	<script src="${ctx}/js/adminPage/repository/index.js?v=${jsrandom}" type="text/javascript"></script>
+</body>
+
+
+</html>

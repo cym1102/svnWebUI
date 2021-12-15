@@ -1,0 +1,46 @@
+<div class="layui-side layui-bg-black">
+	<div class="layui-side-scroll">
+		<!-- 左侧导航区域（可配合layui已有的垂直导航） -->
+		<ul class="layui-nav layui-nav-tree" lay-filter="test">
+			<li class="layui-nav-item layui-nav-itemed">
+				<a class="" href="javascript:;">
+					<span style="color: aqua;">菜单</span>
+				</a>
+				<dl class="layui-nav-child">
+					<dd>
+						<a href="${ctx}/adminPage/info">个人信息</a>
+					</dd>
+					
+					<#if user.type == 1>
+						<dd>
+							<a href="${ctx}/adminPage/config">服务管理</a>
+						</dd>
+						
+						<dd>
+							<a href="${ctx}/adminPage/repository">仓库管理</a>
+						</dd>
+						
+						<dd>
+							<a href="${ctx}/adminPage/user">用户管理</a>
+						</dd>
+						
+						<dd>
+							<a href="${ctx}/adminPage/group">小组管理</a>
+						</dd>
+					</#if>
+					
+					
+					
+				</dl>
+			</li>
+
+		</ul>
+	</div>
+</div>
+
+<script type="text/javascript">
+	$(function() {
+		var url = location.pathname + location.search;
+		$("a[href='" + ctx + url.substr(1) + "']").parent().addClass("layui-this");
+	})
+</script>

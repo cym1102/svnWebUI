@@ -1,0 +1,106 @@
+<!DOCTYPE HTML>
+<html>
+<head>
+<#include "/adminPage/common.html"/>
+<style type="text/css">
+</style>
+</head>
+<body>
+	<!-- 内容主体区域 -->
+	<div style="padding: 15px">
+		<form action="${ctx}/adminPage/repository/groupPermission" id="searchForm" method="post">
+			<div class="layui-inline">
+				<button type="button" class="layui-btn layui-btn-danger" onclick="add()">添加小组</button>
+			</div>
+	
+			<input type="hidden" name="repositoryId" value="${repositoryId}"> 
+			<input type="hidden" name="curr" value="${page.curr}"> 
+			<input type="hidden" name="limit" value="${page.limit}">
+		</form>
+
+		<table class="layui-table">
+			<thead>
+				<tr>
+					<th>小组</th>
+					<th>路径</th>
+					<th>权限</th>
+					<th>操作</th>
+				</tr>
+			</thead>
+			<tbody>
+				<#list page.records as repositoryGroupExt>
+				<tr>
+					<td>${repositoryGroupExt.group.name}</td>
+					<td>${repositoryGroupExt.path}
+					&nbsp;&nbsp; <a style="color: blue;" href="javascript:copyToClipboard('${repositoryGroupExt.path}')">复制</a>
+					</td>
+					<td>
+					<#if repositoryGroupExt.permission == 'r'>
+						读
+					</#if>
+					<#if repositoryGroupExt.permission == 'rw'>
+						读写
+					</#if>
+					
+					</td>
+					<td>
+						<button class="layui-btn layui-btn-sm" onclick="edit('${repositoryGroupExt.id}')">编辑</button>
+						<button class="layui-btn layui-btn-sm layui-btn-danger" onclick="del('${repositoryGroupExt.id}')">删除</button>
+					</td>
+				</tr>
+				</#list>
+			</tbody>
+		</table>
+		<div id="pageInfo"></div>
+	</div>
+
+	<div style="height: 0px; width: 0px; overflow: hidden;">
+		<!-- 弹出框 -->
+		<div class="layui-form" id="windowDiv" style="padding: 15px; display: none">
+			<form id="addForm">
+				<input type="hidden" name="id" id="id">
+				<input type="hidden" name="repositoryId" value="${repositoryId}"> 
+				
+				<div class="layui-form-item">
+					<label class="layui-form-label">小组</label>
+					<div class="layui-input-inline">
+						<div id="groupId"></div>
+					</div>
+				</div>
+				
+				<div class="layui-form-item">
+					<label class="layui-form-label">路径</label>
+					<div class="layui-input-inline">
+						<input type="text" name="path" id="path" class="layui-input" >
+					</div>
+					<div class="layui-input-inline">
+						<button type="button" class="layui-btn" onclick="rootSelect.selectRoot('path','${repositoryId}')">选择</button>
+					</div>
+				</div>
+				
+				<div class="layui-form-item">
+					<label class="layui-form-label">权限</label>
+					<div class="layui-input-inline">
+						<select type="text" name="permission" id="permission">
+							<option value="r">读</option>
+							<option value="rw">读写</option>
+						</select>
+					</div>
+				</div>
+
+
+				<div class="layui-form-item" style="text-align: center;">
+					<button type="button" class="layui-btn layui-btn-normal" onclick="addOver()">提交</button>
+					<button type="button" class="layui-btn" onclick="layer.closeAll()">关闭</button>
+				</div>
+			</form>
+		</div>
+
+	</div>
+	
+	<#include '/adminPage/select_root.html'/>
+	<script src="${ctx}/js/adminPage/repository/groupPermission.js?v=${jsrandom}" type="text/javascript"></script>
+</body>
+
+
+</html>

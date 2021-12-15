@@ -1,0 +1,91 @@
+<!DOCTYPE HTML>
+<html>
+<head>
+<#include "/adminPage/common.html"/>
+
+</head>
+<body class="layui-layout-body">
+	<div class="layui-layout layui-layout-admin">
+
+		<#include "/adminPage/header.html"/>
+		<#include "/adminPage/menu.html"/>
+
+		<div class="layui-body">
+			<!-- 内容主体区域 -->
+			<div style="padding: 15px">
+				<fieldset class="layui-elem-field layui-field-title">
+					<legend>${trueName}的仓库</legend>
+				</fieldset>
+
+				<div class="layui-form">
+					<button type="button" class="layui-btn layui-btn-normal" onclick="changePass()">修改登录密码</button>
+				</div>
+
+				<table class="layui-table">
+					<thead>
+						<tr>
+							<th>仓库名</th>
+							<th>url</th>
+							<th>权限</th>
+						</tr>
+					</thead>
+					<tbody>
+						<#list repositoryUserList as repositoryUserExt>
+						<tr>
+							<td>${repositoryUserExt.repository.name}</td>
+							<td>${repositoryUserExt.path} &nbsp;&nbsp; <a style="color: blue;" href="javascript:copyToClipboard('${repositoryUserExt.path}')">复制</a>
+							</td>
+							<td><#if repositoryUserExt.permission=='r'> 读 </#if> <#if repositoryUserExt.permission=='rw'> 读写 </#if></td>
+						</tr>
+						</#list>
+					</tbody>
+				</table>
+			</div>
+		</div>
+	</div>
+
+
+	<div style="height: 0px; width: 0px; overflow: hidden;">
+		<!-- 弹出框 -->
+		<div class="layui-form" id="windowDiv" style="padding: 15px; display: none">
+			<form id="addForm">
+				<input type="hidden" name="id" id="id">
+
+
+				<div class="layui-form-item">
+					<label class="layui-form-label">旧密码<span class="red">*</span></label>
+					<div class="layui-input-block">
+						<input type="password" name="oldPass" id="oldPass" class="layui-input">
+					</div>
+				</div>
+
+
+				<div class="layui-form-item">
+					<label class="layui-form-label">新密码<span class="red">*</span></label>
+					<div class="layui-input-block">
+						<input type="password" name="newPass" id="newPass" class="layui-input">
+					</div>
+				</div>
+
+
+				<div class="layui-form-item">
+					<label class="layui-form-label">再次输入<span class="red">*</span></label>
+					<div class="layui-input-block">
+						<input type="password" name="repeatPass" id="repeatPass" class="layui-input">
+					</div>
+				</div>
+				
+				<div class="layui-form-item" style="text-align: center;">
+					<button type="button" class="layui-btn layui-btn-normal" onclick="changeOver()">提交</button>
+					<button type="button" class="layui-btn" onclick="layer.closeAll()">关闭</button>
+				</div>
+			</form>
+		</div>
+
+	</div>
+
+	<script src="${ctx}/js/adminPage/info/index.js?v=${jsrandom}" type="text/javascript"></script>
+</body>
+
+
+</html>
