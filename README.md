@@ -21,8 +21,6 @@ Windows上倒是有不错的svn服务端软件即VisualSVN, 但一来Windows服�
 
 本项目是基于springBoot的web系统, 数据库使用sqlite, 因此服务器上不需要安装任何数据库
 
-项目启动时会释放一个.sqlite.db到系统用户文件夹中, 注意进行备份
-
 使用本软件前请先安装Subversion
 
 
@@ -197,25 +195,29 @@ systemctl start svnwebui.service
 
 注册完毕后, 进入登录页面进行登录
 
+![输入图片说明](http://www.nginxwebui.cn/img/svn/个人管理.png "admin.jpg")
+
+个人信息, 可在这个页面查看当前用户的拥有仓库, 并可修改用户密码.
+
 ![输入图片说明](http://www.nginxwebui.cn/img/svn/服务管理.png "admin.jpg")
 
 服务管理, 可在这个页面查看Subversion服务的开启情况, 并进行停止和重启.
 
 ![输入图片说明](http://www.nginxwebui.cn/img/svn/仓库管理.png "admin.jpg")
 
-仓库管理, 可添加仓库及修改仓库, 添加仓库后即可获得仓库的svn地址, 十分方便
+仓库管理, 可添加仓库及修改仓库, 添加仓库后即可获得仓库的svn地址, 在Subversion服务开启的情况下可直接checkout, 十分方便
 
 ![输入图片说明](http://www.nginxwebui.cn/img/svn/用户授权.png "admin.jpg")
 
-选择对应的用户对仓库进行授权
+选择对应的用户对仓库进行授权, 可以授权到某个目录
 
 ![输入图片说明](http://www.nginxwebui.cn/img/svn/小组授权.png "admin.jpg")
 
-选择对应的小组对仓库进行授权
+选择对应的小组对仓库进行授权, 可以授权到某个目录
 
 ![输入图片说明](http://www.nginxwebui.cn/img/svn/用户管理.png "admin.jpg")
 
-用户管理, 可添加和编辑用户
+用户管理, 可添加和编辑用户, 用户分两种, 管理员和普通用户, 普通用户只能看到自己的信息, 管理员可管理整个平台的信息
 
 ![输入图片说明](http://www.nginxwebui.cn/img/svn/分组管理.png "admin.jpg")
 
