@@ -3,10 +3,11 @@ package com.cym.service;
 import java.util.ArrayList;
 import java.util.List;
 
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.stereotype.Service;
+import org.noear.solon.annotation.Inject;
+import org.noear.solon.extend.aspect.annotation.Service;
 
-import com.cym.config.SqlConfig;
+import com.cym.config.HomeConfig;
+import com.cym.config.ProjectConfig;
 import com.cym.ext.GroupExt;
 import com.cym.ext.UserExt;
 import com.cym.model.Group;
@@ -15,26 +16,26 @@ import com.cym.model.Repository;
 import com.cym.model.RepositoryGroup;
 import com.cym.model.RepositoryUser;
 import com.cym.model.User;
+import com.cym.sqlhelper.bean.Page;
+import com.cym.sqlhelper.utils.ConditionAndWrapper;
+import com.cym.sqlhelper.utils.ConditionOrWrapper;
+import com.cym.sqlhelper.utils.SqlHelper;
 import com.cym.utils.BeanExtUtil;
 
-import cn.craccd.sqlHelper.bean.Page;
-import cn.craccd.sqlHelper.utils.ConditionAndWrapper;
-import cn.craccd.sqlHelper.utils.ConditionOrWrapper;
-import cn.craccd.sqlHelper.utils.SqlHelper;
 import cn.hutool.core.io.FileUtil;
+import cn.hutool.core.io.resource.ClassPathResource;
 import cn.hutool.core.util.RuntimeUtil;
 import cn.hutool.core.util.StrUtil;
-import cn.hutool.json.JSONArray;
-import cn.hutool.json.JSONObject;
-import cn.hutool.json.JSONUtil;
 
 @Service
 public class RepositoryService {
 
-	@Autowired
+	@Inject
 	SqlHelper sqlHelper;
-	@Autowired
-	SqlConfig sqlConfig;
+	@Inject
+	ProjectConfig projectConfig;
+	@Inject
+	HomeConfig homeConfig;
 
 	public Page search(Page page, String keywords) {
 		ConditionAndWrapper conditionAndWrapper = new ConditionAndWrapper();
@@ -59,7 +60,7 @@ public class RepositoryService {
 
 	public void deleteById(String repositoryId) {
 		Repository repository = sqlHelper.findById(repositoryId, Repository.class);
-		String dir = sqlConfig.home + "/repo/" + repository.getName();
+		String dir = homeConfig.home + "/repo/" + repository.getName();
 		FileUtil.del(dir);
 
 		sqlHelper.deleteById(repositoryId, Repository.class);
@@ -72,7 +73,7 @@ public class RepositoryService {
 
 		if (StrUtil.isEmpty(repository.getId())) {
 			// 创建仓库
-			String dir = sqlConfig.home + "/repo/" + repository.getName();
+			String dir = homeConfig.home + "/repo/" + repository.getName();
 			FileUtil.del(dir);
 			FileUtil.mkdir(dir);
 			try {
@@ -81,6 +82,11 @@ public class RepositoryService {
 			} catch (Exception e) {
 				e.printStackTrace();
 			}
+			
+			// 拷贝配置文件
+			String svnserve_conf = homeConfig.home + "/repo/" + repository.getName() + "/conf/svnserve.conf";
+			ClassPathResource resource = new ClassPathResource("file/svnserve.conf");
+			FileUtil.writeFromStream(resource.getStream(), svnserve_conf);
 		}
 
 		sqlHelper.insertOrUpdate(repository);

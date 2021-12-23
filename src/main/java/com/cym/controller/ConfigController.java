@@ -1,26 +1,19 @@
 package com.cym.controller;
 
 import java.io.File;
-import java.net.URI;
-import java.net.URISyntaxException;
 import java.nio.charset.Charset;
-import java.security.CodeSource;
-import java.security.ProtectionDomain;
 import java.util.ArrayList;
 import java.util.List;
 
-import javax.servlet.http.HttpSession;
+import org.noear.solon.annotation.Controller;
+import org.noear.solon.annotation.Inject;
+import org.noear.solon.annotation.Mapping;
+import org.noear.solon.core.handle.ModelAndView;
 
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.stereotype.Controller;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.ResponseBody;
-import org.springframework.web.servlet.ModelAndView;
-
-import com.cym.config.SqlConfig;
+import com.cym.config.HomeConfig;
+import com.cym.config.ProjectConfig;
 import com.cym.service.SettingService;
 import com.cym.utils.BaseController;
-import com.cym.utils.JarUtil;
 import com.cym.utils.JsonResult;
 import com.cym.utils.SystemTool;
 
@@ -28,16 +21,19 @@ import cn.hutool.core.io.FileUtil;
 import cn.hutool.core.util.RuntimeUtil;
 
 @Controller
-@RequestMapping("/adminPage/config")
+@Mapping("/adminPage/config")
 public class ConfigController extends BaseController {
 
-	@Autowired
-	SqlConfig sqlConfig;
-	@Autowired
+	@Inject
+	ProjectConfig projectConfig;
+	@Inject
 	SettingService settingService;
+	
+	@Inject
+	HomeConfig homeConfig;
 
-	@RequestMapping("")
-	public ModelAndView index(HttpSession httpSession, ModelAndView modelAndView) {
+	@Mapping("")
+	public ModelAndView index() {
 		boolean hasSvnserve = false;
 		if (SystemTool.isWindows()) {
 			String[] command = { "where svnserve" };
@@ -50,14 +46,13 @@ public class ConfigController extends BaseController {
 			hasSvnserve = rs.contains("svnserve");
 		}
 
-		modelAndView.addObject("port", settingService.get("port"));
-		modelAndView.addObject("hasSvnserve", hasSvnserve);
-		modelAndView.setViewName("/adminPage/config/index");
+		ModelAndView modelAndView = buildMav("/adminPage/config/index.html");
+		modelAndView.put("port", settingService.get("port"));
+		modelAndView.put("hasSvnserve", hasSvnserve);
 		return modelAndView;
 	}
 
-	@RequestMapping("getStatus")
-	@ResponseBody
+	@Mapping("getStatus")
 	public JsonResult getStatus() {
 		Boolean isRun = false;
 		if (SystemTool.isWindows()) {
@@ -80,17 +75,13 @@ public class ConfigController extends BaseController {
 		return renderSuccess(status);
 	}
 
-	@RequestMapping("start")
-	@ResponseBody
+	@Mapping("start")
+
 	public JsonResult start(String port) {
 		settingService.set("port", port);
 
 		if (SystemTool.isWindows()) {
-			String home = sqlConfig.home;
-//			if (!home.contains(":")) {
-//				// 获取盘符
-//				home = JarUtil.getCurrentFilePath().split(":")[0] + ":" + home;
-//			}
+			String home = homeConfig.home;
 
 			// 释放vbs
 			String cmd = "svnserve.exe -d -r " + (home + File.separator + "repo").replace("/", "\\") + " --listen-port " + port;
@@ -101,13 +92,12 @@ public class ConfigController extends BaseController {
 
 			RuntimeUtil.execForStr("wscript " + home + "/run.vbs");
 		} else {
-			RuntimeUtil.execForStr("svnserve -d -r " + sqlConfig.home + "/repo --listen-port " + port);
+			RuntimeUtil.execForStr("svnserve -d -r " + homeConfig.home + "/repo --listen-port " + port);
 		}
 		return renderSuccess();
 	}
 
-	@RequestMapping("stop")
-	@ResponseBody
+	@Mapping("stop")
 	public JsonResult stop() {
 		if (SystemTool.isWindows()) {
 			RuntimeUtil.execForStr("taskkill /f /im svnserve.exe");

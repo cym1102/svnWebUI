@@ -1,9 +1,8 @@
 package com.cym.model;
 
-import org.springframework.beans.factory.annotation.Value;
-
-import cn.craccd.sqlHelper.bean.BaseModel;
-import cn.craccd.sqlHelper.config.Table;
+import com.cym.sqlhelper.bean.BaseModel;
+import com.cym.sqlhelper.config.InitValue;
+import com.cym.sqlhelper.config.Table;
 
 /**
  * 用户
@@ -20,7 +19,7 @@ public class User extends BaseModel {
 	String pass;
 
 	// 权限 0:普通用戶 1:管理員
-	@Value("0")
+	@InitValue("0")
 	Integer type;
 
 	// 姓名

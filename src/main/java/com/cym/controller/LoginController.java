@@ -1,17 +1,14 @@
 package com.cym.controller;
 
-import javax.servlet.http.HttpServletRequest;
-import javax.servlet.http.HttpServletResponse;
-import javax.servlet.http.HttpSession;
-
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.stereotype.Controller;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.ResponseBody;
-import org.springframework.web.servlet.ModelAndView;
+import org.noear.solon.annotation.Controller;
+import org.noear.solon.annotation.Inject;
+import org.noear.solon.annotation.Mapping;
+import org.noear.solon.core.handle.Context;
+import org.noear.solon.core.handle.ModelAndView;
 
 import com.cym.model.User;
 import com.cym.service.UserService;
+import com.cym.sqlhelper.bean.Page;
 import com.cym.utils.BaseController;
 import com.cym.utils.JsonResult;
 import com.wf.captcha.SpecCaptcha;
@@ -24,39 +21,39 @@ import com.wf.captcha.utils.CaptchaUtil;
  * @author Useristrator
  *
  */
-@RequestMapping("/adminPage/login")
+@Mapping("/adminPage/login")
 @Controller
 public class LoginController extends BaseController {
-	@Autowired
+	@Inject
 	UserService userService;
 
-	@RequestMapping("")
-	public ModelAndView admin(ModelAndView modelAndView, HttpServletRequest request, HttpSession httpSession) {
-		modelAndView.addObject("adminCount", sqlHelper.findAllCount(User.class));
-		modelAndView.setViewName("/adminPage/login/index");
+	@Mapping("")
+	public ModelAndView admin() {
+		ModelAndView modelAndView = buildMav("/adminPage/login/index.html");
+		modelAndView.put("adminCount", sqlHelper.findAllCount(User.class));
+		
 		return modelAndView;
 	}
 
-	@RequestMapping(value = "login")
-	@ResponseBody
-	public JsonResult submitLogin(String name, String pass, String code, HttpServletRequest request) {
-		if (!CaptchaUtil.ver(code, request)) {
-			CaptchaUtil.clear(request); // 销毁验证码
+	@Mapping(value = "login")
+	public JsonResult submitLogin(String name, String pass, String code) {
+		String captcha = (String) Context.current().session("captcha");
+		if (!code.equals(captcha)) {
+			Context.current().sessionRemove("captcha"); // 销毁验证码
 			return renderError("验证码不正确"); // 验证码不正确
 		}
-		CaptchaUtil.clear(request); // 销毁验证码
-		
+		Context.current().sessionRemove("captcha"); // 销毁验证码
+
 		User user = userService.login(name, pass);
 		if (user == null) {
 			return renderError("登录失败,请检查用户名密码");
 		}
 
-		request.getSession().setAttribute("user", user);
+		Context.current().sessionSet("user", user);
 		return renderSuccess();
 	}
 
-	@RequestMapping("addAdmin")
-	@ResponseBody
+	@Mapping("addAdmin")
 	public JsonResult addAdmin(String trueName, String name, String pass) {
 
 		Long adminCount = sqlHelper.findAllCount(User.class);
@@ -73,17 +70,23 @@ public class LoginController extends BaseController {
 		return renderSuccess();
 	}
 
-	@RequestMapping("loginOut")
-	public String loginOut(HttpSession httpSession) {
-		httpSession.removeAttribute("user");
-		return "redirect:/adminPage/login";
+	@Mapping("loginOut")
+	public void loginOut(Context ctx) {
+		ctx.redirect("/adminPage/login");
 	}
 
-	@RequestMapping("/getCode")
-	public void getCode(HttpServletRequest httpServletRequest, HttpServletResponse httpServletResponse) throws Exception {
+	@Mapping("/getCode")
+	public void getCode() throws Exception {
+		Context.current().headerAdd("Pragma", "No-cache");
+		Context.current().headerAdd("Cache-Control", "no-cache");
+		Context.current().headerAdd("Expires", "0");
+		Context.current().contentType("image/gif");
+
 		SpecCaptcha specCaptcha = new SpecCaptcha(100, 40, 4);
 		specCaptcha.setCharType(Captcha.TYPE_ONLY_NUMBER);
-		CaptchaUtil.out(specCaptcha, httpServletRequest, httpServletResponse);
+
+		Context.current().sessionSet("captcha", specCaptcha.text().toLowerCase());
+		specCaptcha.out(Context.current().outputStream());
 	}
 
 }

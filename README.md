@@ -19,7 +19,7 @@ Windows上倒是有不错的svn服务端软件即VisualSVN, 但一来Windows服�
 
 #### 技术说明
 
-本项目是基于springBoot的web系统, 数据库使用sqlite, 因此服务器上不需要安装任何数据库
+本项目是基于springBoot的web系统, 数据库使用h2, 因此服务器上不需要安装任何数据库
 
 使用本软件前请先安装Subversion
 
@@ -66,9 +66,9 @@ Path : JDK安装目录\bin
 2.下载最新版发行包jar
 
 ```
-Linux: wget -O /home/svnWebUI/svnWebUI.jar http://file.nginxwebui.cn/svnWebUI-1.1.0.jar
+Linux: wget -O /home/svnWebUI/svnWebUI.jar http://file.nginxwebui.cn/svnWebUI-1.2.0.jar
 
-Windows: 直接使用浏览器下载 http://file.nginxwebui.cn/svnWebUI-1.1.0.jar
+Windows: 直接使用浏览器下载 http://file.nginxwebui.cn/svnWebUI-1.2.0.jar
 ```
 
 有新版本只需要修改路径中的版本即可
@@ -76,24 +76,22 @@ Windows: 直接使用浏览器下载 http://file.nginxwebui.cn/svnWebUI-1.1.0.ja
 3.启动程序
 
 ```
-Linux: nohup java -jar -Xmx64m /home/svnWebUI/svnWebUI.jar --server.port=6060 --project.home=/home/svnWebUI/ > /dev/null &
+Linux: nohup java -jar /home/svnWebUI/svnWebUI.jar --project.home=/home/svnWebUI/ > /dev/null &
 
-Windows: java -jar -Xmx64m D:/home/svnWebUI/svnWebUI.jar --server.port=6060 --project.home=D:/home/svnWebUI/
+Windows: java -jar D:/home/svnWebUI/svnWebUI.jar --project.home=D:/home/svnWebUI/
 ```
 
 参数说明(都是非必填)
 
--Xmx64m 最大分配内存数
-
 --server.port 占用端口, 默认以6060端口启动
 
---project.home 项目配置文件目录，存放数据库文件，证书文件，日志等, 默认为/home/nginxWebUI/
+--project.home 项目配置文件目录，存放仓库文件, 数据库文件等, 默认为jar所在路径
 
 注意命令最后加一个&号, 表示项目后台运行
 
 #### docker安装说明
 
-本项目制作了docker镜像, 支持 x86_64/arm64/arm v7 平台，同时包含Subversion和svnWebUI在内, 一体化管理与运行Subversion. 
+本项目制作了docker镜像, 支持 x86/x86_64/arm64/arm v7 平台，同时包含Subversion和svnWebUI在内, 一体化管理与运行Subversion. 
 
 1.安装docker容器环境
 
@@ -118,7 +116,7 @@ docker pull cym1102/svnwebui:latest
 3.启动容器: 
 
 ```
-docker run -itd -v /home/svnWebUI:/home/svnWebUI -e BOOT_OPTIONS="--server.port=6060" --privileged=true -p 6060:6060 -p 3690:3690 cym1102/svnwebui:latest
+docker run -itd -v /home/svnWebUI:/home/svnWebUI --privileged=true -p 6060:6060 -p 3690:3690 cym1102/svnwebui:latest
 ```
 
 注意: 
@@ -126,12 +124,6 @@ docker run -itd -v /home/svnWebUI:/home/svnWebUI -e BOOT_OPTIONS="--server.port=
 1. 需要映射6060端口与3690端口, 6060为web网页端口, 3690为svn默认端口. 
 
 2. 容器需要映射路径/home/svnWebUI:/home/svnWebUI, 此路径下存放项目所有数据文件, 包括数据库, 配置文件, 日志等, 升级镜像时, 此目录可保证项目数据不丢失. 请注意备份.
-
-3. -e BOOT_OPTIONS 参数可填充java启动参数, 可以靠此项参数修改端口号
-
---server.port 占用端口, 不填默认以6060端口启动
-
-4. 日志默认存放在/home/svnWebUI/log/svnWebUI.log
 
 
 #### 编译说明
@@ -223,30 +215,4 @@ systemctl start svnwebui.service
 
 小组管理, 可添加和编辑小组
 
-#### 找回密码
 
-如果忘记了登录密码，可按如下教程找回密码
-
-1. 安装sqlite3命令（Docker镜像已经安装好了）
-
-```
-apt install sqlite3
-```
-
-2. 读取sqlite.db文件
-
-```
-sqlite3 /home/svnWebUI/sqlite.db
-```
-
-3. 查找user表
-
-```
-select * from user;
-```
-
-4. 退出sqlite3
-
-```
-.quit
-```

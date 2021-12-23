@@ -3,7 +3,8 @@ package com.cym.utils;
 import java.util.ArrayList;
 import java.util.List;
 
-import cn.craccd.sqlHelper.bean.Page;
+import com.cym.sqlhelper.bean.Page;
+
 import cn.hutool.core.bean.BeanUtil;
 
 public class BeanExtUtil {

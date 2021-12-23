@@ -28,7 +28,7 @@ $(function() {
 				}
 			},
 			error : function() {
-				layer.alert(commonStr.errorInfo);
+				layer.alert('出错了,请联系技术人员!');
 			}
 		});
 	})

@@ -3,16 +3,18 @@ package com.cym.utils;
 import java.io.IOException;
 import java.net.URI;
 import java.net.URISyntaxException;
+import java.util.HashMap;
 
-import javax.servlet.ServletOutputStream;
-import javax.servlet.http.HttpServletResponse;
-import javax.servlet.http.HttpSession;
-
-import org.springframework.beans.factory.annotation.Autowired;
+import org.noear.solon.annotation.Component;
+import org.noear.solon.annotation.Controller;
+import org.noear.solon.annotation.Inject;
+import org.noear.solon.core.handle.Context;
+import org.noear.solon.core.handle.ModelAndView;
 
 import com.cym.model.User;
+import com.cym.sqlhelper.bean.Page;
+import com.cym.sqlhelper.utils.SqlHelper;
 
-import cn.craccd.sqlHelper.utils.SqlHelper;
 import cn.hutool.core.io.IoUtil;
 import cn.hutool.poi.excel.ExcelWriter;
 
@@ -20,11 +22,16 @@ import cn.hutool.poi.excel.ExcelWriter;
  * Author: D.Yang Email: koyangslash@gmail.com Date: 16/10/9 Time: 下午1:37
  * Describe: 基础控制器
  */
+@Controller
 public class BaseController {
-	@Autowired
+
+	@Inject("${project.version}")
+	String currentVersion;
+	
+
+	@Inject
 	protected SqlHelper sqlHelper;
-	
-	
+
 	protected JsonResult renderError() {
 		JsonResult result = new JsonResult();
 		result.setSuccess(false);
@@ -52,32 +59,41 @@ public class BaseController {
 		return result;
 	}
 
-
 	protected JsonResult renderSuccess(Object obj) {
 		JsonResult result = renderSuccess();
 		result.setObj(obj);
 		return result;
 	}
 
-	protected User getLoginUser(HttpSession httpSession) {
-		return (User) httpSession.getAttribute("user");
+	protected User getLoginUser() {
+		return (User) Context.current().session("user");
 	}
 
+//	protected void handleStream(HttpServletResponse response, ExcelWriter writer, String fileName) throws IOException {
+//		response.setContentType("application/vnd.openxmlformats-officedocument.spreadsheetml.sheet;charset=utf-8");
+//		response.setHeader("Content-Disposition", "attachment;filename=" + fileName + ".xlsx");
+//		ServletOutputStream out = response.getOutputStream();
+//		writer.flush(out, true);
+//		writer.close();
+//		IoUtil.close(out);
+//	}
 
-	protected void handleStream(HttpServletResponse response, ExcelWriter writer, String fileName) throws IOException {
-		response.setContentType("application/vnd.openxmlformats-officedocument.spreadsheetml.sheet;charset=utf-8");
-		response.setHeader("Content-Disposition", "attachment;filename=" + fileName + ".xlsx");
-		ServletOutputStream out = response.getOutputStream();
-		writer.flush(out, true);
-		writer.close();
-		IoUtil.close(out);
+	@SuppressWarnings("unchecked")
+	public ModelAndView buildMav(String view) {
+		ModelAndView mav = new ModelAndView(view);
+		mav.put("jsrandom", System.currentTimeMillis());
+		mav.put("currentVersion", currentVersion);
+		mav.put("ctx", Context.current().url().replace(Context.current().path(), ""));
+		mav.put("page", new Page<>());
+		mav.put("user", Context.current().session("user"));
+		
+		return mav;
 	}
 
-
-	public static String getIP(String url) {
+	public String getIP() {
 		URI uri = null;
 		try {
-			uri = new URI(url);
+			uri = new URI(Context.current().url() + "/");
 		} catch (URISyntaxException e) {
 			e.printStackTrace();
 		}

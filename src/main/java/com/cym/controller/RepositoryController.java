@@ -11,18 +11,14 @@ import java.util.Collections;
 import java.util.Comparator;
 import java.util.List;
 
-import javax.servlet.ServletOutputStream;
-import javax.servlet.http.HttpServletRequest;
-import javax.servlet.http.HttpServletResponse;
+import org.noear.solon.annotation.Controller;
+import org.noear.solon.annotation.Inject;
+import org.noear.solon.annotation.Mapping;
+import org.noear.solon.core.handle.Context;
+import org.noear.solon.core.handle.ModelAndView;
 
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.stereotype.Controller;
-import org.springframework.transaction.annotation.Transactional;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.ResponseBody;
-import org.springframework.web.servlet.ModelAndView;
-
-import com.cym.config.SqlConfig;
+import com.cym.config.HomeConfig;
+import com.cym.config.ProjectConfig;
 import com.cym.ext.Path;
 import com.cym.ext.RepositoryExt;
 import com.cym.ext.RepositoryGroupExt;
@@ -36,6 +32,7 @@ import com.cym.model.User;
 import com.cym.service.ConfigService;
 import com.cym.service.RepositoryService;
 import com.cym.service.SettingService;
+import com.cym.sqlhelper.bean.Page;
 import com.cym.utils.BaseController;
 import com.cym.utils.BeanExtUtil;
 import com.cym.utils.JarUtil;
@@ -43,35 +40,36 @@ import com.cym.utils.JsonResult;
 import com.cym.utils.PathUtls;
 import com.cym.utils.SystemTool;
 
-import cn.craccd.sqlHelper.bean.Page;
 import cn.hutool.core.io.FileUtil;
 import cn.hutool.core.util.CharsetUtil;
 import cn.hutool.core.util.RuntimeUtil;
 import cn.hutool.core.util.StrUtil;
 
 @Controller
-@RequestMapping("/adminPage/repository")
+@Mapping("/adminPage/repository")
 public class RepositoryController extends BaseController {
-	@Autowired
-	SqlConfig sqlConfig;
-	@Autowired
+	@Inject
+	ProjectConfig projectConfig;
+	@Inject
 	RepositoryService repositoryService;
-	@Autowired
+	@Inject
 	ConfigService configService;
-	@Autowired
+	@Inject
 	SettingService settingService;
-	@Autowired
+	@Inject
 	PathUtls pathUtls;
-
-	@RequestMapping("")
-	public ModelAndView index(HttpServletRequest request, ModelAndView modelAndView, Page page, String keywords) {
+	@Inject
+	HomeConfig homeConfig;
+	
+	@Mapping("")
+	public ModelAndView index(Page page, String keywords) {
 		String port = settingService.get("port");
 
 		page = repositoryService.search(page, keywords);
 
 		Page<RepositoryExt> pageExt = BeanExtUtil.copyPageByProperties(page, RepositoryExt.class);
 		for (RepositoryExt repositoryExt : (List<RepositoryExt>) pageExt.getRecords()) {
-			String url = "svn://" + getIP(request.getRequestURL().toString() + "/");
+			String url = "svn://" + getIP();
 			if (!port.equals("3690")) {
 				url += (":" + port);
 			}
@@ -79,15 +77,13 @@ public class RepositoryController extends BaseController {
 			repositoryExt.setUrl(url);
 		}
 
-		modelAndView.addObject("keywords", keywords);
-		modelAndView.addObject("page", pageExt);
-		modelAndView.setViewName("/adminPage/repository/index");
+		ModelAndView modelAndView = buildMav("/adminPage/repository/index.html");
+		modelAndView.put("keywords", keywords);
+		modelAndView.put("page", pageExt);
 		return modelAndView;
 	}
 
-	@Transactional
-	@RequestMapping("addOver")
-	@ResponseBody
+	@Mapping("addOver")
 	public JsonResult addOver(Repository repository) {
 		Repository repositoryOrg = repositoryService.getByName(repository.getName(), repository.getId());
 		if (repositoryOrg != null) {
@@ -99,24 +95,21 @@ public class RepositoryController extends BaseController {
 		return renderSuccess();
 	}
 
-	@RequestMapping("detail")
-	@ResponseBody
+	@Mapping("detail")
 	public JsonResult detail(String id) {
 		Repository repository = sqlHelper.findById(id, Repository.class);
 		return renderSuccess(repository);
 	}
 
-	@Transactional
-	@RequestMapping("del")
-	@ResponseBody
+	@Mapping("del")
 	public JsonResult del(String id) {
 		repositoryService.deleteById(id);
 		configService.refresh();
 		return renderSuccess();
 	}
 
-	@RequestMapping("userPermission")
-	public ModelAndView userPermission(HttpServletRequest request, ModelAndView modelAndView, Page page, String repositoryId) {
+	@Mapping("userPermission")
+	public ModelAndView userPermission(Page page, String repositoryId) {
 		String port = settingService.get("port");
 
 		page = repositoryService.userPermission(page, repositoryId);
@@ -126,7 +119,7 @@ public class RepositoryController extends BaseController {
 		for (RepositoryUserExt repositoryUserExt : (List<RepositoryUserExt>) pageExt.getRecords()) {
 			repositoryUserExt.setUser(sqlHelper.findById(repositoryUserExt.getUserId(), User.class));
 
-			String url = "svn://" + getIP(request.getRequestURL().toString() + "/");
+			String url = "svn://" + getIP();
 			if (!port.equals("3690")) {
 				url += (":" + port);
 			}
@@ -134,17 +127,15 @@ public class RepositoryController extends BaseController {
 			repositoryUserExt.setPath(url);
 		}
 
-		modelAndView.addObject("userList", sqlHelper.findAll(User.class));
+		ModelAndView modelAndView = buildMav("/adminPage/repository/userPermission.html");
+		modelAndView.put("userList", sqlHelper.findAll(User.class));
 
-		modelAndView.addObject("repositoryId", repositoryId);
-		modelAndView.addObject("page", pageExt);
-		modelAndView.setViewName("/adminPage/repository/userPermission");
+		modelAndView.put("repositoryId", repositoryId);
+		modelAndView.put("page", pageExt);
 		return modelAndView;
 	}
 
-	@Transactional
-	@RequestMapping("addUser")
-	@ResponseBody
+	@Mapping("addUser")
 	public JsonResult addUser(RepositoryUser repositoryUser) {
 		if (repositoryService.hasUser(repositoryUser.getUserId(), repositoryUser.getPath(), repositoryUser.getRepositoryId(), repositoryUser.getId())) {
 			return renderError("该用户路径授权已存在");
@@ -154,25 +145,21 @@ public class RepositoryController extends BaseController {
 		return renderSuccess();
 	}
 
-	@Transactional
-	@RequestMapping("delUser")
-	@ResponseBody
+	@Mapping("delUser")
 	public JsonResult delUser(String id) {
 		repositoryService.delUser(id);
 		configService.refresh();
 		return renderSuccess();
 	}
 
-	@Transactional
-	@RequestMapping("userDetail")
-	@ResponseBody
+	@Mapping("userDetail")
 	public JsonResult userDetail(String id) {
 
 		return renderSuccess(sqlHelper.findById(id, RepositoryUser.class));
 	}
 
-	@RequestMapping("groupPermission")
-	public ModelAndView groupPermission(HttpServletRequest request, ModelAndView modelAndView, Page page, String repositoryId) {
+	@Mapping("groupPermission")
+	public ModelAndView groupPermission(Page page, String repositoryId) {
 		String port = settingService.get("port");
 
 		page = repositoryService.groupPermission(page, repositoryId);
@@ -182,25 +169,22 @@ public class RepositoryController extends BaseController {
 		for (RepositoryGroupExt repositoryGroupExt : (List<RepositoryGroupExt>) pageExt.getRecords()) {
 			repositoryGroupExt.setGroup(sqlHelper.findById(repositoryGroupExt.getGroupId(), Group.class));
 
-			String url = "svn://" + getIP(request.getRequestURL().toString() + "/");
+			String url = "svn://" + getIP();
 			if (!port.equals("3690")) {
 				url += (":" + port);
 			}
-			url += ("/" + repository.getName()  + repositoryGroupExt.getPath());
+			url += ("/" + repository.getName() + repositoryGroupExt.getPath());
 			repositoryGroupExt.setPath(url);
 		}
+		ModelAndView modelAndView = buildMav("/adminPage/repository/groupPermission.html");
+		modelAndView.put("groupList", sqlHelper.findAll(Group.class));
 
-		modelAndView.addObject("groupList", sqlHelper.findAll(Group.class));
-
-		modelAndView.addObject("repositoryId", repositoryId);
-		modelAndView.addObject("page", pageExt);
-		modelAndView.setViewName("/adminPage/repository/groupPermission");
+		modelAndView.put("repositoryId", repositoryId);
+		modelAndView.put("page", pageExt);
 		return modelAndView;
 	}
 
-	@Transactional
-	@RequestMapping("addGroup")
-	@ResponseBody
+	@Mapping("addGroup")
 	public JsonResult addGroup(RepositoryGroup repositoryGroup) {
 		if (repositoryService.hasGroup(repositoryGroup.getGroupId(), repositoryGroup.getPath(), repositoryGroup.getRepositoryId(), repositoryGroup.getId())) {
 			return renderError("该小组路径授权已存在");
@@ -211,39 +195,28 @@ public class RepositoryController extends BaseController {
 		return renderSuccess();
 	}
 
-	@Transactional
-	@RequestMapping("delGroup")
-	@ResponseBody
+	@Mapping("delGroup")
 	public JsonResult delGroup(String id) {
 		repositoryService.delGroup(id);
 		configService.refresh();
 		return renderSuccess();
 	}
 
-	@Transactional
-	@RequestMapping("groupDetail")
-	@ResponseBody
+	@Mapping("groupDetail")
 	public JsonResult groupDetail(String id) {
 
 		return renderSuccess(sqlHelper.findById(id, RepositoryGroup.class));
 	}
 
-	@Transactional
-	@RequestMapping("loadOver")
-	@ResponseBody
+	@Mapping("loadOver")
 	public JsonResult loadOver(String id, String dirTemp) {
 
 		Repository repository = sqlHelper.findById(id, Repository.class);
 
 		String rs = "";
-		String home = sqlConfig.home;
+		String home = homeConfig.home;
 
 		if (SystemTool.isWindows()) {
-
-//			if (!home.contains(":")) {
-//				// 获取盘符
-//				home = JarUtil.getCurrentFilePath().split(":")[0] + ":" + home;
-//			}
 
 			String cmd = "svnadmin.exe load " + (home + File.separator + "repo" + File.separator + repository.getName() + File.separator).replace("/", "\\") + " < " + dirTemp;
 			FileUtil.writeString(cmd, home + File.separator + "dump.bat", CharsetUtil.GBK);
@@ -262,22 +235,16 @@ public class RepositoryController extends BaseController {
 		return renderSuccess(rs.replace("\n", "<br>"));
 	}
 
-	@Transactional
-	@RequestMapping("dumpOver")
-	@ResponseBody
-	public void dumpOver(String id, HttpServletRequest request, HttpServletResponse response) throws Exception {
+	@Mapping("dumpOver")
+	public void dumpOver(String id) throws Exception {
 		Repository repository = sqlHelper.findById(id, Repository.class);
 
 		String rs = "";
-		String home = sqlConfig.home;
+		String home = homeConfig.home;
 		String dumpTemp = null;
 
 		if (SystemTool.isWindows()) {
 
-//			if (!home.contains(":")) {
-//				// 获取盘符
-//				home = JarUtil.getCurrentFilePath().split(":")[0] + ":" + home;
-//			}
 			dumpTemp = home + File.separator + "temp" + File.separator + repository.getName() + ".dump";
 			String cmd = "svnadmin.exe dump " + (home + File.separator + "repo" + File.separator + repository.getName() + File.separator).replace("/", "\\") + " > " + dumpTemp;
 
@@ -297,30 +264,13 @@ public class RepositoryController extends BaseController {
 		System.out.println(rs);
 
 		if (FileUtil.exist(dumpTemp)) {
-
-			// 读到流中
-			InputStream inputStream = new FileInputStream(dumpTemp);// 文件的存放路径
-			response.reset();
-			response.setContentType("application/octet-stream");
-			String filename = new File(dumpTemp).getName();
-			response.addHeader("Content-Disposition", "attachment; filename=" + URLEncoder.encode(filename, "UTF-8"));
-			ServletOutputStream outputStream = response.getOutputStream();
-			byte[] b = new byte[1024];
-			int len;
-			// 从输入流中读取一定数量的字节，并将其存储在缓冲区字节数组中，读到末尾返回-1
-			while ((len = inputStream.read(b)) > 0) {
-				outputStream.write(b, 0, len);
-			}
-			inputStream.close();
-
+			Context.current().outputAsFile(new File(dumpTemp));
 			FileUtil.del(dumpTemp);
 		}
 
 	}
 
-	@Transactional
-	@RequestMapping("getFileList")
-	@ResponseBody
+	@Mapping("getFileList")
 	public JsonResult getFileList(String id) {
 
 		List<Path> paths = pathUtls.getPath(id);
@@ -328,10 +278,8 @@ public class RepositoryController extends BaseController {
 		return renderSuccess(paths);
 	}
 
-	@Transactional
-	@RequestMapping("see")
-	@ResponseBody
-	public ModelAndView see(ModelAndView modelAndView, String repositoryId, String id) {
+	@Mapping("see")
+	public ModelAndView see(String repositoryId, String id) {
 		Repository repository = sqlHelper.findById(repositoryId, Repository.class);
 		List<Path> paths = pathUtls.getPath(repositoryId);
 
@@ -345,23 +293,18 @@ public class RepositoryController extends BaseController {
 
 		System.out.println(filePath);
 
-		String home = sqlConfig.home;
+		String home = homeConfig.home;
 		String rs = null;
 
 		if (SystemTool.isWindows()) {
-//			if (!home.contains(":")) {
-//				// 获取盘符
-//				home = JarUtil.getCurrentFilePath().split(":")[0] + ":" + home;
-//			}
 			String cmd = "svnlook.exe cat " + (home + File.separator + "repo" + File.separator + repository.getName() + File.separator).replace("/", "\\") + " " + filePath;
 			rs = RuntimeUtil.execForStr(cmd);
 		} else {
 			String sh = "svnlook cat " + (home + File.separator + "repo" + File.separator + repository.getName() + File.separator) + " " + filePath;
 			rs = RuntimeUtil.execForStr(sh);
 		}
-
-		modelAndView.addObject("rs", rs);
-		modelAndView.setViewName("/adminPage/repository/see");
+		ModelAndView modelAndView = buildMav("/adminPage/repository/see.html");
+		modelAndView.put("rs", rs);
 		return modelAndView;
 	}
 
@@ -374,8 +317,7 @@ public class RepositoryController extends BaseController {
 		return null;
 	}
 
-	@RequestMapping("getUserList")
-	@ResponseBody
+	@Mapping("getUserList")
 	public JsonResult getUserList() {
 
 		List<User> users = sqlHelper.findAll(User.class);
@@ -391,8 +333,7 @@ public class RepositoryController extends BaseController {
 		return renderSuccess(selects);
 	}
 
-	@RequestMapping("getGroupList")
-	@ResponseBody
+	@Mapping("getGroupList")
 	public JsonResult getGroupList() {
 
 		List<Group> groups = sqlHelper.findAll(Group.class);

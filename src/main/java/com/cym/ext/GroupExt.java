@@ -4,9 +4,7 @@ import java.util.List;
 
 import com.cym.model.Group;
 import com.cym.model.User;
-
-import cn.craccd.sqlHelper.config.InitValue;
-import io.swagger.annotations.ApiModelProperty;
+import com.cym.sqlhelper.config.InitValue;
 
 public class GroupExt extends Group {
 
@@ -15,7 +13,7 @@ public class GroupExt extends Group {
 	List<String> userIds;
 
 	@InitValue("r")
-	@ApiModelProperty("读写类型 'r' 'w' 'rw'")
+	//读写类型 'r' 'w' 'rw'
 	String permission;
 
 	public List<String> getUserIds() {

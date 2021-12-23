@@ -26,4 +26,8 @@ public class JarUtil {
 		}
 		return root.getAbsolutePath();
 	}
+	
+	public static void main(String[] args) {
+		System.out.println(getCurrentFilePath());
+	}
 }

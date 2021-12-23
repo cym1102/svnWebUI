@@ -1,9 +1,8 @@
 package com.cym.model;
 
-import cn.craccd.sqlHelper.bean.BaseModel;
-import cn.craccd.sqlHelper.config.InitValue;
-import cn.craccd.sqlHelper.config.Table;
-import io.swagger.annotations.ApiModelProperty;
+import com.cym.sqlhelper.bean.BaseModel;
+import com.cym.sqlhelper.config.InitValue;
+import com.cym.sqlhelper.config.Table;
 
 @Table
 public class RepositoryUser extends BaseModel {
@@ -11,7 +10,7 @@ public class RepositoryUser extends BaseModel {
 	String userId;
 	
 	@InitValue("r")
-	@ApiModelProperty("读写类型 'n' 'r' 'rw'")
+	//权限 'r' 'rw'
 	String permission;
 
 	@InitValue("/")

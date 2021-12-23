@@ -6,34 +6,35 @@ import java.util.Collections;
 import java.util.Comparator;
 import java.util.List;
 
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.stereotype.Component;
+import org.noear.solon.annotation.Component;
+import org.noear.solon.annotation.Inject;
 
-import com.cym.config.SqlConfig;
+import com.cym.config.HomeConfig;
+import com.cym.config.ProjectConfig;
 import com.cym.ext.Path;
 import com.cym.model.Repository;
 import com.cym.service.RepositoryService;
+import com.cym.sqlhelper.utils.SqlHelper;
 
-import cn.craccd.sqlHelper.utils.SqlHelper;
 import cn.hutool.core.io.FileUtil;
 import cn.hutool.core.util.CharsetUtil;
 import cn.hutool.core.util.RuntimeUtil;
-import cn.hutool.core.util.StrUtil;
-import cn.hutool.json.JSONUtil;
 
 @Component
 public class PathUtls {
-	@Autowired
-	SqlConfig sqlConfig;
-	@Autowired
+	@Inject
+	ProjectConfig projectConfig;
+	@Inject
 	SqlHelper sqlHelper;
-	@Autowired
+	@Inject
 	RepositoryService repositoryService;
+	@Inject
+	HomeConfig homeConfig;
 
 	public List<Path> getPath(String repositoryId) {
 		Repository repository = sqlHelper.findById(repositoryId, Repository.class);
 
-		String home = sqlConfig.home;
+		String home = homeConfig.home;
 		List<String> lines = null;
 		if (SystemTool.isWindows()) {
 
@@ -48,7 +49,7 @@ public class PathUtls {
 			lines = RuntimeUtil.execForLines(home + File.separator + "tree.bat");
 		} else {
 			String cmd = "svnlook tree " + (home + File.separator + "repo" + File.separator + repository.getName() + File.separator);
-			
+
 			FileUtil.writeString(cmd, home + File.separator + "tree.sh", CharsetUtil.UTF_8);
 			lines = RuntimeUtil.execForLines("sh", home + File.separator + "tree.sh");
 		}

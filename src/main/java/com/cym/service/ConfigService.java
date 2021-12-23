@@ -1,56 +1,42 @@
 package com.cym.service;
 
-import java.io.IOException;
 import java.nio.charset.Charset;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.stream.Collectors;
 
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.core.io.ClassPathResource;
-import org.springframework.stereotype.Service;
+import org.noear.solon.annotation.Inject;
+import org.noear.solon.extend.aspect.annotation.Service;
 
-import com.cym.config.SqlConfig;
-import com.cym.ext.GroupExt;
-import com.cym.ext.UserExt;
+import com.cym.config.HomeConfig;
+import com.cym.config.ProjectConfig;
 import com.cym.model.Group;
 import com.cym.model.Repository;
 import com.cym.model.RepositoryGroup;
 import com.cym.model.RepositoryUser;
 import com.cym.model.User;
+import com.cym.sqlhelper.utils.ConditionAndWrapper;
+import com.cym.sqlhelper.utils.SqlHelper;
 
-import cn.craccd.sqlHelper.utils.ConditionAndWrapper;
-import cn.craccd.sqlHelper.utils.SqlHelper;
 import cn.hutool.core.io.FileUtil;
-import cn.hutool.core.io.IORuntimeException;
 import cn.hutool.core.util.StrUtil;
 
 @Service
 public class ConfigService {
-	@Autowired
+	@Inject
 	SqlHelper sqlHelper;
-	@Autowired
-	SqlConfig sqlConfig;
-	@Autowired
+	@Inject
+	ProjectConfig projectConfig;
+	@Inject
 	RepositoryService repositoryService;
-	@Autowired
+	@Inject
 	GroupService groupService;
+	@Inject
+	HomeConfig homeConfig;
 
 	public void refresh() {
-		List<Repository> repositories = sqlHelper.findAll(Repository.class);
-		String passwd = sqlConfig.home + "/repo/conf/passwd";
-		String authz = sqlConfig.home + "/repo/conf/authz";
-
-		for (Repository repository : repositories) {
-			String svnserve_conf = sqlConfig.home + "/repo/" + repository.getName() + "/conf/svnserve.conf";
-
-			try {
-				ClassPathResource resource = new ClassPathResource("file/svnserve.conf");
-				FileUtil.writeFromStream(resource.getInputStream(), svnserve_conf);
-			} catch (IORuntimeException | IOException e) {
-				e.printStackTrace();
-			}
-		}
+		String passwd = homeConfig.home + "/repo/conf/passwd";
+		String authz = homeConfig.home + "/repo/conf/authz";
 
 		// 用户名密码
 		List<String> passwdLines = new ArrayList<>();
@@ -74,6 +60,7 @@ public class ConfigService {
 		}
 
 		// 权限
+		List<Repository> repositories = sqlHelper.findAll(Repository.class);
 		for (Repository repository : repositories) {
 			List<String> paths = getPaths(repository.getId());
 			for (String path : paths) {

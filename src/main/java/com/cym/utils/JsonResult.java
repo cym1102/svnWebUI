@@ -1,8 +1,5 @@
 package com.cym.utils;
 
-import com.fasterxml.jackson.annotation.JsonInclude;
-
-
 /**
  * Author: D.Yang
  * Email: koyangslash@gmail.com
@@ -10,7 +7,6 @@ import com.fasterxml.jackson.annotation.JsonInclude;
  * Time: 下午5:50
  * Describe: 封装Json返回信息
  */
-@JsonInclude(JsonInclude.Include.NON_NULL)
 public class JsonResult {
     private boolean success;
     private String status;
