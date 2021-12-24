@@ -60,7 +60,7 @@ public class RepositoryController extends BaseController {
 	PathUtls pathUtls;
 	@Inject
 	HomeConfig homeConfig;
-	
+
 	@Mapping("")
 	public ModelAndView index(Page page, String keywords) {
 		String port = settingService.get("port");
@@ -291,8 +291,6 @@ public class RepositoryController extends BaseController {
 			filePath = path.getName() + "/" + filePath;
 		}
 
-		System.out.println(filePath);
-
 		String home = homeConfig.home;
 		String rs = null;
 
@@ -314,6 +312,17 @@ public class RepositoryController extends BaseController {
 				return path;
 			}
 		}
+
+		for (Path path : paths) {
+			if (path.getChildren() != null && path.getChildren().size() > 0) {
+				Path chlid = findPathById(id, path.getChildren());
+				if (chlid != null) {
+					return chlid;
+				}
+
+			}
+		}
+
 		return null;
 	}
 

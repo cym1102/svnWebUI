@@ -37,7 +37,7 @@ $(function() {
 		var upload = layui.upload;
 		upload.render({
 			elem: '#upload',
-			url: '/adminPage/main/upload/',
+			url: '/adminPage/main/upload',
 			accept: 'file',
 			before: function(res) {
 				load = layer.load();

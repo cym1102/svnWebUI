@@ -66,9 +66,9 @@ Path : JDK安装目录\bin
 2.下载最新版发行包jar
 
 ```
-Linux: wget -O /home/svnWebUI/svnWebUI.jar http://file.nginxwebui.cn/svnWebUI-1.2.0.jar
+Linux: wget -O /home/svnWebUI/svnWebUI.jar http://file.nginxwebui.cn/svnWebUI-1.2.2.jar
 
-Windows: 直接使用浏览器下载 http://file.nginxwebui.cn/svnWebUI-1.2.0.jar
+Windows: 直接使用浏览器下载 http://file.nginxwebui.cn/svnWebUI-1.2.2.jar
 ```
 
 有新版本只需要修改路径中的版本即可
@@ -116,7 +116,7 @@ docker pull cym1102/svnwebui:latest
 3.启动容器: 
 
 ```
-docker run -itd -v /home/svnWebUI:/home/svnWebUI --privileged=true -p 6060:6060 -p 3690:3690 cym1102/svnwebui:latest
+docker run -itd -v /home/svnWebUI:/home/svnWebUI --privileged=true -p 6060:6060 -p 3690:3690 cym1102/svnwebui:1.2.2
 ```
 
 注意: 
@@ -215,4 +215,32 @@ systemctl start svnwebui.service
 
 小组管理, 可添加和编辑小组
 
+#### 找回密码
 
+1. 下载h2客户端
+
+```
+ wget -O /home/svnWebUI/h2.jar http://file.nginxwebui.cn/h2.jar
+```
+
+2. 连接h2数据库
+
+```
+java -cp /home/svnWebUI/h2.jar org.h2.tools.Shell
+URL: jdbc:h2:/home/svnWebUI/h2 #这个路径指向--project.home下的h2
+Driver: #直接回车
+User: sa
+Password: #直接回车
+```
+
+3. 查找user表, 即可得到用户名密码
+
+```
+select * from `user`;
+```
+
+4. 退出
+
+```
+exit;
+```
