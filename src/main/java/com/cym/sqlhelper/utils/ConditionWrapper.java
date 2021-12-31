@@ -24,7 +24,7 @@ public abstract class ConditionWrapper {
 	 * 
 	 * @return Condition
 	 */
-	public String build(List<Object> values) {
+	public String build(List<String> values) {
 		String sql = "";
 		if (list.size() > 0) {
 			List<String> blocks = new ArrayList<String>();
@@ -43,12 +43,12 @@ public abstract class ConditionWrapper {
 						if (condition.getValue() instanceof List) {
 							block = buildColumn(condition.getColumn(), condition.getValue().getClass()) + " " + condition.getOperation() + " " + buildIn(condition.getValue());
 							for (Object val : (List<Object>) condition.getValue()) {
-								values.add(val);
+								values.add(val.toString());
 							}
 						} else {
 							block = buildColumn(condition.getColumn(), condition.getValue().getClass()) + " " + condition.getOperation() + " ?";
 							if (!condition.getOperation().equals("LIKE")) {
-								values.add(condition.getValue());
+								values.add(condition.getValue().toString());
 							} else {
 								values.add("%" + condition.getValue().toString().replace("%", "\\%") + "%");
 							}

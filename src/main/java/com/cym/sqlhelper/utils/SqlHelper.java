@@ -239,7 +239,7 @@ public class SqlHelper extends SqlUtils {
 			return;
 		}
 		List<String> fieldsPart = new ArrayList<String>();
-		List<Object> paramValues = new ArrayList<Object>();
+		List<String> paramValues = new ArrayList<String>();
 		for (Entry<String, Object> entry : update.getSets().entrySet()) {
 			if (entry.getKey() != null && entry.getValue() != null) {
 				fieldsPart.add("`" + StrUtil.toUnderlineCase(entry.getKey()) + "`=?");
@@ -352,7 +352,7 @@ public class SqlHelper extends SqlUtils {
 	 * @param clazz 类
 	 */
 	public void deleteByQuery(ConditionWrapper conditionWrapper, Class<?> clazz) {
-		List<Object> values = new ArrayList<Object>();
+		List<String> values = new ArrayList<String>();
 		String sql = "DELETE FROM `" + StrUtil.toUnderlineCase(clazz.getSimpleName()) + "`";
 		if (conditionWrapper != null && conditionWrapper.notEmpty()) {
 			sql += " WHERE " + conditionWrapper.build(values);
@@ -413,7 +413,7 @@ public class SqlHelper extends SqlUtils {
 	 * @return Page 分页
 	 */
 	public Page findPage(ConditionWrapper conditionWrapper, Sort sort, Page page, Class<?> clazz) {
-		List<Object> values = new ArrayList<Object>();
+		List<String> values = new ArrayList<String>();
 		// 查询出一共的条数
 		Long count = findCountByQuery(conditionWrapper, clazz);
 
@@ -496,7 +496,7 @@ public class SqlHelper extends SqlUtils {
 	 * @return T 对象
 	 */
 	public <T> T findOneByQuery(ConditionWrapper conditionWrapper, Sort sort, Class<T> clazz) {
-		List<Object> values = new ArrayList<Object>();
+		List<String> values = new ArrayList<String>();
 		List<T> list = new ArrayList<T>();
 		String sql = "SELECT * FROM `" + StrUtil.toUnderlineCase(clazz.getSimpleName()) + "`";
 		if (conditionWrapper != null && conditionWrapper.notEmpty()) {
@@ -547,7 +547,7 @@ public class SqlHelper extends SqlUtils {
 	 * @return List 列表
 	 */
 	public <T> List<T> findListByQuery(ConditionWrapper conditionWrapper, Sort sort, Class<T> clazz) {
-		List<Object> values = new ArrayList<Object>();
+		List<String> values = new ArrayList<String>();
 
 		String sql = "SELECT * FROM `" + StrUtil.toUnderlineCase(clazz.getSimpleName()) + "`";
 		if (conditionWrapper != null && conditionWrapper.notEmpty()) {
@@ -806,7 +806,7 @@ public class SqlHelper extends SqlUtils {
 	 * @return Long 数量
 	 */
 	public Long findCountByQuery(ConditionWrapper conditionWrapper, Class<?> clazz) {
-		List<Object> values = new ArrayList<Object>();
+		List<String> values = new ArrayList<String>();
 		String sql = "SELECT COUNT(*) FROM `" + StrUtil.toUnderlineCase(clazz.getSimpleName()) + "`";
 		if (conditionWrapper != null && conditionWrapper.notEmpty()) {
 			sql += " WHERE " + conditionWrapper.build(values);

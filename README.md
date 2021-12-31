@@ -19,7 +19,7 @@ Windows上倒是有不错的svn服务端软件即VisualSVN, 但一来Windows服�
 
 #### 技术说明
 
-本项目是基于springBoot的web系统, 数据库使用h2, 因此服务器上不需要安装任何数据库
+本项目是基于springBoot的web系统, 数据库使用h2, 因此服务器上不需要安装任何数据库, 同时也兼容mysql
 
 使用本软件前请先安装Subversion
 
@@ -27,7 +27,7 @@ Windows上倒是有不错的svn服务端软件即VisualSVN, 但一来Windows服�
 ```
 演示地址: http://svn.nginxwebui.cn:6060
 用户名: admin
-密码: admin
+密码: Admin123
 ```
 
 
@@ -66,9 +66,9 @@ Path : JDK安装目录\bin
 2.下载最新版发行包jar
 
 ```
-Linux: wget -O /home/svnWebUI/svnWebUI.jar http://file.nginxwebui.cn/svnWebUI-1.2.2.jar
+Linux: wget -O /home/svnWebUI/svnWebUI.jar http://file.nginxwebui.cn/svnWebUI-1.2.3.jar
 
-Windows: 直接使用浏览器下载 http://file.nginxwebui.cn/svnWebUI-1.2.2.jar
+Windows: 直接使用浏览器下载 http://file.nginxwebui.cn/svnWebUI-1.2.3.jar
 ```
 
 有新版本只需要修改路径中的版本即可
@@ -76,16 +76,24 @@ Windows: 直接使用浏览器下载 http://file.nginxwebui.cn/svnWebUI-1.2.2.ja
 3.启动程序
 
 ```
-Linux: nohup java -jar /home/svnWebUI/svnWebUI.jar --project.home=/home/svnWebUI/ > /dev/null &
+Linux: nohup java -jar /home/svnWebUI/svnWebUI.jar --server.port=6060 > /dev/null &
 
-Windows: java -jar D:/home/svnWebUI/svnWebUI.jar --project.home=D:/home/svnWebUI/
+Windows: java -jar D:/home/svnWebUI/svnWebUI.jar --server.port=6060
 ```
 
 参数说明(都是非必填)
 
 --server.port 占用端口, 默认以6060端口启动
 
---project.home 项目配置文件目录，存放仓库文件, 数据库文件等, 默认为jar所在路径
+--project.home 项目配置文件目录，存放仓库文件, 数据库文件等, 默认为/home/svnWebUI/
+
+--database.type=mysql 使用其他数据库，不填为使用本地h2数据库
+
+--database.url=jdbc:mysql://ip:port/dbname 数据库url
+
+--database.username=root 数据库用户
+
+--database.password=pass 数据库密码
 
 注意命令最后加一个&号, 表示项目后台运行
 
@@ -116,7 +124,7 @@ docker pull cym1102/svnwebui:latest
 3.启动容器: 
 
 ```
-docker run -itd -v /home/svnWebUI:/home/svnWebUI --privileged=true -p 6060:6060 -p 3690:3690 cym1102/svnwebui:1.2.2
+docker run -itd -v /home/svnWebUI:/home/svnWebUI --privileged=true -p 6060:6060 -p 3690:3690 cym1102/svnwebui:latest
 ```
 
 注意: 
