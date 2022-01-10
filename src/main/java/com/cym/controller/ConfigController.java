@@ -25,8 +25,6 @@ import cn.hutool.core.util.RuntimeUtil;
 public class ConfigController extends BaseController {
 
 	@Inject
-	ProjectConfig projectConfig;
-	@Inject
 	SettingService settingService;
 	
 	@Inject

@@ -16,7 +16,6 @@ import org.noear.solon.annotation.Inject;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import com.cym.controller.MainController;
 import com.cym.sqlhelper.config.DataSourceEmbed;
 
 import cn.hutool.core.util.StrUtil;
@@ -28,7 +27,7 @@ public class JdbcTemplate {
 	@Inject
 	DataSourceEmbed dataSourceEmbed; 
 	SnowFlake snowFlake = new SnowFlake(1, 1);
-	static Logger logger = LoggerFactory.getLogger(MainController.class);
+	static Logger logger = LoggerFactory.getLogger(JdbcTemplate.class);
 	
 	public List<Map<String, Object>> queryForList(String formatSql, Object... array) {
 		try {

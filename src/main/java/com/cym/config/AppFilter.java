@@ -13,9 +13,6 @@ import com.cym.model.User;
 @Component
 public class AppFilter implements Filter {
 
-	@Inject("${project.version}")
-	String currentVersion;
-
 	@Override
 	public void doFilter(Context ctx, FilterChain chain) throws Throwable {
 		try {

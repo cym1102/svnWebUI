@@ -10,13 +10,13 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import com.cym.controller.ConfigController;
+import com.cym.model.User;
 import com.cym.service.SettingService;
+import com.cym.sqlhelper.utils.SqlHelper;
 import com.cym.utils.FilePermissionUtil;
-import com.cym.utils.JarUtil;
 import com.cym.utils.SystemTool;
 
 import cn.hutool.core.io.FileUtil;
-import cn.hutool.core.util.RuntimeUtil;
 
 @Component
 public class ProjectConfig {
@@ -29,8 +29,22 @@ public class ProjectConfig {
 	@Inject
 	SettingService settingService;
 
-	@Init(index = 30)
+	@Inject("${project.findPass}")
+	Boolean findPass;
+	@Inject
+	SqlHelper sqlHelper;
+	
+	@Init
 	public void init() {
+		// 打印密码
+		if (findPass) {
+			List<User> users = sqlHelper.findAll(User.class);
+			for (User user : users) {
+				System.out.println("用户名:" + user.getName() + " 密码:" + user.getPass());
+			}
+			System.exit(1);
+		}
+		
 		// 初始化svn端口
 		if (settingService.get("port") == null) {
 			settingService.set("port", "3690");
@@ -59,17 +73,6 @@ public class ProjectConfig {
 	 */
 	private Boolean inDocker() {
 		if (SystemTool.isLinux()) {
-//			List<String> rs = RuntimeUtil.execForLines("cat /proc/1/cgroup");
-//			for (String str : rs) {
-//				if (str.contains("docker")) {
-//					logger.info("I am in docker");
-//					return true;
-//				}
-//				if (str.contains("kubepods")) {
-//					logger.info("I am in k8s");
-//					return true;
-//				}
-//			}
 
 			if (FileUtil.exist("/usr/local/bin/entrypoint.sh")) {
 				logger.info("I am in docker");

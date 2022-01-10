@@ -25,7 +25,7 @@ public class DataSourceEmbed {
 
 	DataSource dataSource;
 
-	@Init(index = 10)
+	@Init
 	public void init() {
 		if (databaseType.equalsIgnoreCase("sqlite") || databaseType.equalsIgnoreCase("h2")) {
 			String dbPath = homeConfig.home + "h2";

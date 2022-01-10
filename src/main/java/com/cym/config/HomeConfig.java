@@ -16,7 +16,7 @@ public class HomeConfig {
 	@Inject("${project.home}")
 	public String home;
 
-	@Init(index = 0)
+	@Init
 	public void init() {
 		if (StrUtil.isEmpty(home)) {
 			// 获取jar位置

@@ -3,11 +3,10 @@ server:
  
   
 project:
-  version: 1.2.3
   sqlPrint: false
   beanPackage: com.cym.model
   home: /home/svnWebUI/
-  
+  findPass: false
   
 solon:
   app.name: svnWebUI

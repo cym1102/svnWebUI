@@ -45,7 +45,7 @@ public class SqlHelper extends SqlUtils {
 
 	static Logger logger = LoggerFactory.getLogger(SqlHelper.class);
 	SnowFlake snowFlake = new SnowFlake(1, 1);
-	@Init(index = 20)
+	@Init
 	public void init() throws SQLException {
 		Set<Class<?>> set = ClassUtil.scanPackage(packageName);
 		for (Class<?> clazz : set) {

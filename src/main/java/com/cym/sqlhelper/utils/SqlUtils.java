@@ -107,7 +107,7 @@ public class SqlUtils {
 
 	public void checkOrCreateColumn(Class<?> clazz, String name, Set<String> columns) throws SQLException {
 		if (!columns.contains(StrUtil.toUnderlineCase(name))) {
-			String sql = "ALTER TABLE `" + StrUtil.toUnderlineCase(clazz.getSimpleName()) + "` ADD COLUMN `" + StrUtil.toUnderlineCase(name) + "` TEXT";
+			String sql = "ALTER TABLE `" + StrUtil.toUnderlineCase(clazz.getSimpleName()) + "` ADD COLUMN `" + StrUtil.toUnderlineCase(name) + "` LONGTEXT";
 			logQuery(formatSql(sql));
 			jdbcTemplate.execute(formatSql(sql));
 		}
