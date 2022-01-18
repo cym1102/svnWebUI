@@ -29,7 +29,7 @@ public class LoginController extends BaseController {
 
 	@Mapping("")
 	public ModelAndView admin() {
-		ModelAndView modelAndView = buildMav("/adminPage/login/index.html");
+		ModelAndView modelAndView = new ModelAndView("/adminPage/login/index.html");
 		modelAndView.put("adminCount", sqlHelper.findAllCount(User.class));
 		
 		return modelAndView;

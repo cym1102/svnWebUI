@@ -7,6 +7,10 @@ public class SvnWebUI {
 	public static void main(String[] args) {
 		Solon.start(SvnWebUI.class, args, app -> {
 			app.onError(e -> e.printStackTrace());
+			
+			app.before(c -> {
+				c.pathNew(c.path().replace("//", "/"));
+			});
 
 			app.onEvent(freemarker.template.Configuration.class, cfg -> {
 				cfg.setSetting("classic_compatible", "true");

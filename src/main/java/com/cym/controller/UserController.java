@@ -8,7 +8,7 @@ import org.noear.solon.annotation.Inject;
 import org.noear.solon.annotation.Mapping;
 import org.noear.solon.core.handle.ModelAndView;
 
-import com.cym.config.ProjectConfig;
+import com.cym.config.InitConfig;
 import com.cym.model.User;
 import com.cym.service.ConfigService;
 import com.cym.service.UserService;
@@ -26,20 +26,19 @@ public class UserController extends BaseController {
 	@Inject
 	ConfigService configService;
 	@Inject
-	ProjectConfig projectConfig;
+	InitConfig projectConfig;
 
 	@Mapping("")
 	public ModelAndView index(Page page, String keywords) {
 
 		page = userService.search(page, keywords);
-		ModelAndView modelAndView = buildMav("/adminPage/user/index.html");
+		ModelAndView modelAndView = new ModelAndView("/adminPage/user/index.html");
 		modelAndView.put("keywords", keywords);
 		modelAndView.put("page", page);
 		return modelAndView;
 	}
 
 	@Mapping("addOver")
-
 	public JsonResult addOver(User user) {
 		User userOrg = userService.getByName(user.getName(), user.getId());
 		if (userOrg != null) {
@@ -52,14 +51,12 @@ public class UserController extends BaseController {
 	}
 
 	@Mapping("detail")
-
 	public JsonResult detail(String id) {
 		User user = sqlHelper.findById(id, User.class);
 		return renderSuccess(user);
 	}
 
 	@Mapping("del")
-
 	public JsonResult del(String id) {
 		userService.deleteById(id);
 		configService.refresh();
@@ -67,7 +64,6 @@ public class UserController extends BaseController {
 	}
 
 	@Mapping("importOver")
-
 	public JsonResult importOver(String dirTemp) {
 
 		List<String> lines = FileUtil.readLines(dirTemp, Charset.forName("UTF-8"));
@@ -81,7 +77,7 @@ public class UserController extends BaseController {
 		}
 
 		FileUtil.del(dirTemp);
-
+		configService.refresh();
 		return renderSuccess();
 	}
 

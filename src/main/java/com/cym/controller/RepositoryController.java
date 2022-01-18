@@ -18,7 +18,7 @@ import org.noear.solon.core.handle.Context;
 import org.noear.solon.core.handle.ModelAndView;
 
 import com.cym.config.HomeConfig;
-import com.cym.config.ProjectConfig;
+import com.cym.config.InitConfig;
 import com.cym.ext.Path;
 import com.cym.ext.RepositoryExt;
 import com.cym.ext.RepositoryGroupExt;
@@ -49,7 +49,7 @@ import cn.hutool.core.util.StrUtil;
 @Mapping("/adminPage/repository")
 public class RepositoryController extends BaseController {
 	@Inject
-	ProjectConfig projectConfig;
+	InitConfig projectConfig;
 	@Inject
 	RepositoryService repositoryService;
 	@Inject
@@ -73,11 +73,11 @@ public class RepositoryController extends BaseController {
 			if (!port.equals("3690")) {
 				url += (":" + port);
 			}
-			url += "/" + repositoryExt.getName() + "/";
+			url += "/" + repositoryExt.getName();
 			repositoryExt.setUrl(url);
 		}
 
-		ModelAndView modelAndView = buildMav("/adminPage/repository/index.html");
+		ModelAndView modelAndView = new ModelAndView("/adminPage/repository/index.html");
 		modelAndView.put("keywords", keywords);
 		modelAndView.put("page", pageExt);
 		return modelAndView;
@@ -124,10 +124,13 @@ public class RepositoryController extends BaseController {
 				url += (":" + port);
 			}
 			url += ("/" + repository.getName() + repositoryUserExt.getPath());
+			if (url.endsWith("/")) {
+				url = url.substring(0, url.length() - 1);
+			}
 			repositoryUserExt.setPath(url);
 		}
 
-		ModelAndView modelAndView = buildMav("/adminPage/repository/userPermission.html");
+		ModelAndView modelAndView = new ModelAndView("/adminPage/repository/userPermission.html");
 		modelAndView.put("userList", sqlHelper.findAll(User.class));
 
 		modelAndView.put("repositoryId", repositoryId);
@@ -174,9 +177,13 @@ public class RepositoryController extends BaseController {
 				url += (":" + port);
 			}
 			url += ("/" + repository.getName() + repositoryGroupExt.getPath());
+
+			if (url.endsWith("/")) {
+				url = url.substring(0, url.length() - 1);
+			}
 			repositoryGroupExt.setPath(url);
 		}
-		ModelAndView modelAndView = buildMav("/adminPage/repository/groupPermission.html");
+		ModelAndView modelAndView = new ModelAndView("/adminPage/repository/groupPermission.html");
 		modelAndView.put("groupList", sqlHelper.findAll(Group.class));
 
 		modelAndView.put("repositoryId", repositoryId);
@@ -301,7 +308,7 @@ public class RepositoryController extends BaseController {
 			String sh = "svnlook cat " + (home + File.separator + "repo" + File.separator + repository.getName() + File.separator) + " " + filePath;
 			rs = RuntimeUtil.execForStr(sh);
 		}
-		ModelAndView modelAndView = buildMav("/adminPage/repository/see.html");
+		ModelAndView modelAndView = new ModelAndView("/adminPage/repository/see.html");
 		modelAndView.put("rs", rs);
 		return modelAndView;
 	}

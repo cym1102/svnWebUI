@@ -11,7 +11,7 @@ import org.noear.solon.annotation.Mapping;
 import org.noear.solon.core.handle.ModelAndView;
 
 import com.cym.config.HomeConfig;
-import com.cym.config.ProjectConfig;
+import com.cym.config.InitConfig;
 import com.cym.service.SettingService;
 import com.cym.utils.BaseController;
 import com.cym.utils.JsonResult;
@@ -44,7 +44,7 @@ public class ConfigController extends BaseController {
 			hasSvnserve = rs.contains("svnserve");
 		}
 
-		ModelAndView modelAndView = buildMav("/adminPage/config/index.html");
+		ModelAndView modelAndView = new ModelAndView("/adminPage/config/index.html");
 		modelAndView.put("port", settingService.get("port"));
 		modelAndView.put("hasSvnserve", hasSvnserve);
 		return modelAndView;

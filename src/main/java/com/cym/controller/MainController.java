@@ -12,7 +12,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import com.cym.config.HomeConfig;
-import com.cym.config.ProjectConfig;
+import com.cym.config.InitConfig;
 import com.cym.utils.BaseController;
 import com.cym.utils.JarUtil;
 import com.cym.utils.JsonResult;
@@ -25,7 +25,7 @@ import cn.hutool.core.io.FileUtil;
 public class MainController extends BaseController {
 	static Logger logger = LoggerFactory.getLogger(MainController.class);
 	@Inject
-	ProjectConfig projectConfig;
+	InitConfig projectConfig;
 	
 	@Inject
 	HomeConfig homeConfig;

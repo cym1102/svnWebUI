@@ -8,7 +8,7 @@ import org.noear.solon.annotation.Mapping;
 import org.noear.solon.core.handle.Context;
 import org.noear.solon.core.handle.ModelAndView;
 
-import com.cym.config.ProjectConfig;
+import com.cym.config.InitConfig;
 import com.cym.ext.RepositoryUserExt;
 import com.cym.model.Repository;
 import com.cym.model.RepositoryUser;
@@ -24,7 +24,7 @@ import com.cym.utils.JsonResult;
 public class InfoController extends BaseController {
 
 	@Inject
-	ProjectConfig projectConfig;
+	InitConfig projectConfig;
 	@Inject
 	RepositoryService repositoryService;
 	@Inject
@@ -51,14 +51,13 @@ public class InfoController extends BaseController {
 			repositoryUserExt.setPath(url);
 		}
 		
-		ModelAndView modelAndView = buildMav("/adminPage/info/index.html");
+		ModelAndView modelAndView = new ModelAndView("/adminPage/info/index.html");
 		modelAndView.put("repositoryUserList", repositoryUserList);
 		modelAndView.put("trueName", user.getTrueName());
 		return modelAndView;
 	}
 
 	@Mapping("changeOver")
-
 	public JsonResult changeOver( String oldPass, String newPass, String repeatPass) {
 		User user = getLoginUser();
 		if (!user.getPass().equals(oldPass)) {

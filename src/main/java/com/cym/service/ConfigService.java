@@ -9,7 +9,7 @@ import org.noear.solon.annotation.Inject;
 import org.noear.solon.extend.aspect.annotation.Service;
 
 import com.cym.config.HomeConfig;
-import com.cym.config.ProjectConfig;
+import com.cym.config.InitConfig;
 import com.cym.model.Group;
 import com.cym.model.Repository;
 import com.cym.model.RepositoryGroup;
@@ -26,7 +26,7 @@ public class ConfigService {
 	@Inject
 	SqlHelper sqlHelper;
 	@Inject
-	ProjectConfig projectConfig;
+	InitConfig projectConfig;
 	@Inject
 	RepositoryService repositoryService;
 	@Inject
@@ -53,8 +53,15 @@ public class ConfigService {
 		List<Group> groupList = sqlHelper.findAll(Group.class);
 		for (Group group : groupList) {
 			String groupStr = group.getName() + " = ";
+
+			List<String> names = new ArrayList<>();
 			List<User> users = groupService.getUserList(group.getId());
-			List<String> names = users.stream().map(User::getName).collect(Collectors.toList());
+			names.addAll(users.stream().map(User::getName).collect(Collectors.toList()));
+			List<Group> groups = groupService.getGroupList(group.getId());
+			for (Group groupSlave : groups) {
+				names.add("@" + groupSlave.getName());
+			}
+
 			groupStr += StrUtil.join(",", names);
 			authzLines.add(groupStr);
 		}

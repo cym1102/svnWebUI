@@ -1,38 +1,40 @@
 var load;
 var userIds;
+var groupIds;
 
 $(function() {
 	layui.config({
 		base: ctx + 'lib/layui/exts/xmSelect/'
 	}).extend({
 		xmSelect: 'xm-select'
-	}).use(['xmSelect'], function(){
+	}).use(['xmSelect'], function() {
 		var xmSelect = layui.xmSelect;
-		
+
 		$.ajax({
-			type : 'GET',
-			url : ctx + '/adminPage/group/getUserList',
-			success : function(data) {
+			type: 'GET',
+			url: ctx + '/adminPage/group/getUserList',
+			success: function(data) {
 				if (data) {
 					userIds = xmSelect.render({
-					    el: '#userIds', 
-					    name : 'userIds',
+						el: '#userIds',
+						name: 'userIds',
 						filterable: true,
-					    model: { label: { type: 'text' } },
-					    radio: false,
-					    clickClose: false,
-					    data: data.obj
+						model: { label: { type: 'text' } },
+						radio: false,
+						clickClose: false,
+						data: data.obj
 					})
-				}else{
+				} else {
 					layer.msg(data.msg);
 				}
 			},
-			error : function() {
+			error: function() {
 				layer.alert('出错了,请联系技术人员!');
 			}
 		});
+
 	})
-	
+
 	layui.use('upload', function() {
 		var upload = layui.upload;
 		upload.render({
@@ -71,13 +73,43 @@ function search() {
 }
 
 function add() {
-	$("#id").val("");
-	$("#name").val("");
 
-	userIds.setValue([""]);
+	$.ajax({
+		type: 'GET',
+		url: ctx + '/adminPage/group/getGroupList',
+		data: {
+			groupId: ""
+		},
+		success: function(data) {
+			if (data) {
+				groupIds = xmSelect.render({
+					el: '#groupIds',
+					name: 'groupIds',
+					filterable: true,
+					model: { label: { type: 'text' } },
+					radio: false,
+					clickClose: false,
+					data: data.obj
+				})
 
-	form.render();
-	showWindow("添加小组");
+				$("#id").val("");
+				$("#name").val("");
+
+				userIds.setValue([""]);
+				groupIds.setValue([""]);
+
+				form.render();
+				showWindow("添加小组");
+
+			} else {
+				layer.msg(data.msg);
+			}
+		},
+		error: function() {
+			layer.alert('出错了,请联系技术人员!');
+		}
+	});
+
 }
 
 
@@ -121,33 +153,66 @@ function addOver() {
 
 function edit(id) {
 	showLoad();
+
 	$.ajax({
 		type: 'GET',
-		url: ctx + '/adminPage/group/detail',
-		dataType: 'json',
+		url: ctx + '/adminPage/group/getGroupList',
 		data: {
-			id: id
+			groupId: id
 		},
 		success: function(data) {
-			closeLoad();
-			if (data.success) {
-				var groupExt = data.obj;
-				$("#id").val(groupExt.id);
-				$("#name").val(groupExt.name);
+			if (data) {
+				groupIds = xmSelect.render({
+					el: '#groupIds',
+					name: 'groupIds',
+					filterable: true,
+					model: { label: { type: 'text' } },
+					radio: false,
+					clickClose: false,
+					data: data.obj
+				})
 
-				userIds.setValue(data.obj.userIds);
+				$.ajax({
+					type: 'GET',
+					url: ctx + '/adminPage/group/detail',
+					dataType: 'json',
+					data: {
+						id: id
+					},
+					success: function(data) {
+						closeLoad();
+						if (data.success) {
+							var groupExt = data.obj;
+							$("#id").val(groupExt.id);
+							$("#name").val(groupExt.name);
 
-				form.render();
-				showWindow("编辑小组");
+							userIds.setValue(data.obj.userIds);
+							groupIds.setValue(data.obj.groupIds);
+
+							form.render();
+							showWindow("编辑小组");
+						} else {
+							layer.msg(data.msg);
+						}
+					},
+					error: function() {
+						closeLoad();
+						alert("出错了,请联系技术人员!");
+					}
+				});
+
+
 			} else {
 				layer.msg(data.msg);
 			}
 		},
 		error: function() {
-			closeLoad();
-			alert("出错了,请联系技术人员!");
+			layer.alert('出错了,请联系技术人员!');
 		}
 	});
+
+
+
 }
 
 function del(id) {
