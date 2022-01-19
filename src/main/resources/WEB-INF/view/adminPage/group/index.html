@@ -45,7 +45,8 @@
 					<thead>
 						<tr>
 							<th>小组名</th>
-							<th>成员</th>
+							<th>成员用户</th>
+							<th>成员小组</th>
 							<th>操作</th>
 						</tr>
 					</thead>
@@ -54,6 +55,7 @@
 						<tr>
 							<td>${groupExt.name}</td>
 							<td><#list groupExt.userList as user> ${user.trueName} </#list></td>
+							<td><#list groupExt.groupList as group> ${group.name} </#list></td>
 							<td>
 								<button class="layui-btn layui-btn-sm" onclick="edit('${groupExt.id}')">编辑</button>
 
@@ -84,9 +86,16 @@
 				</div>
 
 				<div class="layui-form-item">
-					<label class="layui-form-label">包含用户</label>
+					<label class="layui-form-label">成员用户</label>
 					<div class="layui-input-block">
 						<div id="userIds"></div>
+					</div>
+				</div>
+				
+				<div class="layui-form-item">
+					<label class="layui-form-label">成员小组</label>
+					<div class="layui-input-block">
+						<div id="groupIds"></div>
 					</div>
 				</div>
 

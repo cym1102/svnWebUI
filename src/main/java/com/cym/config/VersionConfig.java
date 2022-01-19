@@ -29,7 +29,6 @@ public class VersionConfig {
 		// 获取版本号
 		try {
 			currentVersion = getFromPom();
-			System.out.println(currentVersion);
 		} catch (Exception e) {
 			logger.info(e.getMessage(), e);
 		}
@@ -42,7 +41,9 @@ public class VersionConfig {
 		String jarPath = VersionConfig.class.getProtectionDomain().getCodeSource().getLocation().getFile();
 		jarPath = java.net.URLDecoder.decode(jarPath, "UTF-8");
 		try {
-			URL url = new URL("jar:file:" + jarPath + "!/META-INF/maven/com.cym/nginxWebUI/pom.properties");
+			System.out.println(jarPath);
+			URL url = new URL("jar:file:" + jarPath + "!/META-INF/maven/com.cym/svnWebUI/pom.properties");
+			System.out.println(url);
 			InputStream inputStream = url.openStream();
 			Properties properties = new Properties();
 			properties.load(inputStream);

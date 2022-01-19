@@ -27,7 +27,7 @@ Windows上倒是有不错的svn服务端软件即VisualSVN, 但一来Windows服�
 ```
 演示地址: http://svn.nginxwebui.cn:6060
 用户名: admin
-密码: Admin123
+密码: admin
 ```
 
 
@@ -66,9 +66,9 @@ Path : JDK安装目录\bin
 2.下载最新版发行包jar
 
 ```
-Linux: wget -O /home/svnWebUI/svnWebUI.jar http://file.nginxwebui.cn/svnWebUI-1.2.5.jar
+Linux: wget -O /home/svnWebUI/svnWebUI.jar http://file.nginxwebui.cn/svnWebUI-1.2.9.jar
 
-Windows: 直接使用浏览器下载 http://file.nginxwebui.cn/svnWebUI-1.2.5.jar
+Windows: 直接使用浏览器下载 http://file.nginxwebui.cn/svnWebUI-1.2.9.jar
 ```
 
 有新版本只需要修改路径中的版本即可
@@ -78,7 +78,7 @@ Windows: 直接使用浏览器下载 http://file.nginxwebui.cn/svnWebUI-1.2.5.ja
 ```
 Linux: nohup java -jar /home/svnWebUI/svnWebUI.jar --server.port=6060 > /dev/null &
 
-Windows: java -jar D:/home/svnWebUI/svnWebUI.jar --server.port=6060
+Windows: java -jar -Dfile.encoding=UTF-8 D:/home/svnWebUI/svnWebUI.jar --server.port=6060
 ```
 
 参数说明(都是非必填)
@@ -227,16 +227,16 @@ systemctl start svnwebui.service
 
 如果忘记了登录密码，可按如下教程找回密码
 
-1.停止nginxWebUI
+1.停止svnWebUI
 
 ```
 pkill java
 ```
 
-2.使用找回密码参数运行nginxWebUI.jar
+2.使用找回密码参数运行svnWebUI.jar
 
 ```
-java -jar nginxWebUI.jar --project.home=/home/svnWebUI/ --project.findPass=true
+java -jar svnWebUI.jar --project.home=/home/svnWebUI/ --project.findPass=true
 ```
 
 --project.home 为项目文件所在目录

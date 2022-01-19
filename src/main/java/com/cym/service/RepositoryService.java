@@ -7,7 +7,7 @@ import org.noear.solon.annotation.Inject;
 import org.noear.solon.extend.aspect.annotation.Service;
 
 import com.cym.config.HomeConfig;
-import com.cym.config.ProjectConfig;
+import com.cym.config.InitConfig;
 import com.cym.ext.GroupExt;
 import com.cym.ext.UserExt;
 import com.cym.model.Group;
@@ -33,7 +33,7 @@ public class RepositoryService {
 	@Inject
 	SqlHelper sqlHelper;
 	@Inject
-	ProjectConfig projectConfig;
+	InitConfig projectConfig;
 	@Inject
 	HomeConfig homeConfig;
 

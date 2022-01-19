@@ -10,7 +10,7 @@ import org.noear.solon.annotation.Component;
 import org.noear.solon.annotation.Inject;
 
 import com.cym.config.HomeConfig;
-import com.cym.config.ProjectConfig;
+import com.cym.config.InitConfig;
 import com.cym.ext.Path;
 import com.cym.model.Repository;
 import com.cym.service.RepositoryService;
@@ -23,7 +23,7 @@ import cn.hutool.core.util.RuntimeUtil;
 @Component
 public class PathUtls {
 	@Inject
-	ProjectConfig projectConfig;
+	InitConfig projectConfig;
 	@Inject
 	SqlHelper sqlHelper;
 	@Inject

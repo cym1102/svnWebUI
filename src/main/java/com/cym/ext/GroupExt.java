@@ -9,12 +9,30 @@ import com.cym.sqlhelper.config.InitValue;
 public class GroupExt extends Group {
 
 	List<User> userList;
+	List<Group> groupList;
 
 	List<String> userIds;
+	List<String> groupIds;
 
 	@InitValue("r")
-	//读写类型 'r' 'w' 'rw'
+	// 读写类型 'r' 'w' 'rw'
 	String permission;
+
+	public List<Group> getGroupList() {
+		return groupList;
+	}
+
+	public void setGroupList(List<Group> groupList) {
+		this.groupList = groupList;
+	}
+
+	public List<String> getGroupIds() {
+		return groupIds;
+	}
+
+	public void setGroupIds(List<String> groupIds) {
+		this.groupIds = groupIds;
+	}
 
 	public List<String> getUserIds() {
 		return userIds;

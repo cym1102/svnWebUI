@@ -22,6 +22,7 @@ import com.cym.utils.BeanExtUtil;
 import com.cym.utils.JsonResult;
 
 import cn.hutool.core.io.FileUtil;
+import cn.hutool.core.util.StrUtil;
 
 @Controller
 @Mapping("/adminPage/group")
@@ -38,26 +39,34 @@ public class GroupController extends BaseController {
 		Page pageExt = BeanExtUtil.copyPageByProperties(page, GroupExt.class);
 		for (GroupExt groupExt : (List<GroupExt>) pageExt.getRecords()) {
 			groupExt.setUserList(groupService.getUserList(groupExt.getId()));
+			groupExt.setGroupList(groupService.getGroupList(groupExt.getId()));
 		}
 
-		ModelAndView modelAndView = buildMav("/adminPage/group/index.html");
-		
+		ModelAndView modelAndView = new ModelAndView("/adminPage/group/index.html");
+
 		modelAndView.put("keywords", keywords);
 		modelAndView.put("page", pageExt);
-
 
 		return modelAndView;
 	}
 
-	
 	@Mapping("addOver")
-	public JsonResult addOver(Group group,  String[] userIds) {
+	public JsonResult addOver(Group group, String[] userIds, String[] groupIds) {
 		Group groupOrg = groupService.getByName(group.getName(), group.getId());
 		if (groupOrg != null) {
 			return renderError("此小组名已存在");
 		}
 
-		groupService.insertOrUpdate(group, userIds);
+		// 检查是否出现循环依赖
+		if (StrUtil.isNotEmpty(group.getId())) {
+			String link = groupService.checkLoop(group.getId(), groupIds);
+			if (StrUtil.isNotEmpty(link)) {
+				return renderError("出现小组循环依赖: " + link);
+			}
+
+		}
+
+		groupService.insertOrUpdate(group, userIds, groupIds);
 		configService.refresh();
 		return renderSuccess();
 	}
@@ -68,24 +77,23 @@ public class GroupController extends BaseController {
 		GroupExt groupExt = BeanExtUtil.copyNewByProperties(group, GroupExt.class);
 		List<User> userList = groupService.getUserList(group.getId());
 		groupExt.setUserList(userList);
-
 		groupExt.setUserIds(userList.stream().map(User::getId).collect(Collectors.toList()));
-		
+
+		List<Group> groupList = groupService.getGroupList(group.getId());
+		groupExt.setGroupList(groupList);
+		groupExt.setGroupIds(groupList.stream().map(Group::getId).collect(Collectors.toList()));
+
 		return renderSuccess(groupExt);
 	}
 
-	
 	@Mapping("del")
-	
 	public JsonResult del(String id) {
 		groupService.deleteById(id);
 		configService.refresh();
 		return renderSuccess();
 	}
 
-	
 	@Mapping("importOver")
-	
 	public JsonResult importOver(String dirTemp) {
 
 		List<String> lines = FileUtil.readLines(dirTemp, Charset.forName("UTF-8"));
@@ -107,12 +115,11 @@ public class GroupController extends BaseController {
 		}
 
 		FileUtil.del(dirTemp);
-
+		configService.refresh();
 		return renderSuccess();
 	}
 
 	@Mapping("getUserList")
-	
 	public JsonResult getUserList() {
 
 		List<User> users = sqlHelper.findAll(User.class);
@@ -122,6 +129,26 @@ public class GroupController extends BaseController {
 			Select select = new Select();
 			select.setName(user.getTrueName());
 			select.setValue(user.getId());
+			selects.add(select);
+		}
+
+		return renderSuccess(selects);
+	}
+
+	@Mapping("getGroupList")
+	public JsonResult getGroupList(String groupId) {
+
+		List<Group> groups = sqlHelper.findAll(Group.class);
+
+		List<Select> selects = new ArrayList<>();
+		for (Group group : groups) {
+			if (StrUtil.isNotEmpty(groupId) && group.getId().equals(groupId)) {
+				continue;
+			}
+
+			Select select = new Select();
+			select.setName(group.getName());
+			select.setValue(group.getId());
 			selects.add(select);
 		}
 
