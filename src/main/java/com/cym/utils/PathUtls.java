@@ -75,7 +75,7 @@ public class PathUtls {
 			for (int i = 0; i < lines.size(); i++) {
 				if (lines.get(i).replace(lines.get(i).trim(), "").equals(blank)) {
 					Path parentPath = findParentPath(lines, i, lines.get(i), paths);
-					Path path = buildPath(lines.get(i), parentPath.getFullPath() + lines.get(i).replace(" ", ""));
+					Path path = buildPath(lines.get(i), parentPath.getFullPath() + lines.get(i).trim());
 					parentPath.getChildren().add(path);
 
 					// 按文件夹排序
