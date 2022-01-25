@@ -1,5 +1,6 @@
 package com.cym.service;
 
+import java.io.File;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -69,20 +70,24 @@ public class RepositoryService {
 
 	}
 
-	public void insertOrUpdate(Repository repository) {
+	public void insertOrUpdate(Repository repository, Boolean del) {
 
 		if (StrUtil.isEmpty(repository.getId())) {
 			// 创建仓库
 			String dir = homeConfig.home + "/repo/" + repository.getName();
-			FileUtil.del(dir);
-			FileUtil.mkdir(dir);
-			try {
-				String rs = RuntimeUtil.execForStr("svnadmin", "create", dir);
-				System.out.println(rs);
-			} catch (Exception e) {
-				e.printStackTrace();
+			if (del) {
+				FileUtil.del(dir);
+				FileUtil.mkdir(dir);
+
+				try {
+					String rs = RuntimeUtil.execForStr("svnadmin", "create", dir);
+					System.out.println(rs);
+				} catch (Exception e) {
+					e.printStackTrace();
+				}
+
 			}
-			
+
 			// 拷贝配置文件
 			String svnserve_conf = homeConfig.home + "/repo/" + repository.getName() + "/conf/svnserve.conf";
 			ClassPathResource resource = new ClassPathResource("file/svnserve.conf");
@@ -190,18 +195,36 @@ public class RepositoryService {
 		List<String> groupIds = sqlHelper.findPropertiesByQuery(new ConditionAndWrapper().eq(GroupUser::getUserId, userId), GroupUser.class, GroupUser::getGroupId);
 
 		List<RepositoryGroup> groups = sqlHelper.findListByQuery(new ConditionAndWrapper().in(RepositoryGroup::getGroupId, groupIds), RepositoryGroup.class);
-		for(RepositoryGroup repositoryGroup:groups) {
+		for (RepositoryGroup repositoryGroup : groups) {
 			RepositoryUser repositoryUser = new RepositoryUser();
 			repositoryUser.setUserId(userId);
 			repositoryUser.setRepositoryId(repositoryGroup.getRepositoryId());
 			repositoryUser.setPermission(repositoryGroup.getPermission());
 			repositoryUser.setPath(repositoryGroup.getPath());
-			
+
 			list.add(repositoryUser);
 		}
-		
-		
+
 		return list;
+	}
+
+	public Boolean hasDir(String name) {
+		String dir = homeConfig.home + "/repo/" + name;
+		return FileUtil.exist(dir);
+	}
+
+	public void scan() {
+		File dir = new File(homeConfig.home + "/repo/");
+		for (File file : dir.listFiles()) {
+			if (FileUtil.isDirectory(file) && !file.getName().equalsIgnoreCase("conf")) {
+				Long count = sqlHelper.findCountByQuery(new ConditionAndWrapper().eq(Repository::getName, file.getName()), Repository.class);
+				if (count == 0) {
+					Repository repository = new Repository();
+					repository.setName(file.getName());
+					insertOrUpdate(repository, false);
+				}
+			}
+		}
 	}
 
 }

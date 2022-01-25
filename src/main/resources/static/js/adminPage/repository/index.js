@@ -44,6 +44,26 @@ function add() {
 	showWindow("添加仓库");
 }
 
+function scan(){
+	if(confirm("是否扫描 " + $("#home").val() + "repo/ 下已存在仓库?")){
+		$.ajax({
+			type: 'POST',
+			url: ctx + '/adminPage/repository/scan',
+			dataType: 'json',
+			success: function(data) {
+				if (data.success) {
+					location.reload();
+				} else {
+					layer.msg(data.msg);
+				}
+			},
+			error: function() {
+				closeLoad();
+				alert("出错了,请联系技术人员!");
+			}
+		});
+	}
+}
 
 function showWindow(title) {
 	layer.open({
@@ -59,14 +79,44 @@ function addOver() {
 		layer.msg("仓库名为空");
 		return;
 	}
+	
+	$.ajax({
+		type: 'POST',
+		url: ctx + '/adminPage/repository/checkDir',
+		data: {
+			name: $("#name").val()
+		},
+		dataType: 'json',
+		success: function(data) {
+			if (data.success) {
+				if(data.obj){
+					var del = confirm("该仓库目录已存在, 是否删除已有目录?");
+					insert(del);
+				}else{
+					insert(true);
+				}
+			} else {
+				layer.msg(data.msg);
+			}
+		},
+		error: function() {
+			closeLoad();
+			alert("出错了,请联系技术人员!");
+		}
+	});
 
+	
+}
+
+function insert(del){
 	showLoad();
 	$.ajax({
 		type: 'POST',
 		url: ctx + '/adminPage/repository/addOver',
 		data: {
 			id: $("#id").val(),
-			name: $("#name").val()
+			name: $("#name").val(),
+			del : del
 		},
 		dataType: 'json',
 		success: function(data) {
@@ -84,31 +134,42 @@ function addOver() {
 	});
 }
 
-
 function del(id) {
-	if (confirm("确认删除?")) {
-		showLoad();
-		$.ajax({
-			type: 'POST',
-			url: ctx + '/adminPage/repository/del',
-			data: {
-				id: id
-			},
-			dataType: 'json',
-			success: function(data) {
-				closeLoad();
-				if (data.success) {
-					location.reload();
-				} else {
-					layer.msg(data.msg)
-				}
-			},
-			error: function() {
-				closeLoad();
-				alert("出错了,请联系技术人员!");
+	$("#delId").val(id);
+	$("#pass").val("");
+	
+	layer.open({
+		type: 1,
+		title: "删除仓库",
+		area: ['400px', '200px'], // 宽高
+		content: $('#delDiv')
+	});
+}
+
+function delOver() {	
+	showLoad();
+	$.ajax({
+		type: 'POST',
+		url: ctx + '/adminPage/repository/del',
+		data: {
+			id: $("#delId").val(),
+			pass: $("#pass").val()
+		},
+		dataType: 'json',
+		success: function(data) {
+			closeLoad();
+			if (data.success) {
+				location.reload();
+			} else {
+				layer.msg(data.msg)
 			}
-		});
-	}
+		},
+		error: function() {
+			closeLoad();
+			alert("出错了,请联系技术人员!");
+		}
+	});
+	
 }
 
 

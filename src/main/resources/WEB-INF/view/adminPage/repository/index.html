@@ -24,6 +24,8 @@
 				<form action="${ctx}/adminPage/repository" id="searchForm" method="post">
 					<div class="layui-form search">
 						<button type="button" class="layui-btn layui-btn-normal" onclick="add()">添加仓库</button>
+						<button type="button" class="layui-btn layui-btn-normal" onclick="scan()">扫描已有仓库</button>
+
 
 						<div class="layui-inline">
 							<label class="layui-form-label">仓库名</label>
@@ -38,7 +40,7 @@
 					</div>
 
 
-
+					<input type="hidden" name="home" id="home" value="${home}"> 
 					<input type="hidden" name="curr" value="${page.curr}"> 
 					<input type="hidden" name="limit" value="${page.limit}">
 
@@ -97,6 +99,25 @@
 
 				<div class="layui-form-item" style="text-align: center;">
 					<button type="button" class="layui-btn layui-btn-normal" onclick="addOver()">提交</button>
+					<button type="button" class="layui-btn" onclick="layer.closeAll()">关闭</button>
+				</div>
+			</form>
+		</div>
+		
+		
+		<div class="layui-form" id="delDiv" style="padding: 15px; display: none">
+			<form id="delForm">
+				<input type="hidden" name="delId" id="delId">
+				
+				<div class="layui-form-item">
+					<label class="layui-form-label">登录密码<span class="red">*</span></label>
+					<div class="layui-input-block">
+						<input type="text" name="pass" id="pass" class="layui-input">
+					</div>
+				</div>
+
+				<div class="layui-form-item" style="text-align: center;">
+					<button type="button" class="layui-btn layui-btn-normal" onclick="delOver()">删除仓库</button>
 					<button type="button" class="layui-btn" onclick="layer.closeAll()">关闭</button>
 				</div>
 			</form>

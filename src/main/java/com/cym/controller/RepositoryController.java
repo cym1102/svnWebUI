@@ -80,17 +80,27 @@ public class RepositoryController extends BaseController {
 		ModelAndView modelAndView = new ModelAndView("/adminPage/repository/index.html");
 		modelAndView.put("keywords", keywords);
 		modelAndView.put("page", pageExt);
+		modelAndView.put("home", homeConfig.home);
 		return modelAndView;
 	}
 
+	@Mapping("checkDir")
+	public JsonResult checkDir(String name) {
+		return renderSuccess(repositoryService.hasDir(name));
+	}
+
 	@Mapping("addOver")
-	public JsonResult addOver(Repository repository) {
+	public JsonResult addOver(Repository repository, Boolean del) {
+		if (repository.getName().equalsIgnoreCase("conf")) {
+			return renderError("conf为保留关键字,不可用于仓库名");
+		}
+
 		Repository repositoryOrg = repositoryService.getByName(repository.getName(), repository.getId());
 		if (repositoryOrg != null) {
 			return renderError("此仓库名已存在");
 		}
 
-		repositoryService.insertOrUpdate(repository);
+		repositoryService.insertOrUpdate(repository, del);
 		configService.refresh();
 		return renderSuccess();
 	}
@@ -102,7 +112,12 @@ public class RepositoryController extends BaseController {
 	}
 
 	@Mapping("del")
-	public JsonResult del(String id) {
+	public JsonResult del(String id, String pass) {
+		User user = getLoginUser();
+		if (!user.getPass().equals(pass)) {
+			return renderError("密码错误，无法删除库!");
+		}
+
 		repositoryService.deleteById(id);
 		configService.refresh();
 		return renderSuccess();
@@ -363,6 +378,13 @@ public class RepositoryController extends BaseController {
 		}
 
 		return renderSuccess(selects);
+	}
+
+	@Mapping("scan")
+	public JsonResult scan() {
+		repositoryService.scan();
+
+		return renderSuccess();
 	}
 
 }
