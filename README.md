@@ -66,9 +66,9 @@ Path : JDK安装目录\bin
 2.下载最新版发行包jar
 
 ```
-Linux: wget -O /home/svnWebUI/svnWebUI.jar http://file.nginxwebui.cn/svnWebUI-1.3.2.jar
+Linux: wget -O /home/svnWebUI/svnWebUI.jar http://file.nginxwebui.cn/svnWebUI-1.3.3.jar
 
-Windows: 直接使用浏览器下载 http://file.nginxwebui.cn/svnWebUI-1.3.2.jar
+Windows: 直接使用浏览器下载 http://file.nginxwebui.cn/svnWebUI-1.3.3.jar
 ```
 
 有新版本只需要修改路径中的版本即可
@@ -76,7 +76,7 @@ Windows: 直接使用浏览器下载 http://file.nginxwebui.cn/svnWebUI-1.3.2.ja
 3.启动程序
 
 ```
-Linux: nohup java -jar /home/svnWebUI/svnWebUI.jar --server.port=6060 > /dev/null &
+Linux: nohup java -jar -Dfile.encoding=UTF-8 /home/svnWebUI/svnWebUI.jar --server.port=6060 > /dev/null &
 
 Windows: java -jar -Dfile.encoding=UTF-8 D:/home/svnWebUI/svnWebUI.jar --server.port=6060
 ```

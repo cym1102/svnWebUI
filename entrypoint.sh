@@ -1,4 +1,4 @@
 #!/bin/sh
 
 cd /home
-exec java -jar -Xmx64m svnWebUI.jar ${BOOT_OPTIONS} > /dev/null
+exec java -jar -Dfile.encoding=UTF-8 -Xmx64m svnWebUI.jar ${BOOT_OPTIONS} > /dev/null
