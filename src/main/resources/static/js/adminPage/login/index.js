@@ -33,7 +33,7 @@ function login() {
 		success : function(data) {
 			closeLoad();
 			if (data.success) {
-				location.href = ctx + "adminPage/info";
+				location.href = ctx + "/adminPage/info";
 			} else {
 				alert(data.msg);
 				refreshCode('codeImg');
@@ -48,7 +48,7 @@ function login() {
 
 
 function refreshCode(id) {
-	$("#" + id).attr("src", ctx + "adminPage/login/getCode?t=" + (new Date()).getTime());
+	$("#" + id).attr("src", ctx + "/adminPage/login/getCode?t=" + (new Date()).getTime());
 }
 
 

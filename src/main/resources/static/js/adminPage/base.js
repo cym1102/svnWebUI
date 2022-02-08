@@ -153,7 +153,7 @@ function getQueryString(name) {
 
 // 下载文件
 function downloadFile(url, name) {
-	window.open(ctx + "downloadFile?url=" + encodeURIComponent(url) + "&name="
+	window.open(ctx + "/downloadFile?url=" + encodeURIComponent(url) + "&name="
 			+ encodeURIComponent(name));
 }
 

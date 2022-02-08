@@ -1,7 +1,7 @@
 var userId;
 $(function(){
 	layui.config({
-		base: ctx + 'lib/layui/exts/xmSelect/'
+		base: ctx + '/lib/layui/exts/xmSelect/'
 	}).extend({
 		xmSelect: 'xm-select'
 	}).use(['xmSelect'], function(){
