@@ -33,8 +33,7 @@ public class GroupController extends BaseController {
 	ConfigService configService;
 
 	@Mapping("")
-	public ModelAndView index(Page page, String keywords) {
-
+	public ModelAndView index(Page page, String keywords)  {
 		page = groupService.search(page, keywords);
 		Page pageExt = BeanExtUtil.copyPageByProperties(page, GroupExt.class);
 		for (GroupExt groupExt : (List<GroupExt>) pageExt.getRecords()) {
@@ -51,7 +50,7 @@ public class GroupController extends BaseController {
 	}
 
 	@Mapping("addOver")
-	public JsonResult addOver(Group group, String[] userIds, String[] groupIds) {
+	public JsonResult addOver(Group group, String[] userIds, String[] groupIds)  {
 		Group groupOrg = groupService.getByName(group.getName(), group.getId());
 		if (groupOrg != null) {
 			return renderError("此小组名已存在");
@@ -72,7 +71,7 @@ public class GroupController extends BaseController {
 	}
 
 	@Mapping("detail")
-	public JsonResult detail(String id) {
+	public JsonResult detail(String id)  {
 		Group group = sqlHelper.findById(id, Group.class);
 		GroupExt groupExt = BeanExtUtil.copyNewByProperties(group, GroupExt.class);
 		List<User> userList = groupService.getUserList(group.getId());
@@ -87,14 +86,14 @@ public class GroupController extends BaseController {
 	}
 
 	@Mapping("del")
-	public JsonResult del(String id) {
+	public JsonResult del(String id)  {
 		groupService.deleteById(id);
 		configService.refresh();
 		return renderSuccess();
 	}
 
 	@Mapping("importOver")
-	public JsonResult importOver(String dirTemp) {
+	public JsonResult importOver(String dirTemp)  {
 
 		List<String> lines = FileUtil.readLines(dirTemp, Charset.forName("UTF-8"));
 		boolean start = false;

@@ -5,11 +5,12 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.stream.Collectors;
 
+import javax.naming.NamingException;
+
 import org.noear.solon.annotation.Inject;
 import org.noear.solon.extend.aspect.annotation.Service;
 
 import com.cym.config.HomeConfig;
-import com.cym.config.InitConfig;
 import com.cym.model.Group;
 import com.cym.model.Repository;
 import com.cym.model.RepositoryGroup;
@@ -26,15 +27,13 @@ public class ConfigService {
 	@Inject
 	SqlHelper sqlHelper;
 	@Inject
-	InitConfig projectConfig;
-	@Inject
 	RepositoryService repositoryService;
 	@Inject
 	GroupService groupService;
 	@Inject
 	HomeConfig homeConfig;
 
-	public void refresh() {
+	public void refresh()  {
 		String passwd = homeConfig.home + "/repo/conf/passwd";
 		String authz = homeConfig.home + "/repo/conf/authz";
 

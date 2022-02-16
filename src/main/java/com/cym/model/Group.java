@@ -1,6 +1,7 @@
 package com.cym.model;
 
 import com.cym.sqlhelper.bean.BaseModel;
+import com.cym.sqlhelper.config.InitValue;
 import com.cym.sqlhelper.config.Table;
 
 /**
@@ -22,5 +23,4 @@ public class Group extends BaseModel {
 		this.name = name;
 	}
 
-	
 }

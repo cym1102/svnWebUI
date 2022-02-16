@@ -11,7 +11,7 @@ import org.noear.solon.annotation.Mapping;
 import org.noear.solon.core.handle.ModelAndView;
 
 import com.cym.config.HomeConfig;
-import com.cym.config.InitConfig;
+import com.cym.service.ConfigService;
 import com.cym.service.SettingService;
 import com.cym.utils.BaseController;
 import com.cym.utils.JsonResult;
@@ -26,9 +26,10 @@ public class ConfigController extends BaseController {
 
 	@Inject
 	SettingService settingService;
-	
 	@Inject
 	HomeConfig homeConfig;
+	@Inject
+	ConfigService configService;
 
 	@Mapping("")
 	public ModelAndView index() {
@@ -74,7 +75,6 @@ public class ConfigController extends BaseController {
 	}
 
 	@Mapping("start")
-
 	public JsonResult start(String port) {
 		settingService.set("port", port);
 
@@ -105,4 +105,5 @@ public class ConfigController extends BaseController {
 		return renderSuccess();
 	}
 
+	
 }

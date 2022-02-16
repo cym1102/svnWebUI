@@ -52,6 +52,7 @@ function scan(){
 			dataType: 'json',
 			success: function(data) {
 				if (data.success) {
+					alert("扫描完成");
 					location.reload();
 				} else {
 					layer.msg(data.msg);

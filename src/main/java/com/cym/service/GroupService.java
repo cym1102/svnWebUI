@@ -25,7 +25,7 @@ public class GroupService {
 	@Inject
 	SqlHelper sqlHelper;
 
-	public Page search(Page page, String keywords) {
+	public Page search(Page page, String keywords)  {
 		ConditionAndWrapper conditionAndWrapper = new ConditionAndWrapper();
 
 		if (StrUtil.isNotEmpty(keywords)) {
@@ -36,6 +36,7 @@ public class GroupService {
 
 		return pageResp;
 	}
+
 
 	public Group getByName(String name, String groupId) {
 		ConditionAndWrapper conditionAndWrapper = new ConditionAndWrapper().eq(Group::getName, name);
@@ -80,7 +81,7 @@ public class GroupService {
 		}
 	}
 
-	public List<User> getUserList(String groupId) {
+	public List<User> getUserList(String groupId)  {
 		List<String> userIds = sqlHelper.findPropertiesByQuery(new ConditionAndWrapper().eq(GroupUser::getGroupId, groupId), GroupUser.class, GroupUser::getUserId);
 		return sqlHelper.findListByIds(userIds, User.class);
 	}
@@ -108,6 +109,7 @@ public class GroupService {
 	}
 
 	public List<Group> getGroupList(String groupId) {
+
 		List<String> groupIds = sqlHelper.findPropertiesByQuery(new ConditionAndWrapper().eq(GroupGroup::getMasterGroupId, groupId), GroupGroup.class, GroupGroup::getSlaveGroupId);
 		return sqlHelper.findListByIds(groupIds, Group.class);
 

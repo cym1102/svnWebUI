@@ -3,6 +3,8 @@ package com.cym.controller;
 import java.nio.charset.Charset;
 import java.util.List;
 
+import javax.naming.NamingException;
+
 import org.noear.solon.annotation.Controller;
 import org.noear.solon.annotation.Inject;
 import org.noear.solon.annotation.Mapping;
@@ -39,7 +41,7 @@ public class UserController extends BaseController {
 	}
 
 	@Mapping("addOver")
-	public JsonResult addOver(User user) {
+	public JsonResult addOver(User user)  {
 		User userOrg = userService.getByName(user.getName(), user.getId());
 		if (userOrg != null) {
 			return renderError("此登录名已存在");
@@ -57,14 +59,14 @@ public class UserController extends BaseController {
 	}
 
 	@Mapping("del")
-	public JsonResult del(String id) {
+	public JsonResult del(String id)  {
 		userService.deleteById(id);
 		configService.refresh();
 		return renderSuccess();
 	}
 
 	@Mapping("importOver")
-	public JsonResult importOver(String dirTemp) {
+	public JsonResult importOver(String dirTemp)  {
 
 		List<String> lines = FileUtil.readLines(dirTemp, Charset.forName("UTF-8"));
 		for (String line : lines) {

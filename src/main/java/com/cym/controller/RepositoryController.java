@@ -11,6 +11,8 @@ import java.util.Collections;
 import java.util.Comparator;
 import java.util.List;
 
+import javax.naming.NamingException;
+
 import org.noear.solon.annotation.Controller;
 import org.noear.solon.annotation.Inject;
 import org.noear.solon.annotation.Mapping;
@@ -86,11 +88,15 @@ public class RepositoryController extends BaseController {
 
 	@Mapping("checkDir")
 	public JsonResult checkDir(String name) {
+		if (name.equalsIgnoreCase("conf")) {
+			return renderError("conf为保留关键字,不可用于仓库名");
+		}
+		
 		return renderSuccess(repositoryService.hasDir(name));
 	}
 
 	@Mapping("addOver")
-	public JsonResult addOver(Repository repository, Boolean del) {
+	public JsonResult addOver(Repository repository, Boolean del)  {
 		if (repository.getName().equalsIgnoreCase("conf")) {
 			return renderError("conf为保留关键字,不可用于仓库名");
 		}
@@ -112,7 +118,7 @@ public class RepositoryController extends BaseController {
 	}
 
 	@Mapping("del")
-	public JsonResult del(String id, String pass) {
+	public JsonResult del(String id, String pass)  {
 		User user = getLoginUser();
 		if (!user.getPass().equals(pass)) {
 			return renderError("密码错误，无法删除库!");
@@ -154,7 +160,7 @@ public class RepositoryController extends BaseController {
 	}
 
 	@Mapping("addUser")
-	public JsonResult addUser(RepositoryUser repositoryUser) {
+	public JsonResult addUser(RepositoryUser repositoryUser)  {
 		if (repositoryService.hasUser(repositoryUser.getUserId(), repositoryUser.getPath(), repositoryUser.getRepositoryId(), repositoryUser.getId())) {
 			return renderError("该用户路径授权已存在");
 		}
@@ -164,7 +170,7 @@ public class RepositoryController extends BaseController {
 	}
 
 	@Mapping("delUser")
-	public JsonResult delUser(String id) {
+	public JsonResult delUser(String id)  {
 		repositoryService.delUser(id);
 		configService.refresh();
 		return renderSuccess();
@@ -177,7 +183,7 @@ public class RepositoryController extends BaseController {
 	}
 
 	@Mapping("groupPermission")
-	public ModelAndView groupPermission(Page page, String repositoryId) {
+	public ModelAndView groupPermission(Page page, String repositoryId)  {
 		String port = settingService.get("port");
 
 		page = repositoryService.groupPermission(page, repositoryId);
@@ -207,7 +213,7 @@ public class RepositoryController extends BaseController {
 	}
 
 	@Mapping("addGroup")
-	public JsonResult addGroup(RepositoryGroup repositoryGroup) {
+	public JsonResult addGroup(RepositoryGroup repositoryGroup)  {
 		if (repositoryService.hasGroup(repositoryGroup.getGroupId(), repositoryGroup.getPath(), repositoryGroup.getRepositoryId(), repositoryGroup.getId())) {
 			return renderError("该小组路径授权已存在");
 		}
@@ -218,7 +224,7 @@ public class RepositoryController extends BaseController {
 	}
 
 	@Mapping("delGroup")
-	public JsonResult delGroup(String id) {
+	public JsonResult delGroup(String id)  {
 		repositoryService.delGroup(id);
 		configService.refresh();
 		return renderSuccess();

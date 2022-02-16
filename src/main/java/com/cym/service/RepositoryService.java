@@ -34,8 +34,6 @@ public class RepositoryService {
 	@Inject
 	SqlHelper sqlHelper;
 	@Inject
-	InitConfig projectConfig;
-	@Inject
 	HomeConfig homeConfig;
 
 	public Page search(Page page, String keywords) {

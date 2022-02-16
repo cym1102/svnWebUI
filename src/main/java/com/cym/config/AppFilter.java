@@ -9,6 +9,8 @@ import org.noear.solon.core.handle.FilterChain;
 import com.cym.model.User;
 import com.cym.sqlhelper.bean.Page;
 
+import cn.hutool.core.util.StrUtil;
+
 @Component
 public class AppFilter implements Filter {
 	@Inject
@@ -47,7 +49,7 @@ public class AppFilter implements Filter {
 
 			ctx.attrSet("jsrandom", System.currentTimeMillis());
 			ctx.attrSet("currentVersion", versionConfig.currentVersion);
-			ctx.attrSet("ctx", ctx.url().replace(ctx.path(), ""));
+			ctx.attrSet("ctx", getCtxStr(ctx));
 			ctx.attrSet("page", new Page<>());
 			ctx.attrSet("user", ctx.session("user"));
 
@@ -56,6 +58,31 @@ public class AppFilter implements Filter {
 		} catch (Throwable e) {
 			e.printStackTrace();
 		}
+
+	}
+	
+	
+	public String getCtxStr(Context context) {
+		String httpHost = context.header("X-Forwarded-Host");
+		String realPort = context.header("X-Forwarded-Port");
+		String host = context.header("Host");
+
+		String ctx = "//";
+		if (StrUtil.isNotEmpty(httpHost)) {
+			ctx += httpHost;
+		} else if (StrUtil.isNotEmpty(host)) {
+			ctx += host;
+			if (!host.contains(":") && StrUtil.isNotEmpty(realPort)) {
+				ctx += ":" + realPort;
+			}
+		} else {
+			host = context.url().split("/")[2];
+			ctx += host;
+			if (!host.contains(":") && StrUtil.isNotEmpty(realPort)) {
+				ctx += ":" + realPort;
+			}
+		}
+		return ctx;
 
 	}
 }

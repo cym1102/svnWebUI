@@ -14,22 +14,23 @@ $(function() {
 			alert("出错了,请联系技术人员!");
 		}
 	});
+
 });
 
 
 function start() {
 	if (confirm("确定启动？")) {
-		
-		if($("#port").val().trim() == ''){
+
+		if ($("#port").val().trim() == '') {
 			layer.msg("启动端口未设置");
 			return;
 		}
-		
+
 		$.ajax({
 			type: 'POST',
 			url: ctx + '/adminPage/config/start',
-			data : {
-				port : $("#port").val().trim()
+			data: {
+				port: $("#port").val().trim()
 			},
 			dataType: 'json',
 			success: function(data) {

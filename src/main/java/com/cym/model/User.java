@@ -25,6 +25,8 @@ public class User extends BaseModel {
 	// 姓名
 	String trueName;
 
+	
+
 	public String getTrueName() {
 		return trueName;
 	}
