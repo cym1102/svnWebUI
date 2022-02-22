@@ -1,5 +1,6 @@
 package com.cym.utils;
 
+import cn.hutool.core.io.FileUtil;
 import cn.hutool.system.SystemUtil;
 
 public class SystemTool {
@@ -39,5 +40,22 @@ public class SystemTool {
 		}
 		return true;
 	}
+	
+	
+	/**
+	 * 是否在docker中
+	 * 
+	 * @return
+	 */
+	public static Boolean inDocker() {
+		if (SystemTool.isLinux()) {
+			if (FileUtil.exist("/usr/local/bin/entrypoint.sh")) {
+				return true;
+			}
+		}
+
+		return false;
+	}
+
 
 }

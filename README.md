@@ -6,6 +6,12 @@ svnWebUI是一款svn服务端web图形化管理工具, 是一个搭建svn服务�
 
 github: https://github.com/cym1102/svnWebUI
 
+QQ技术交流群1: 1106758598
+
+QQ技术交流群2: 560797506
+
+邮箱: cym1102@qq.com
+
 #### 功能说明
 
 svnWebUI是一款图形化管理Subversion的配置得工具, 虽说现在已进入git的时代, 但svn依然有不少使用场景, 比如公司内的文档管理与共享, svn的概念比git的少很多, 非常适合非程序员使用.
@@ -14,14 +20,16 @@ svnWebUI是一款图形化管理Subversion的配置得工具, 虽说现在已进
 
 Windows上倒是有不错的svn服务端软件即VisualSVN, 但一来Windows服务器少之又少, 第二VisualSVN没有web界面, 每次配置需要开启远程桌面, 安全性不高.
 
-经历几次失败的图形界面配置后, 萌生了写一个现代svn服务端管理软件, 让svn的服务端管理有gitea的轻松体验的想法.
+经历几次失败的图形界面配置后, 萌生了写一个现代svn服务端管理软件, 让svn的服务端管理有gitea一般的轻松体验的想法.
 
 
 #### 技术说明
 
-本项目是基于springBoot的web系统, 数据库使用h2, 因此服务器上不需要安装任何数据库, 同时也兼容mysql
+本项目是基于solon的java项目, 数据库使用h2, 因此服务器上不需要安装任何数据库, 同时也兼容使用mysql
 
-使用本软件前请先安装Subversion
+本地运行本软件，请先安装Subversion，并使用svn:\\\\协议进行checkout。
+
+使用docker版则无需安装任何其他软件，使用http:\\\\协议进行checkout。
 
 
 ```
@@ -66,9 +74,9 @@ Path : JDK安装目录\bin
 2.下载最新版发行包jar
 
 ```
-Linux: wget -O /home/svnWebUI/svnWebUI.jar http://file.nginxwebui.cn/svnWebUI-1.3.5.jar
+Linux: wget -O /home/svnWebUI/svnWebUI.jar http://file.nginxwebui.cn/svnWebUI-1.4.0.jar
 
-Windows: 直接使用浏览器下载 http://file.nginxwebui.cn/svnWebUI-1.3.5.jar
+Windows: 直接使用浏览器下载 http://file.nginxwebui.cn/svnWebUI-1.4.0.jar
 ```
 
 有新版本只需要修改路径中的版本即可
@@ -99,7 +107,7 @@ Windows: java -jar -Dfile.encoding=UTF-8 D:/home/svnWebUI/svnWebUI.jar --server.
 
 #### docker安装说明
 
-本项目制作了docker镜像, 支持 x86/x86_64/arm64/arm v7 平台，同时包含Subversion和svnWebUI在内, 一体化管理与运行Subversion. 
+本项目制作了docker镜像, 支持 x86/x86_64/arm64 平台，同时包含subversion apache2和svnWebUI在内, 与jar版不同的是docker版支持使用http协议访问svn
 
 1.安装docker容器环境
 

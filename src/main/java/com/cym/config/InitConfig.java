@@ -17,10 +17,12 @@ import com.cym.model.User;
 import com.cym.service.SettingService;
 import com.cym.sqlhelper.utils.SqlHelper;
 import com.cym.utils.FilePermissionUtil;
+import com.cym.utils.HttpdUtils;
 import com.cym.utils.SystemTool;
 
 import cn.hutool.core.io.FileUtil;
 import cn.hutool.core.io.resource.ClassPathResource;
+import cn.hutool.core.util.RuntimeUtil;
 
 @Component
 public class InitConfig {
@@ -37,6 +39,8 @@ public class InitConfig {
 	Boolean findPass;
 	@Inject
 	SqlHelper sqlHelper;
+	@Inject
+	HttpdUtils httpdUtils;
 
 	@Init
 	public void init() {
@@ -65,7 +69,15 @@ public class InitConfig {
 		FileUtil.mkdir(homeConfig.home + File.separator + "temp");
 
 		// 判断是否是容器中
-		if (inDocker()) {
+		if (SystemTool.inDocker()) {
+			// 修改端口号
+			httpdUtils.modHttpdPort(settingService.get("port"));
+			// 目录授权
+			RuntimeUtil.execForStr("chown apache.apache -R " + homeConfig.home + File.separator + "repo/");
+			// 启动httpd
+			httpdUtils.start();
+		} else {
+			// 启动svnserve
 			configController.start(settingService.get("port"));
 		}
 
@@ -75,24 +87,6 @@ public class InitConfig {
 		} catch (IOException e) {
 			logger.info(e.getMessage(), e);
 		}
-	}
-
-	/**
-	 * 是否在docker中
-	 * 
-	 * @return
-	 */
-	private Boolean inDocker() {
-		if (SystemTool.isLinux()) {
-
-			if (FileUtil.exist("/usr/local/bin/entrypoint.sh")) {
-				logger.info("I am in docker");
-				return true;
-			}
-		}
-
-		logger.info("I am not in docker");
-		return false;
 	}
 
 	/**

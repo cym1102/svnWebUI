@@ -1,19 +1,15 @@
-FROM alpine:3.15
+FROM centos:centos7
 ENV LANG=zh_CN.UTF-8 \
     TZ=Asia/Shanghai \
     PS1="\u@\h:\w \$ "
-RUN sed -i 's/dl-cdn.alpinelinux.org/mirrors.aliyun.com/g' /etc/apk/repositories \
-    && apk add --update --no-cache \
+RUN yum -y install \
        subversion \
-       openjdk8-jre \
-       tzdata \
-       tini \
-    && fc-cache -f -v \
-    && ln -sf /usr/share/zoneinfo/${TZ} /etc/localtime \
-    && echo "${TZ}" > /etc/timezone \
-    && rm -rf /var/cache/apk/* /tmp/*
+       httpd \
+       mod_dav_svn \
+       java-1.8.0-openjdk \
+    && yum clean all
 COPY target/svnWebUI-*.jar /home/svnWebUI.jar
+COPY svn.conf /etc/httpd/conf.d/svn.conf
 COPY entrypoint.sh /usr/local/bin/entrypoint.sh
-RUN ["chmod", "+x", "/usr/local/bin/entrypoint.sh"]
-VOLUME ["/home/svnWebUI"]
-ENTRYPOINT ["tini", "entrypoint.sh"]
+RUN chmod +x /usr/local/bin/entrypoint.sh
+ENTRYPOINT /usr/local/bin/entrypoint.sh

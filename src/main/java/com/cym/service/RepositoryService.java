@@ -94,6 +94,8 @@ public class RepositoryService {
 
 		sqlHelper.insertOrUpdate(repository);
 
+		// 目录授权
+		RuntimeUtil.execForStr("chown apache.apache -R " + homeConfig.home + File.separator + "repo/");
 	}
 
 	public List<UserExt> getUserExts(String id) {

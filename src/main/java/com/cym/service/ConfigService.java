@@ -1,5 +1,6 @@
 package com.cym.service;
 
+import java.io.File;
 import java.nio.charset.Charset;
 import java.util.ArrayList;
 import java.util.List;
@@ -11,6 +12,7 @@ import org.noear.solon.annotation.Inject;
 import org.noear.solon.extend.aspect.annotation.Service;
 
 import com.cym.config.HomeConfig;
+import com.cym.config.InitConfig;
 import com.cym.model.Group;
 import com.cym.model.Repository;
 import com.cym.model.RepositoryGroup;
@@ -18,8 +20,10 @@ import com.cym.model.RepositoryUser;
 import com.cym.model.User;
 import com.cym.sqlhelper.utils.ConditionAndWrapper;
 import com.cym.sqlhelper.utils.SqlHelper;
+import com.cym.utils.SystemTool;
 
 import cn.hutool.core.io.FileUtil;
+import cn.hutool.core.util.RuntimeUtil;
 import cn.hutool.core.util.StrUtil;
 
 @Service
@@ -33,8 +37,15 @@ public class ConfigService {
 	@Inject
 	HomeConfig homeConfig;
 
-	public void refresh()  {
-		String passwd = homeConfig.home + "/repo/conf/passwd";
+
+	public void refresh() {
+		String passwd = null;
+		if (SystemTool.inDocker()) {
+			passwd = homeConfig.home + "/repo/conf/httpdPasswd";
+		} else {
+			passwd = homeConfig.home + "/repo/conf/passwd";
+		}
+
 		String authz = homeConfig.home + "/repo/conf/authz";
 
 		// 用户名密码
@@ -42,7 +53,12 @@ public class ConfigService {
 		passwdLines.add("[users]");
 		List<User> userList = sqlHelper.findAll(User.class);
 		for (User user : userList) {
-			passwdLines.add(user.getName() + " = " + user.getPass());
+			if (SystemTool.inDocker()) {
+				String pass = RuntimeUtil.execForStr("htpasswd -nb " + user.getName() + " " + user.getPass());
+				passwdLines.add(pass);
+			} else {
+				passwdLines.add(user.getName() + " = " + user.getPass());
+			}
 		}
 		FileUtil.writeLines(passwdLines, passwd, Charset.forName("UTF-8"));
 
@@ -93,7 +109,6 @@ public class ConfigService {
 			}
 		}
 		FileUtil.writeLines(authzLines, authz, Charset.forName("UTF-8"));
-
 	}
 
 	// 去掉路径最后的/
@@ -116,5 +131,7 @@ public class ConfigService {
 		}
 		return paths;
 	}
+
+	
 
 }

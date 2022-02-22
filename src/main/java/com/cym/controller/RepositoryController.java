@@ -71,10 +71,8 @@ public class RepositoryController extends BaseController {
 
 		Page<RepositoryExt> pageExt = BeanExtUtil.copyPageByProperties(page, RepositoryExt.class);
 		for (RepositoryExt repositoryExt : (List<RepositoryExt>) pageExt.getRecords()) {
-			String url = "svn://" + getIP();
-			if (!port.equals("3690")) {
-				url += (":" + port);
-			}
+			String url = buildUrl(port);
+
 			url += "/" + repositoryExt.getName();
 			repositoryExt.setUrl(url);
 		}
@@ -91,12 +89,12 @@ public class RepositoryController extends BaseController {
 		if (name.equalsIgnoreCase("conf")) {
 			return renderError("conf为保留关键字,不可用于仓库名");
 		}
-		
+
 		return renderSuccess(repositoryService.hasDir(name));
 	}
 
 	@Mapping("addOver")
-	public JsonResult addOver(Repository repository, Boolean del)  {
+	public JsonResult addOver(Repository repository, Boolean del) {
 		if (repository.getName().equalsIgnoreCase("conf")) {
 			return renderError("conf为保留关键字,不可用于仓库名");
 		}
@@ -107,6 +105,7 @@ public class RepositoryController extends BaseController {
 		}
 
 		repositoryService.insertOrUpdate(repository, del);
+		
 		configService.refresh();
 		return renderSuccess();
 	}
@@ -118,7 +117,7 @@ public class RepositoryController extends BaseController {
 	}
 
 	@Mapping("del")
-	public JsonResult del(String id, String pass)  {
+	public JsonResult del(String id, String pass) {
 		User user = getLoginUser();
 		if (!user.getPass().equals(pass)) {
 			return renderError("密码错误，无法删除库!");
@@ -140,10 +139,7 @@ public class RepositoryController extends BaseController {
 		for (RepositoryUserExt repositoryUserExt : (List<RepositoryUserExt>) pageExt.getRecords()) {
 			repositoryUserExt.setUser(sqlHelper.findById(repositoryUserExt.getUserId(), User.class));
 
-			String url = "svn://" + getIP();
-			if (!port.equals("3690")) {
-				url += (":" + port);
-			}
+			String url = buildUrl(port);
 			url += ("/" + repository.getName() + repositoryUserExt.getPath());
 			if (url.endsWith("/")) {
 				url = url.substring(0, url.length() - 1);
@@ -160,7 +156,7 @@ public class RepositoryController extends BaseController {
 	}
 
 	@Mapping("addUser")
-	public JsonResult addUser(RepositoryUser repositoryUser)  {
+	public JsonResult addUser(RepositoryUser repositoryUser) {
 		if (repositoryService.hasUser(repositoryUser.getUserId(), repositoryUser.getPath(), repositoryUser.getRepositoryId(), repositoryUser.getId())) {
 			return renderError("该用户路径授权已存在");
 		}
@@ -170,7 +166,7 @@ public class RepositoryController extends BaseController {
 	}
 
 	@Mapping("delUser")
-	public JsonResult delUser(String id)  {
+	public JsonResult delUser(String id) {
 		repositoryService.delUser(id);
 		configService.refresh();
 		return renderSuccess();
@@ -183,7 +179,7 @@ public class RepositoryController extends BaseController {
 	}
 
 	@Mapping("groupPermission")
-	public ModelAndView groupPermission(Page page, String repositoryId)  {
+	public ModelAndView groupPermission(Page page, String repositoryId) {
 		String port = settingService.get("port");
 
 		page = repositoryService.groupPermission(page, repositoryId);
@@ -193,10 +189,7 @@ public class RepositoryController extends BaseController {
 		for (RepositoryGroupExt repositoryGroupExt : (List<RepositoryGroupExt>) pageExt.getRecords()) {
 			repositoryGroupExt.setGroup(sqlHelper.findById(repositoryGroupExt.getGroupId(), Group.class));
 
-			String url = "svn://" + getIP();
-			if (!port.equals("3690")) {
-				url += (":" + port);
-			}
+			String url = buildUrl(port);
 			url += ("/" + repository.getName() + repositoryGroupExt.getPath());
 
 			if (url.endsWith("/")) {
@@ -212,8 +205,25 @@ public class RepositoryController extends BaseController {
 		return modelAndView;
 	}
 
+	private String buildUrl(String port) {
+		String url = null;
+		if (SystemTool.inDocker()) {
+			url = "http://" + getIP();
+			if (!port.equals("80")) {
+				url += (":" + port);
+			}
+			//url += "/svn";
+		} else {
+			url = "svn://" + getIP();
+			if (!port.equals("3690")) {
+				url += (":" + port);
+			}
+		}
+		return url;
+	}
+
 	@Mapping("addGroup")
-	public JsonResult addGroup(RepositoryGroup repositoryGroup)  {
+	public JsonResult addGroup(RepositoryGroup repositoryGroup) {
 		if (repositoryService.hasGroup(repositoryGroup.getGroupId(), repositoryGroup.getPath(), repositoryGroup.getRepositoryId(), repositoryGroup.getId())) {
 			return renderError("该小组路径授权已存在");
 		}
@@ -224,7 +234,7 @@ public class RepositoryController extends BaseController {
 	}
 
 	@Mapping("delGroup")
-	public JsonResult delGroup(String id)  {
+	public JsonResult delGroup(String id) {
 		repositoryService.delGroup(id);
 		configService.refresh();
 		return renderSuccess();
