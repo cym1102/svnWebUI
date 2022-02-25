@@ -62,26 +62,15 @@ public class BaseController {
 	}
 
 
-//	@SuppressWarnings("unchecked")
-//	public ModelAndView buildMav(String view) {
-//		ModelAndView mav = new ModelAndView(view);
-//		mav.put("jsrandom", System.currentTimeMillis());
-//		mav.put("currentVersion", versionConfig.currentVersion);
-//		mav.put("ctx", Context.current().url().replace(Context.current().path(), ""));
-//		mav.put("page", new Page<>());
-//		mav.put("user", Context.current().session("user"));
-//
-//		return mav;
-//	}
 
-	public String getIP() {
-		URI uri = null;
-		try {
-			uri = new URI(Context.current().url() + "/");
-		} catch (URISyntaxException e) {
-			e.printStackTrace();
-		}
-		return uri.getHost();
-	}
+//	public String getIP() {
+//		URI uri = null;
+//		try {
+//			uri = new URI(Context.current().url() + "/");
+//		} catch (URISyntaxException e) {
+//			e.printStackTrace();
+//		}
+//		return uri.getHost();
+//	}
 
 }

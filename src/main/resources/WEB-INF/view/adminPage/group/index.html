@@ -20,18 +20,18 @@
 
 				<form action="${ctx}/adminPage/group" id="searchForm" method="post">
 					<div class="layui-form search">
-						<button type="button" class="layui-btn layui-btn-normal" onclick="add()">添加小组</button>
-						<button type="button" class="layui-btn layui-btn-normal" onclick="importGroup()">导入小组</button>
+						<button type="button" class="layui-btn layui-btn-normal layui-btn-sm" onclick="add()">添加小组</button>
+						<button type="button" class="layui-btn layui-btn-normal layui-btn-sm" onclick="importGroup()">导入小组</button>
 
 						<div class="layui-inline">
 							<label class="layui-form-label">关键字</label>
 						</div>
 						<div class="layui-inline">
-							<input type="text" name="keywords" class="layui-input" value="${keywords}">
+							<input type="text" name="keywords"  style="height: 30px;" class="layui-input" value="${keywords}">
 						</div>
 
 						<div class="layui-inline">
-							<button type="button" class="layui-btn" onclick="search()">搜索</button>
+							<button type="button" class="layui-btn layui-btn-sm" onclick="search()">搜索</button>
 						</div>
 					</div>
 
@@ -41,7 +41,7 @@
 
 				</form>
 
-				<table class="layui-table">
+				<table class="layui-table"  lay-size="sm">
 					<thead>
 						<tr>
 							<th>小组名</th>

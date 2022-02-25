@@ -1,27 +1,26 @@
 package com.cym.controller;
 
 import java.io.File;
-import java.io.FileInputStream;
-import java.io.InputStream;
-import java.net.URI;
-import java.net.URISyntaxException;
-import java.net.URLEncoder;
+import java.io.IOException;
+import java.nio.charset.Charset;
 import java.util.ArrayList;
-import java.util.Collections;
 import java.util.Comparator;
 import java.util.List;
-
-import javax.naming.NamingException;
 
 import org.noear.solon.annotation.Controller;
 import org.noear.solon.annotation.Inject;
 import org.noear.solon.annotation.Mapping;
 import org.noear.solon.core.handle.Context;
 import org.noear.solon.core.handle.ModelAndView;
+import org.tmatesoft.svn.core.SVNException;
+import org.tmatesoft.svn.core.SVNURL;
+import org.tmatesoft.svn.core.auth.ISVNAuthenticationManager;
+import org.tmatesoft.svn.core.io.SVNRepository;
+import org.tmatesoft.svn.core.io.SVNRepositoryFactory;
+import org.tmatesoft.svn.core.wc.SVNWCUtil;
 
 import com.cym.config.HomeConfig;
 import com.cym.config.InitConfig;
-import com.cym.ext.Path;
 import com.cym.ext.RepositoryExt;
 import com.cym.ext.RepositoryGroupExt;
 import com.cym.ext.RepositoryUserExt;
@@ -30,6 +29,7 @@ import com.cym.model.Group;
 import com.cym.model.Repository;
 import com.cym.model.RepositoryGroup;
 import com.cym.model.RepositoryUser;
+import com.cym.model.TreeNode;
 import com.cym.model.User;
 import com.cym.service.ConfigService;
 import com.cym.service.RepositoryService;
@@ -37,12 +37,14 @@ import com.cym.service.SettingService;
 import com.cym.sqlhelper.bean.Page;
 import com.cym.utils.BaseController;
 import com.cym.utils.BeanExtUtil;
-import com.cym.utils.JarUtil;
 import com.cym.utils.JsonResult;
 import com.cym.utils.PathUtls;
+import com.cym.utils.SvnAdminUtils;
 import com.cym.utils.SystemTool;
 
 import cn.hutool.core.io.FileUtil;
+import cn.hutool.core.net.URLDecoder;
+import cn.hutool.core.net.URLEncoder;
 import cn.hutool.core.util.CharsetUtil;
 import cn.hutool.core.util.RuntimeUtil;
 import cn.hutool.core.util.StrUtil;
@@ -62,6 +64,8 @@ public class RepositoryController extends BaseController {
 	PathUtls pathUtls;
 	@Inject
 	HomeConfig homeConfig;
+	@Inject
+	SvnAdminUtils svnAdminUtils;
 
 	@Mapping("")
 	public ModelAndView index(Page page, String keywords) {
@@ -71,7 +75,7 @@ public class RepositoryController extends BaseController {
 
 		Page<RepositoryExt> pageExt = BeanExtUtil.copyPageByProperties(page, RepositoryExt.class);
 		for (RepositoryExt repositoryExt : (List<RepositoryExt>) pageExt.getRecords()) {
-			String url = buildUrl(port);
+			String url = pathUtls.buildUrl(port);
 
 			url += "/" + repositoryExt.getName();
 			repositoryExt.setUrl(url);
@@ -95,8 +99,8 @@ public class RepositoryController extends BaseController {
 
 	@Mapping("addOver")
 	public JsonResult addOver(Repository repository, Boolean del) {
-		if (repository.getName().equalsIgnoreCase("conf")) {
-			return renderError("conf为保留关键字,不可用于仓库名");
+		if (StrUtil.isEmpty(repository.getName())) {
+			return renderError("仓库名为空");
 		}
 
 		Repository repositoryOrg = repositoryService.getByName(repository.getName(), repository.getId());
@@ -105,7 +109,7 @@ public class RepositoryController extends BaseController {
 		}
 
 		repositoryService.insertOrUpdate(repository, del);
-		
+
 		configService.refresh();
 		return renderSuccess();
 	}
@@ -113,7 +117,13 @@ public class RepositoryController extends BaseController {
 	@Mapping("detail")
 	public JsonResult detail(String id) {
 		Repository repository = sqlHelper.findById(id, Repository.class);
-		return renderSuccess(repository);
+		RepositoryExt repositoryExt = BeanExtUtil.copyNewByProperties(repository, RepositoryExt.class);
+		String url = pathUtls.buildUrl(settingService.get("port"));
+
+		url += "/" + repositoryExt.getName();
+		repositoryExt.setUrl(url);
+
+		return renderSuccess(repositoryExt);
 	}
 
 	@Mapping("del")
@@ -139,7 +149,7 @@ public class RepositoryController extends BaseController {
 		for (RepositoryUserExt repositoryUserExt : (List<RepositoryUserExt>) pageExt.getRecords()) {
 			repositoryUserExt.setUser(sqlHelper.findById(repositoryUserExt.getUserId(), User.class));
 
-			String url = buildUrl(port);
+			String url = pathUtls.buildUrl(port);
 			url += ("/" + repository.getName() + repositoryUserExt.getPath());
 			if (url.endsWith("/")) {
 				url = url.substring(0, url.length() - 1);
@@ -189,7 +199,7 @@ public class RepositoryController extends BaseController {
 		for (RepositoryGroupExt repositoryGroupExt : (List<RepositoryGroupExt>) pageExt.getRecords()) {
 			repositoryGroupExt.setGroup(sqlHelper.findById(repositoryGroupExt.getGroupId(), Group.class));
 
-			String url = buildUrl(port);
+			String url = pathUtls.buildUrl(port);
 			url += ("/" + repository.getName() + repositoryGroupExt.getPath());
 
 			if (url.endsWith("/")) {
@@ -205,22 +215,7 @@ public class RepositoryController extends BaseController {
 		return modelAndView;
 	}
 
-	private String buildUrl(String port) {
-		String url = null;
-		if (SystemTool.inDocker()) {
-			url = "http://" + getIP();
-			if (!port.equals("80")) {
-				url += (":" + port);
-			}
-			//url += "/svn";
-		} else {
-			url = "svn://" + getIP();
-			if (!port.equals("3690")) {
-				url += (":" + port);
-			}
-		}
-		return url;
-	}
+
 
 	@Mapping("addGroup")
 	public JsonResult addGroup(RepositoryGroup repositoryGroup) {
@@ -309,59 +304,58 @@ public class RepositoryController extends BaseController {
 	}
 
 	@Mapping("getFileList")
-	public JsonResult getFileList(String id) {
-
-		List<Path> paths = pathUtls.getPath(id);
-
-		return renderSuccess(paths);
-	}
-
-	@Mapping("see")
-	public ModelAndView see(String repositoryId, String id) {
-		Repository repository = sqlHelper.findById(repositoryId, Repository.class);
-		List<Path> paths = pathUtls.getPath(repositoryId);
-
-		Path path = findPathById(id, paths);
-
-		String filePath = path.getName();
-		while (StrUtil.isNotEmpty(path.getpId())) {
-			path = findPathById(path.getpId(), paths);
-			filePath = path.getName() + "/" + filePath;
+	public List<TreeNode> getFileList(String id, String url) {
+		if (StrUtil.isEmpty(id)) {
+			id = url;
 		}
+		// URLcode转码
+		id = URLDecoder.decode(id, Charset.forName("UTF-8"));
 
-		String home = homeConfig.home;
-		String rs = null;
+		List<TreeNode> list = pathUtls.getPath(id);
 
-		if (SystemTool.isWindows()) {
-			String cmd = "svnlook.exe cat " + (home + File.separator + "repo" + File.separator + repository.getName() + File.separator).replace("/", "\\") + " " + filePath;
-			rs = RuntimeUtil.execForStr(cmd);
-		} else {
-			String sh = "svnlook cat " + (home + File.separator + "repo" + File.separator + repository.getName() + File.separator) + " " + filePath;
-			rs = RuntimeUtil.execForStr(sh);
-		}
-		ModelAndView modelAndView = new ModelAndView("/adminPage/repository/see.html");
-		modelAndView.put("rs", rs);
-		return modelAndView;
-	}
+		// 按文件夹进行排序
+		list.sort(new Comparator<TreeNode>() {
 
-	private Path findPathById(String id, List<Path> paths) {
-		for (Path path : paths) {
-			if (path.getId().equals(id)) {
-				return path;
-			}
-		}
+			@Override
+			public int compare(TreeNode o1, TreeNode o2) {
 
-		for (Path path : paths) {
-			if (path.getChildren() != null && path.getChildren().size() > 0) {
-				Path chlid = findPathById(id, path.getChildren());
-				if (chlid != null) {
-					return chlid;
+				if (o1.getIsParent().equals("true") && o2.getIsParent().equals("false")) {
+					return -1;
+				}
+				if (o1.getIsParent().equals("false") && o2.getIsParent().equals("true")) {
+					return 1;
 				}
 
+				return o1.getName().compareToIgnoreCase(o2.getName());
 			}
-		}
+		});
 
-		return null;
+		return list;
+	}
+
+	@Mapping("download")
+	public void download(String url, Context context) throws SVNException, IOException {
+		url = URLDecoder.decode(url, Charset.forName("UTF-8"));
+
+		SVNRepository svnRepository = SVNRepositoryFactory.create(SVNURL.parseURIEncoded(url));
+		ISVNAuthenticationManager authManager = SVNWCUtil.createDefaultAuthenticationManager(svnAdminUtils.adminUserName, svnAdminUtils.adminUserPass.toCharArray());
+		svnRepository.setAuthenticationManager(authManager);
+
+		String fileName = getFileName(url);
+
+		context.headerAdd("Accept-Ranges", "bytes");
+		context.headerAdd("Content-Type", "application/octet-stream");
+		context.headerAdd("Content-Disposition", "attachment;filename=" + URLEncoder.createDefault().encode(fileName, Charset.forName("UTF-8")));
+		svnRepository.getFile(pathUtls.getRelativePath(url), -1, null, context.outputStream());
+
+	}
+
+	private String getFileName(String relativePath) {
+		if (relativePath.contains("/")) {
+			String[] names = relativePath.split("/");
+			return names[names.length - 1];
+		}
+		return relativePath;
 	}
 
 	@Mapping("getUserList")
@@ -399,7 +393,7 @@ public class RepositoryController extends BaseController {
 	@Mapping("scan")
 	public JsonResult scan() {
 		repositoryService.scan();
-
+		configService.refresh();
 		return renderSuccess();
 	}
 

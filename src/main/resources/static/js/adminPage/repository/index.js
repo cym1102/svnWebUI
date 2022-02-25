@@ -1,4 +1,5 @@
 var load;
+
 $(function() {
 	layui.use('upload', function() {
 		var upload = layui.upload;
@@ -180,7 +181,7 @@ function groupPermission(id,name) {
 	layer.open({
 		type: 2,
 		title: name + '-小组授权',
-		area: ['1000px', '720px;'],
+		area: ['1000px', '630px;'],
 		content: ctx + "/adminPage/repository/groupPermission?repositoryId=" + id
 	});
 }
@@ -189,7 +190,7 @@ function userPermission(id,name) {
 	layer.open({
 		type: 2,
 		title: name + '-用户授权',
-		area: ['1000px', '720px;'],
+		area: ['1000px', '630px;'],
 		content: ctx + "/adminPage/repository/userPermission?repositoryId=" + id
 	});
 }
@@ -243,53 +244,4 @@ function dumpBak(id) {
 	window.open(ctx + '/adminPage/repository/dumpOver?id=' + id);
 }
 
-var zTreeObj;
-function seeFile(id) {
-	$("#repositoryId").val(id);
-	$.ajax({
-		type: 'POST',
-		url: ctx + '/adminPage/repository/getFileList',
-		data: {
-			id: id
-		},
-		dataType: 'json',
-		success: function(data) {
-			if (data.success) {
-				var zNodes = data.obj
-				var setting = {
-					data: {
-						simpleData: {
-							enable: true
-						}
-					}
-				};
-				console.log(zNodes)
-				zTreeObj = $.fn.zTree.init($("#rootSelect"), setting, zNodes);
-			
-				layer.open({
-					type: 1,
-					title: "文件目录",
-					area: ['600px', '620px'], // 宽高
-					content: $('#rootSelectDiv')
-				});
-			} else {
-				layer.msg(data.msg);
-			}
 
-
-		},
-		error: function() {
-			layer.alert("出错了,请联系技术人员!");
-		}
-	});
-}
-
-function see() {
-	var nodes = zTreeObj.getSelectedNodes();
-	if (nodes.length > 0) {
-		window.open(ctx + '/adminPage/repository/see?id=' + nodes[0].id + "&repositoryId=" + $("#repositoryId").val());
-	} else {
-		layer.msg("未选中文件");
-	}
-
-}

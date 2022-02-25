@@ -20,18 +20,18 @@
 
 				<form action="${ctx}/adminPage/user" id="searchForm" method="post" >
 					<div class="layui-form search">
-						<button type="button" class="layui-btn layui-btn-normal" onclick="add()">添加用户</button>
-						<button type="button" class="layui-btn layui-btn-normal" onclick="importUser()">导入用户</button>
+						<button type="button" class="layui-btn layui-btn-normal layui-btn-sm" onclick="add()">添加用户</button>
+						<button type="button" class="layui-btn layui-btn-normal layui-btn-sm" onclick="importUser()">导入用户</button>
 							
 						<div class="layui-inline">
 							<label class="layui-form-label">关键字</label>
 						</div>
 						<div class="layui-inline">
-							<input type="text" name="keywords" class="layui-input" value="${keywords}">
+							<input type="text" name="keywords" class="layui-input" style="height: 30px;" value="${keywords}">
 						</div>
 						
 						<div class="layui-inline">
-							<button type="button" class="layui-btn" onclick="search()">搜索</button>
+							<button type="button" class="layui-btn layui-btn-sm" onclick="search()">搜索</button>
 						</div>
 					</div>
 
@@ -42,7 +42,7 @@
 	
 			</form>
 
-			<table class="layui-table">
+			<table class="layui-table" lay-size="sm">
 				<thead>
 					<tr>
 						<th>姓名</th>

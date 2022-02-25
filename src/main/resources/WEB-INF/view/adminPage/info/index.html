@@ -18,15 +18,16 @@
 				</fieldset>
 
 				<div class="layui-form">
-					<button type="button" class="layui-btn layui-btn-normal" onclick="changePass()">修改登录密码</button>
+					<button type="button" class="layui-btn layui-btn-normal layui-btn-sm" onclick="changePass()">修改登录密码</button>
 				</div>
 
-				<table class="layui-table">
+				<table class="layui-table"  lay-size="sm">
 					<thead>
 						<tr>
 							<th>仓库名</th>
 							<th>url</th>
 							<th>权限</th>
+							<th>操作</th>
 						</tr>
 					</thead>
 					<tbody>
@@ -36,6 +37,9 @@
 							<td>${repositoryUserExt.path} &nbsp;&nbsp; <a style="color: blue;" href="javascript:copyToClipboard('${repositoryUserExt.path}')">复制</a>
 							</td>
 							<td><#if repositoryUserExt.permission=='r'> 读 </#if> <#if repositoryUserExt.permission=='rw'> 读写 </#if></td>
+							<td>
+								<button class="layui-btn layui-btn-sm" onclick="seeFile('${repositoryUserExt.path}')">查看文件</button>
+							</td>
 						</tr>
 						</#list>
 					</tbody>
@@ -83,7 +87,8 @@
 		</div>
 
 	</div>
-
+	
+	<#include "/adminPage/select_file.html"/>
 	<script src="${ctx}/js/adminPage/info/index.js?v=${jsrandom}" type="text/javascript"></script>
 </body>
 

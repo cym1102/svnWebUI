@@ -2,7 +2,7 @@
 	<modelVersion>4.0.0</modelVersion>
 	<groupId>com.cym</groupId>
 	<artifactId>svnWebUI</artifactId>
-	<version>1.4.0</version>
+	<version>1.4.4</version>
 
 	<properties>
 		<project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
@@ -13,7 +13,7 @@
 	<parent>
 		<groupId>org.noear</groupId>
 		<artifactId>solon-parent</artifactId>
-		<version>1.6.23</version>
+		<version>1.6.26</version>
 	</parent>
 
 	<dependencies>
@@ -22,6 +22,11 @@
 			<groupId>org.noear</groupId>
 			<artifactId>solon-web</artifactId>
 		</dependency>
+		<dependency>
+			<groupId>org.noear</groupId>
+			<artifactId>solon.schedule</artifactId>
+		</dependency>
+
 		<dependency>
 			<groupId>org.noear</groupId>
 			<artifactId>logback-solon-plugin</artifactId>
@@ -61,6 +66,12 @@
 			<groupId>org.apache.maven</groupId>
 			<artifactId>maven-model</artifactId>
 			<version>3.0</version>
+		</dependency>
+		<!-- https://mvnrepository.com/artifact/org.tmatesoft.svnkit/svnkit -->
+		<dependency>
+			<groupId>org.tmatesoft.svnkit</groupId>
+			<artifactId>svnkit</artifactId>
+			<version>1.10.4</version>
 		</dependency>
 
 	</dependencies>

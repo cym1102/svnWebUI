@@ -14,20 +14,20 @@
 			<!-- 内容主体区域 -->
 			<div style="padding: 15px">
 				<fieldset class="layui-elem-field layui-field-title">
-					<legend>服务管理</legend>
+					<legend>Svn服务管理</legend>
 				</fieldset>
 
 				<#if hasSvnserve>
 				<div class="layui-form">
 					<div class="layui-inline">
-						<button type="button" class="layui-btn" onclick="start()">启动Svn服务</button>
+						<button type="button" class="layui-btn layui-btn-sm" onclick="start()">启动Svn服务</button>
 					</div>
 					<div class="layui-inline">
-						<button type="button" class="layui-btn" onclick="stop()">停止Svn服务</button>
+						<button type="button" class="layui-btn layui-btn-sm" onclick="stop()">停止Svn服务</button>
 					</div>
 					<div class="layui-inline">&nbsp;&nbsp;&nbsp;&nbsp;svn端口:</div>
 					<div class="layui-inline">
-						<input type="number" class="layui-input" style="width: 100px;" id="port" value="${port}">
+						<input type="number" class="layui-input" style="width: 100px; height: 30px;" id="port" value="${port}">
 					</div>
 
 					<div class="layui-inline">
@@ -49,6 +49,46 @@
 					<h3>Windows: 下载链接 https://www.visualsvn.com/server/download/</h3>
 				</div>
 				</#if>
+
+			</div>
+
+
+			<div style="padding: 15px">
+				<fieldset class="layui-elem-field layui-field-title">
+					<legend>WebHook配置</legend>
+				</fieldset>
+
+				<div class="layui-form" style="width: 500px;">
+					<div class="layui-form-item">
+						<label class="layui-form-label"> 状态 </label>
+						<div class="layui-input-block">
+							<select name="open" id="open">
+								<option value="false">关闭</option>
+								<option value="true">开启</option>
+							</select>
+						</div>
+					</div>
+
+
+					<div class="layui-form-item">
+						<label class="layui-form-label"> Url链接 </label>
+						<div class="layui-input-block">
+							<input type="text" name="url" id="url" class="layui-input">
+						</div>
+					</div>
+
+					<div class="layui-form-item">
+						<label class="layui-form-label"> 验证密码 </label>
+						<div class="layui-input-block">
+							<input type="text" name="password" id="password" class="layui-input">
+						</div>
+					</div>
+
+					<div class="layui-form-item">
+						<button type="button" class="layui-btn layui-btn-normal" style="margin-left: 150px;" onclick="save()">保存</button>
+						<button type="button" class="layui-btn" onclick="readme()">说明</button>
+					</div>
+				</div>
 
 			</div>
 		</div>

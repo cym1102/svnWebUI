@@ -8,7 +8,6 @@ import org.noear.solon.annotation.Inject;
 import org.noear.solon.extend.aspect.annotation.Service;
 
 import com.cym.config.HomeConfig;
-import com.cym.config.InitConfig;
 import com.cym.ext.GroupExt;
 import com.cym.ext.UserExt;
 import com.cym.model.Group;
@@ -22,6 +21,7 @@ import com.cym.sqlhelper.utils.ConditionAndWrapper;
 import com.cym.sqlhelper.utils.ConditionOrWrapper;
 import com.cym.sqlhelper.utils.SqlHelper;
 import com.cym.utils.BeanExtUtil;
+import com.cym.utils.SystemTool;
 
 import cn.hutool.core.io.FileUtil;
 import cn.hutool.core.io.resource.ClassPathResource;
@@ -85,17 +85,15 @@ public class RepositoryService {
 				}
 
 			}
-
-			// 拷贝配置文件
-			String svnserve_conf = homeConfig.home + "/repo/" + repository.getName() + "/conf/svnserve.conf";
-			ClassPathResource resource = new ClassPathResource("file/svnserve.conf");
-			FileUtil.writeFromStream(resource.getStream(), svnserve_conf);
+			
 		}
 
 		sqlHelper.insertOrUpdate(repository);
 
 		// 目录授权
-		RuntimeUtil.execForStr("chown apache.apache -R " + homeConfig.home + File.separator + "repo/");
+		if(SystemTool.inDocker()) {
+			RuntimeUtil.execForStr("chown apache.apache -R " + homeConfig.home + File.separator + "repo/");
+		}
 	}
 
 	public List<UserExt> getUserExts(String id) {
@@ -216,7 +214,7 @@ public class RepositoryService {
 	public void scan() {
 		File dir = new File(homeConfig.home + "/repo/");
 		for (File file : dir.listFiles()) {
-			if (FileUtil.isDirectory(file) && !file.getName().equalsIgnoreCase("conf")) {
+			if (FileUtil.isDirectory(file)) {
 				Long count = sqlHelper.findCountByQuery(new ConditionAndWrapper().eq(Repository::getName, file.getName()), Repository.class);
 				if (count == 0) {
 					Repository repository = new Repository();
@@ -225,6 +223,14 @@ public class RepositoryService {
 				}
 			}
 		}
+	}
+
+	public Repository getByUrl(String url) {
+		
+		String[] urls = url.split("/");
+		String name = urls[3];
+		
+		return sqlHelper.findOneByQuery(new ConditionAndWrapper().eq(Repository::getName, name), Repository.class);
 	}
 
 }

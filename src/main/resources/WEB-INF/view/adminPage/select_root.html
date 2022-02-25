@@ -4,10 +4,11 @@
 <div style="height: 0px; width: 0px; overflow: hidden;">
 	<!-- 弹出框 -->
 	<div class="layui-form" id="rootSelectDiv" style="padding: 15px; display: none">
-		<ul id="rootSelect" class="ztree" style="height: 450px;overflow: auto;"></ul>
+		<ul id="rootSelect" class="ztree" style="height: 400px;overflow: auto;"></ul>
 		
 		<div class="layui-form-item" style="text-align: center;margin-top: 20px;">
-			<button type="button" class="layui-btn layui-btn-sm" onclick="rootSelect.selectOver()">选择</button>
+			<button type="button" class="layui-btn layui-btn-sm" onclick="selectOver()">选择</button>
+			<button type="button" class="layui-btn layui-btn-sm" onclick="selectRootOver()">根目录</button>
 			<button type="button" class="layui-btn layui-btn-sm layui-btn-normal" onclick="rootSelect.close()">关闭</button>
 			
 		</div>

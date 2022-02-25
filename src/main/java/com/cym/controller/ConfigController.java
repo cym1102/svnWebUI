@@ -11,8 +11,10 @@ import org.noear.solon.annotation.Mapping;
 import org.noear.solon.core.handle.ModelAndView;
 
 import com.cym.config.HomeConfig;
+import com.cym.model.WebHook;
 import com.cym.service.ConfigService;
 import com.cym.service.SettingService;
+import com.cym.service.WebHookService;
 import com.cym.utils.BaseController;
 import com.cym.utils.HttpdUtils;
 import com.cym.utils.JsonResult;
@@ -20,6 +22,7 @@ import com.cym.utils.SystemTool;
 
 import cn.hutool.core.io.FileUtil;
 import cn.hutool.core.util.RuntimeUtil;
+import cn.hutool.json.JSONUtil;
 
 @Controller
 @Mapping("/adminPage/config")
@@ -33,6 +36,8 @@ public class ConfigController extends BaseController {
 	ConfigService configService;
 	@Inject
 	HttpdUtils httpdUtils;
+	@Inject
+	WebHookService webHookService;
 
 	@Mapping("")
 	public ModelAndView index() {
@@ -88,6 +93,23 @@ public class ConfigController extends BaseController {
 		return renderSuccess(status);
 	}
 
+	@Mapping("getWebHook")
+	public JsonResult getWebHook() {
+		WebHook webHook = webHookService.get();
+		return renderSuccess(webHook);
+	}
+
+	@Mapping("saveHook")
+	public JsonResult saveHook(WebHook webHook) {
+		WebHook webHookOrg = webHookService.get();
+		webHookOrg.setOpen(webHook.getOpen());
+		webHookOrg.setUrl(webHook.getUrl());
+		webHookOrg.setPassword(webHook.getPassword());
+		sqlHelper.updateById(webHookOrg);
+
+		return renderSuccess();
+	}
+
 	@Mapping("start")
 	public JsonResult start(String port) {
 		settingService.set("port", port);
@@ -128,4 +150,67 @@ public class ConfigController extends BaseController {
 		return renderSuccess();
 	}
 
+	@Mapping("test.js")
+	public JsonResult test(TestObj testObj) {
+		System.err.println(JSONUtil.toJsonPrettyStr(testObj));
+		return renderSuccess();
+	}
+
+	public static class TestObj {
+		String repository;
+		String author;
+		String commitMessage;
+		String revision;
+		String password;
+		String time;
+
+		public String getTime() {
+			return time;
+		}
+
+		public void setTime(String time) {
+			this.time = time;
+		}
+
+		public String getRepository() {
+			return repository;
+		}
+
+		public void setRepository(String repository) {
+			this.repository = repository;
+		}
+
+		public String getAuthor() {
+			return author;
+		}
+
+		public void setAuthor(String author) {
+			this.author = author;
+		}
+
+		public String getCommitMessage() {
+			return commitMessage;
+		}
+
+		public void setCommitMessage(String commitMessage) {
+			this.commitMessage = commitMessage;
+		}
+
+		public String getRevision() {
+			return revision;
+		}
+
+		public void setRevision(String revision) {
+			this.revision = revision;
+		}
+
+		public String getPassword() {
+			return password;
+		}
+
+		public void setPassword(String password) {
+			this.password = password;
+		}
+
+	}
 }

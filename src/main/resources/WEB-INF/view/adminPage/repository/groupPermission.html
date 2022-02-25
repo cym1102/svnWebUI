@@ -10,7 +10,7 @@
 	<div style="padding: 15px">
 		<form action="${ctx}/adminPage/repository/groupPermission" id="searchForm" method="post">
 			<div class="layui-inline">
-				<button type="button" class="layui-btn layui-btn-danger" onclick="add()">添加小组</button>
+				<button type="button" class="layui-btn layui-btn-danger layui-btn-sm" onclick="add()">添加小组</button>
 			</div>
 	
 			<input type="hidden" name="repositoryId" value="${repositoryId}"> 
@@ -18,7 +18,7 @@
 			<input type="hidden" name="limit" value="${page.limit}">
 		</form>
 
-		<table class="layui-table">
+		<table class="layui-table"  lay-size="sm">
 			<thead>
 				<tr>
 					<th>小组</th>
@@ -31,8 +31,9 @@
 				<#list page.records as repositoryGroupExt>
 				<tr>
 					<td>${repositoryGroupExt.group.name}</td>
-					<td>${repositoryGroupExt.path}
-					&nbsp;&nbsp; <a style="color: blue;" href="javascript:copyToClipboard('${repositoryGroupExt.path}')">复制</a>
+					<td style="width: 600px;word-break: break-all; word-wrap: break-word;">
+						${repositoryGroupExt.path}
+						&nbsp;&nbsp; <a style="color: blue;" href="javascript:copyToClipboard('${repositoryGroupExt.path}')">复制</a>
 					</td>
 					<td>
 					<#if repositoryGroupExt.permission == 'r'>
@@ -74,7 +75,7 @@
 						<input type="text" name="path" id="path" class="layui-input" >
 					</div>
 					<div class="layui-input-inline">
-						<button type="button" class="layui-btn" onclick="rootSelect.selectRoot('path','${repositoryId}')">选择</button>
+						<button type="button" class="layui-btn" onclick="selectRoot('path','${repositoryId}')">选择</button>
 					</div>
 				</div>
 				

@@ -18,6 +18,8 @@ import com.cym.service.SettingService;
 import com.cym.utils.BaseController;
 import com.cym.utils.BeanExtUtil;
 import com.cym.utils.JsonResult;
+import com.cym.utils.PathUtls;
+import com.cym.utils.SystemTool;
 
 @Controller
 @Mapping("/adminPage/info")
@@ -29,6 +31,8 @@ public class InfoController extends BaseController {
 	RepositoryService repositoryService;
 	@Inject
 	SettingService settingService;
+	@Inject
+	PathUtls pathUtls;
 
 	@Mapping("")
 	public ModelAndView index() {
@@ -43,22 +47,35 @@ public class InfoController extends BaseController {
 			Repository repository = sqlHelper.findById(repositoryUserExt.getRepositoryId(), Repository.class);
 			repositoryUserExt.setRepository(repository);
 
-			String url = "svn://" + getIP();
-			if (!port.equals("3690")) {
-				url += (":" + port);
-			}
+			String url = pathUtls.buildUrl(port);
 			url += ("/" + repository.getName() + repositoryUserExt.getPath());
 			repositoryUserExt.setPath(url);
 		}
-		
+
 		ModelAndView modelAndView = new ModelAndView("/adminPage/info/index.html");
 		modelAndView.put("repositoryUserList", repositoryUserList);
 		modelAndView.put("trueName", user.getTrueName());
 		return modelAndView;
 	}
 
+//	private String buildUrl(String port) {
+//		String url = null;
+//		if (SystemTool.inDocker()) {
+//			url = "http://" + getIP();
+//			if (!port.equals("80")) {
+//				url += (":" + port);
+//			}
+//		} else {
+//			url = "svn://" + getIP();
+//			if (!port.equals("3690")) {
+//				url += (":" + port);
+//			}
+//		}
+//		return url;
+//	}
+
 	@Mapping("changeOver")
-	public JsonResult changeOver( String oldPass, String newPass, String repeatPass) {
+	public JsonResult changeOver(String oldPass, String newPass, String repeatPass) {
 		User user = getLoginUser();
 		if (!user.getPass().equals(oldPass)) {
 			return renderError("旧密码不正确");

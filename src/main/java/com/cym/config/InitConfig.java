@@ -11,15 +11,19 @@ import org.noear.solon.annotation.Init;
 import org.noear.solon.annotation.Inject;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.tmatesoft.svn.core.internal.io.dav.DAVRepositoryFactory;
+import org.tmatesoft.svn.core.internal.io.svn.SVNRepositoryFactoryImpl;
 
 import com.cym.controller.ConfigController;
 import com.cym.model.User;
+import com.cym.service.ConfigService;
 import com.cym.service.SettingService;
 import com.cym.sqlhelper.utils.SqlHelper;
 import com.cym.utils.FilePermissionUtil;
 import com.cym.utils.HttpdUtils;
 import com.cym.utils.SystemTool;
 
+import ch.qos.logback.core.joran.spi.DefaultClass;
 import cn.hutool.core.io.FileUtil;
 import cn.hutool.core.io.resource.ClassPathResource;
 import cn.hutool.core.util.RuntimeUtil;
@@ -41,6 +45,10 @@ public class InitConfig {
 	SqlHelper sqlHelper;
 	@Inject
 	HttpdUtils httpdUtils;
+	@Inject
+	ConfigService configService;
+	@Inject
+	ScheduleTask scheduleTask;
 
 	@Init
 	public void init() {
@@ -76,9 +84,13 @@ public class InitConfig {
 			RuntimeUtil.execForStr("chown apache.apache -R " + homeConfig.home + File.separator + "repo/");
 			// 启动httpd
 			httpdUtils.start();
+			// 客户端启动
+			DAVRepositoryFactory.setup();
 		} else {
 			// 启动svnserve
 			configController.start(settingService.get("port"));
+			// 客户端启动
+			SVNRepositoryFactoryImpl.setup();
 		}
 
 		// 展示logo
@@ -87,6 +99,28 @@ public class InitConfig {
 		} catch (IOException e) {
 			logger.info(e.getMessage(), e);
 		}
+
+	
+		
+		// 刷新配置文件
+		configService.refresh();
+		
+		// 删除conf文件夹
+		File conf = new File(homeConfig.home + File.separator + "repo" + File.separator + "conf");
+		File passwd = new File(homeConfig.home + File.separator + "repo" + File.separator + "conf" + File.separator + "passwd");
+		File authz = new File(homeConfig.home + File.separator + "repo" + File.separator + "conf" + File.separator + "authz");
+		File httpdPasswd = new File(homeConfig.home + File.separator + "repo" + File.separator + "conf" + File.separator + "httpdPasswd");
+
+		passwd.delete();
+		authz.delete();
+		httpdPasswd.delete();
+
+		if (conf.exists() && FileUtil.isDirEmpty(conf)) {
+			conf.delete();
+		}
+		
+		// 预热定时任务
+		scheduleTask.hookTasks();
 	}
 
 	/**

@@ -1,0 +1,14 @@
+
+
+<script src="${ctx}/js/adminPage/select_file.js?v=${jsrandom}" type="text/javascript"></script>
+<div style="height: 0px; width: 0px; overflow: hidden;">
+	<!-- 弹出框 -->
+	<div class="layui-form" id="fileSelectDiv" style="padding: 15px; display: none">
+		<ul id="fileSelect" class="ztree" style="height: 400px; overflow: auto;"></ul>
+
+		<div class="layui-form-item" style="text-align: center; margin-top: 20px;">
+			<button type="button" class="layui-btn layui-btn-sm" onclick="download()">下载</button>
+			<button type="button" class="layui-btn layui-btn-sm layui-btn-normal" onclick="layer.closeAll()">关闭</button>
+		</div>
+	</div>
+</div>

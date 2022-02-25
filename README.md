@@ -12,6 +12,10 @@ QQ技术交流群2: 560797506
 
 邮箱: cym1102@qq.com
 
+微信捐赠二维码
+
+<img src="http://www.nginxwebui.cn/img/weixin.png"  height="200" width="200">
+
 #### 功能说明
 
 svnWebUI是一款图形化管理Subversion的配置得工具, 虽说现在已进入git的时代, 但svn依然有不少使用场景, 比如公司内的文档管理与共享, svn的概念比git的少很多, 非常适合非程序员使用.
@@ -74,9 +78,9 @@ Path : JDK安装目录\bin
 2.下载最新版发行包jar
 
 ```
-Linux: wget -O /home/svnWebUI/svnWebUI.jar http://file.nginxwebui.cn/svnWebUI-1.4.0.jar
+Linux: wget -O /home/svnWebUI/svnWebUI.jar http://file.nginxwebui.cn/svnWebUI-1.4.4.jar
 
-Windows: 直接使用浏览器下载 http://file.nginxwebui.cn/svnWebUI-1.4.0.jar
+Windows: 直接使用浏览器下载 http://file.nginxwebui.cn/svnWebUI-1.4.4.jar
 ```
 
 有新版本只需要修改路径中的版本即可
