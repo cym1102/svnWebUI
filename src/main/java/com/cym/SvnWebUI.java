@@ -2,13 +2,16 @@ package com.cym;
 
 import org.noear.solon.Solon;
 import org.noear.solon.schedule.annotation.EnableScheduling;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 @EnableScheduling
 public class SvnWebUI {
+	static Logger logger = LoggerFactory.getLogger(SvnWebUI.class);
 
 	public static void main(String[] args) {
 		Solon.start(SvnWebUI.class, args, app -> {
-			app.onError(e -> e.printStackTrace());
+			app.onError(e -> logger.error(e.getMessage(), e));
 
 			app.before(c -> {
 				String path = c.path();
@@ -17,7 +20,6 @@ public class SvnWebUI {
 				}
 				c.pathNew(path);
 			});
-			;
 
 			app.onEvent(freemarker.template.Configuration.class, cfg -> {
 				cfg.setSetting("classic_compatible", "true");

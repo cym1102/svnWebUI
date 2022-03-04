@@ -31,7 +31,7 @@ public class LoginController extends BaseController {
 	public ModelAndView admin() {
 		ModelAndView modelAndView = new ModelAndView("/adminPage/login/index.html");
 		modelAndView.put("adminCount", sqlHelper.findAllCount(User.class));
-		
+
 		return modelAndView;
 	}
 
@@ -47,6 +47,10 @@ public class LoginController extends BaseController {
 		User user = userService.login(name, pass);
 		if (user == null) {
 			return renderError("登录失败,请检查用户名密码");
+		}
+
+		if (user.getOpen() != 0) {
+			return renderError("该用户已停用");
 		}
 
 		Context.current().sessionSet("user", user);

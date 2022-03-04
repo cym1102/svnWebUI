@@ -53,7 +53,6 @@ function scan(){
 			dataType: 'json',
 			success: function(data) {
 				if (data.success) {
-					alert("扫描完成");
 					location.reload();
 				} else {
 					layer.msg(data.msg);
@@ -84,45 +83,12 @@ function addOver() {
 	
 	$.ajax({
 		type: 'POST',
-		url: ctx + '/adminPage/repository/checkDir',
+		url: ctx + '/adminPage/repository/addOver',
 		data: {
 			name: $("#name").val()
 		},
 		dataType: 'json',
 		success: function(data) {
-			if (data.success) {
-				if(data.obj){
-					var del = confirm("该仓库目录已存在, 是否删除已有目录?");
-					insert(del);
-				}else{
-					insert(true);
-				}
-			} else {
-				layer.msg(data.msg);
-			}
-		},
-		error: function() {
-			closeLoad();
-			alert("出错了,请联系技术人员!");
-		}
-	});
-
-	
-}
-
-function insert(del){
-	showLoad();
-	$.ajax({
-		type: 'POST',
-		url: ctx + '/adminPage/repository/addOver',
-		data: {
-			id: $("#id").val(),
-			name: $("#name").val(),
-			del : del
-		},
-		dataType: 'json',
-		success: function(data) {
-			closeLoad();
 			if (data.success) {
 				location.reload();
 			} else {
@@ -195,6 +161,64 @@ function userPermission(id,name) {
 	});
 }
 
+function allPermission(id, name){
+	$("#perId").val(id);
+	$.ajax({
+		type: 'POST',
+		url: ctx + '/adminPage/repository/detail',
+		data: {
+			id: id
+		},
+		dataType: 'json',
+		success: function(data) {
+			if (data.success) {
+				var repository = data.obj;
+				$("#allPermission").val(repository.allPermission);
+				form.render();
+				layer.open({
+					type: 1,
+					title: name + '-全体授权',
+					area: ['400px', '300px;'],
+					content: $('#allPermissionDiv')
+				});
+	
+	
+			} else {
+				layer.msg(data.msg)
+			}
+		},
+		error: function() {
+			alert("出错了,请联系技术人员!");
+		}
+	});
+	
+}
+
+function allPermissionOver(){
+	
+	$.ajax({
+		type: 'POST',
+		url: ctx + '/adminPage/repository/allPermissionOver',
+		data: {
+			id: $("#perId").val(),
+			allPermission : $("#allPermission").val()
+		},
+		dataType: 'json',
+		success: function(data) {
+			if (data.success) {
+				location.reload();
+			} else {
+				layer.msg(data.msg)
+			}
+		},
+		error: function() {
+			alert("出错了,请联系技术人员!");
+		}
+	});
+	
+}
+
+
 var index;
 function loadBak(id, name) {
 	$("#loadId").val(id);
@@ -245,3 +269,24 @@ function dumpBak(id) {
 }
 
 
+function download() {
+	var nodes = fileSelect.zTreeObj.getSelectedNodes();
+	if (nodes.length > 0) {
+		window.open(ctx + '/adminPage/repository/download?url=' + encodeURIComponent(nodes[0].id));
+	} else {
+		layer.msg("未选中文件");
+	}
+}
+
+
+function seeFile(url) {
+	url = encodeURIComponent(url);
+	fileSelect.setting.async.url = ctx + '/adminPage/repository/getFileList?url=' + url;
+	fileSelect.load();
+	layer.open({
+		type: 1,
+		title: "文件目录",
+		area: ['600px', '560px'], // 宽高
+		content: $('#fileSelectDiv')
+	});
+}

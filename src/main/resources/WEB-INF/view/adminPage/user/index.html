@@ -48,6 +48,7 @@
 						<th>姓名</th>
 						<th>登录名</th>
 						<th>类型</th>
+						<th>状态</th>
 						<th>操作</th>
 					</tr>
 				</thead>
@@ -64,6 +65,14 @@
 							</#if>
 							<#if userExt.type == 1>
 								管理員
+							</#if>
+						</td>
+						<td>	
+							<#if userExt.open == 0>
+								<span class="green">启用</span>
+							</#if>
+							<#if userExt.open == 1>
+								<span class="red">停用</span>
 							</#if>
 						</td>
 						
@@ -124,6 +133,15 @@
 					</div>
 				</div>
 				
+				<div class="layui-form-item">
+					<label class="layui-form-label">状态</label>
+					<div class="layui-input-block">
+						<select name="open" id="open">
+							<option value="0" >启用</option>
+							<option value="1" >停用</option>
+						</select>
+					</div>
+				</div>
 				
 
 				<div class="layui-form-item" style="text-align: center;">

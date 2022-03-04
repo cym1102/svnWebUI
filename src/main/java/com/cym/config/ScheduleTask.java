@@ -29,6 +29,7 @@ import com.cym.utils.SvnAdminUtils;
 
 import cn.hutool.core.date.DateUtil;
 import cn.hutool.http.HttpUtil;
+import cn.hutool.json.JSONUtil;
 
 @Component
 public class ScheduleTask {
@@ -89,7 +90,9 @@ public class ScheduleTask {
 						paramMap.put("revision", svnlogentry.getRevision());
 						paramMap.put("password", webHook.getPassword());
 						paramMap.put("time", DateUtil.format(svnlogentry.getDate(), "yyyy-MM-dd HH:mm:ss"));
-						HttpUtil.post(webHook.getUrl(), paramMap, 2000);
+						
+						String json = JSONUtil.toJsonPrettyStr(paramMap);
+						HttpUtil.post(webHook.getUrl(), json, 2000);
 					}
 				}
 			});

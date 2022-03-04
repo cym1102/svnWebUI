@@ -1,11 +1,14 @@
 package com.cym.service;
 
 import java.io.File;
+import java.io.InputStream;
 import java.util.ArrayList;
 import java.util.List;
 
 import org.noear.solon.annotation.Inject;
 import org.noear.solon.extend.aspect.annotation.Service;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import com.cym.config.HomeConfig;
 import com.cym.ext.GroupExt;
@@ -17,6 +20,8 @@ import com.cym.model.RepositoryGroup;
 import com.cym.model.RepositoryUser;
 import com.cym.model.User;
 import com.cym.sqlhelper.bean.Page;
+import com.cym.sqlhelper.bean.Sort;
+import com.cym.sqlhelper.bean.Sort.Direction;
 import com.cym.sqlhelper.utils.ConditionAndWrapper;
 import com.cym.sqlhelper.utils.ConditionOrWrapper;
 import com.cym.sqlhelper.utils.SqlHelper;
@@ -27,10 +32,11 @@ import cn.hutool.core.io.FileUtil;
 import cn.hutool.core.io.resource.ClassPathResource;
 import cn.hutool.core.util.RuntimeUtil;
 import cn.hutool.core.util.StrUtil;
+import cn.hutool.core.util.ZipUtil;
 
 @Service
 public class RepositoryService {
-
+	Logger logger = LoggerFactory.getLogger(getClass());
 	@Inject
 	SqlHelper sqlHelper;
 	@Inject
@@ -59,7 +65,7 @@ public class RepositoryService {
 
 	public void deleteById(String repositoryId) {
 		Repository repository = sqlHelper.findById(repositoryId, Repository.class);
-		String dir = homeConfig.home + "/repo/" + repository.getName();
+		String dir = homeConfig.home + File.separator + "repo" + File.separator + repository.getName();
 		FileUtil.del(dir);
 
 		sqlHelper.deleteById(repositoryId, Repository.class);
@@ -68,32 +74,23 @@ public class RepositoryService {
 
 	}
 
-	public void insertOrUpdate(Repository repository, Boolean del) {
+	public void insertOrUpdate(String name) {
 
-		if (StrUtil.isEmpty(repository.getId())) {
-			// 创建仓库
-			String dir = homeConfig.home + "/repo/" + repository.getName();
-			if (del) {
-				FileUtil.del(dir);
-				FileUtil.mkdir(dir);
-
-				try {
-					String rs = RuntimeUtil.execForStr("svnadmin", "create", dir);
-					System.out.println(rs);
-				} catch (Exception e) {
-					e.printStackTrace();
-				}
-
-			}
-			
+		// 创建仓库
+		String dir = homeConfig.home + File.separator + "repo" + File.separator + name;
+		if (!FileUtil.exist(dir + File.separator + "db")) {
+			ClassPathResource resource = new ClassPathResource("file/repo.zip");
+			InputStream inputStream = resource.getStream();
+			File temp = new File(homeConfig.home + File.separator + "temp" + File.separator + "repo.zip");
+			FileUtil.writeFromStream(inputStream, temp);
+			FileUtil.mkdir(dir);
+			ZipUtil.unzip(temp, new File(dir));
+			FileUtil.del(temp);
 		}
 
+		Repository repository = new Repository();
+		repository.setName(name);
 		sqlHelper.insertOrUpdate(repository);
-
-		// 目录授权
-		if(SystemTool.inDocker()) {
-			RuntimeUtil.execForStr("chown apache.apache -R " + homeConfig.home + File.separator + "repo/");
-		}
 	}
 
 	public List<UserExt> getUserExts(String id) {
@@ -122,12 +119,60 @@ public class RepositoryService {
 		return groupExts;
 	}
 
-	public Page userPermission(Page page, String repositoryId) {
-		return sqlHelper.findPage(new ConditionAndWrapper().eq(RepositoryUser::getRepositoryId, repositoryId), page, RepositoryUser.class);
+	public Page userPermission(Page page, String repositoryId, String keywords, String order) {
+		ConditionAndWrapper conditionAndWrapper = new ConditionAndWrapper().eq(RepositoryUser::getRepositoryId, repositoryId);
+		if (StrUtil.isNotEmpty(keywords)) {
+			ConditionOrWrapper conditionOrWrapper = new ConditionOrWrapper();
+			List<String> userIds = sqlHelper.findIdsByQuery(new ConditionOrWrapper().like(User::getName, keywords).like(User::getTrueName, keywords), User.class);
+			if (userIds.size() > 0) {
+				conditionOrWrapper.in(RepositoryUser::getUserId, userIds);
+			}
+			List<String> repositoryIds = sqlHelper.findIdsByQuery(new ConditionOrWrapper().like(Repository::getName, keywords), Repository.class);
+			if (repositoryIds.size() > 0) {
+				conditionOrWrapper.in(RepositoryUser::getRepositoryId, repositoryIds);
+			}
+
+			conditionOrWrapper.like(RepositoryUser::getPath, keywords);
+			conditionAndWrapper.and(conditionOrWrapper);
+		}
+
+		Sort sort = new Sort();
+		if (order.equals("time")) {
+			sort.add(RepositoryUser::getId, Direction.DESC);
+		}
+		if (order.equals("path")) {
+			sort.add(RepositoryUser::getPath, Direction.ASC);
+		}
+
+		return sqlHelper.findPage(conditionAndWrapper, sort, page, RepositoryUser.class);
 	}
 
-	public Page groupPermission(Page page, String repositoryId) {
-		return sqlHelper.findPage(new ConditionAndWrapper().eq(RepositoryGroup::getRepositoryId, repositoryId), page, RepositoryGroup.class);
+	public Page groupPermission(Page page, String repositoryId, String keywords, String order) {
+		ConditionAndWrapper conditionAndWrapper = new ConditionAndWrapper().eq(RepositoryGroup::getRepositoryId, repositoryId);
+		if (StrUtil.isNotEmpty(keywords)) {
+			ConditionOrWrapper conditionOrWrapper = new ConditionOrWrapper();
+			List<String> groupIds = sqlHelper.findIdsByQuery(new ConditionOrWrapper().like(Group::getName, keywords), Group.class);
+			if (groupIds.size() > 0) {
+				conditionOrWrapper.in(RepositoryGroup::getGroupId, groupIds);
+			}
+			List<String> repositoryIds = sqlHelper.findIdsByQuery(new ConditionOrWrapper().like(Repository::getName, keywords), Repository.class);
+			if (repositoryIds.size() > 0) {
+				conditionOrWrapper.in(RepositoryUser::getRepositoryId, repositoryIds);
+			}
+
+			conditionOrWrapper.like(RepositoryGroup::getPath, keywords);
+			conditionAndWrapper.and(conditionOrWrapper);
+		}
+
+		Sort sort = new Sort();
+		if (order.equals("time")) {
+			sort.add(RepositoryGroup::getId, Direction.DESC);
+		}
+		if (order.equals("path")) {
+			sort.add(RepositoryGroup::getPath, Direction.ASC);
+		}
+
+		return sqlHelper.findPage(conditionAndWrapper, sort, page, RepositoryGroup.class);
 	}
 
 	public String getUserPermission(String userId, String repositoryId) {
@@ -207,30 +252,39 @@ public class RepositoryService {
 	}
 
 	public Boolean hasDir(String name) {
-		String dir = homeConfig.home + "/repo/" + name;
+		String dir = homeConfig.home + File.separator + "repo" + File.separator + name;
 		return FileUtil.exist(dir);
 	}
 
 	public void scan() {
-		File dir = new File(homeConfig.home + "/repo/");
+		File dir = new File(homeConfig.home + File.separator + "repo" + File.separator);
 		for (File file : dir.listFiles()) {
 			if (FileUtil.isDirectory(file)) {
 				Long count = sqlHelper.findCountByQuery(new ConditionAndWrapper().eq(Repository::getName, file.getName()), Repository.class);
 				if (count == 0) {
-					Repository repository = new Repository();
-					repository.setName(file.getName());
-					insertOrUpdate(repository, false);
+					insertOrUpdate(file.getName());
 				}
 			}
 		}
 	}
 
 	public Repository getByUrl(String url) {
-		
+
 		String[] urls = url.split("/");
 		String name = urls[3];
-		
+
 		return sqlHelper.findOneByQuery(new ConditionAndWrapper().eq(Repository::getName, name), Repository.class);
+	}
+
+	public void allPermissionOver(String id, String allPermission) {
+		Repository repository = sqlHelper.findById(id, Repository.class);
+		repository.setAllPermission(allPermission);
+		sqlHelper.updateById(repository);
+	}
+
+	public List<Repository> getListByAll() {
+
+		return sqlHelper.findListByQuery(new ConditionOrWrapper().eq(Repository::getAllPermission, "r").eq(Repository::getAllPermission, "rw"), Repository.class);
 	}
 
 }

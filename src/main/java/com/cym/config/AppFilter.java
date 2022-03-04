@@ -5,6 +5,8 @@ import org.noear.solon.annotation.Inject;
 import org.noear.solon.core.handle.Context;
 import org.noear.solon.core.handle.Filter;
 import org.noear.solon.core.handle.FilterChain;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import com.cym.model.User;
 import com.cym.sqlhelper.bean.Page;
@@ -13,13 +15,13 @@ import cn.hutool.core.util.StrUtil;
 
 @Component
 public class AppFilter implements Filter {
+	Logger logger = LoggerFactory.getLogger(getClass());
 	@Inject
 	VersionConfig versionConfig;
 
 	@Override
 	public void doFilter(Context ctx, FilterChain chain) throws Throwable {
 		try {
-
 			if (ctx.path().contains("adminPage") //
 					&& !ctx.path().contains("/adminPage/login") //
 					&& !ctx.path().endsWith(".js") //
@@ -56,12 +58,12 @@ public class AppFilter implements Filter {
 			chain.doFilter(ctx);
 
 		} catch (Throwable e) {
-			e.printStackTrace();
+			// e.printStackTrace();
+			logger.error(e.getMessage(), e);
 		}
 
 	}
-	
-	
+
 	public String getCtxStr(Context context) {
 		String httpHost = context.header("X-Forwarded-Host");
 		String realPort = context.header("X-Forwarded-Port");

@@ -28,7 +28,7 @@
 
 
 						<div class="layui-inline">
-							<label class="layui-form-label">仓库名</label>
+							<label class="layui-form-label">关键字</label>
 						</div>
 						<div class="layui-inline">
 							<input type="text" name="keywords" class="layui-input" style="height: 30px;" value="${keywords}">
@@ -51,6 +51,7 @@
 						<tr>
 							<th>仓库名</th>
 							<th>url</th>
+							<th>全体授权</th>
 							<th>授权</th>
 							<th>操作</th>
 						</tr>
@@ -63,7 +64,20 @@
 							${repositoryExt.url}
 							&nbsp;&nbsp; <a style="color: blue;" href="javascript:copyToClipboard('${repositoryExt.url}')">复制</a>
 							</td>
+							
 							<td>
+								<#if repositoryExt.allPermission == 'r'>
+									<span class="blue">只读</span>
+								</#if>
+								<#if repositoryExt.allPermission == 'rw'>
+									<span class="green">读写</span>
+								</#if>
+								<#if repositoryExt.allPermission == 'no'>
+									<span class="red">禁止</span>
+								</#if>
+							</td>
+							<td>
+								<button class="layui-btn layui-btn-sm" onclick="allPermission('${repositoryExt.id}','${repositoryExt.name}')">全体授权</button>
 								<button class="layui-btn layui-btn-sm" onclick="userPermission('${repositoryExt.id}','${repositoryExt.name}')">用户授权</button>
 								<button class="layui-btn layui-btn-sm" onclick="groupPermission('${repositoryExt.id}','${repositoryExt.name}')">小组授权</button>
 							</td>
@@ -121,6 +135,31 @@
 				</div>
 			</form>
 		</div>
+		
+		
+		<div class="layui-form" id="allPermissionDiv" style="padding: 15px; display: none">
+			<form id="allPermissionForm">
+				<input type="hidden" name="perId" id="perId">
+
+				<div class="layui-form-item">
+					<label class="layui-form-label">权限</label>
+					<div class="layui-input-inline">
+						<select type="text" name="allPermission" id="allPermission">
+							<option value="rw">读写</option>
+							<option value="r">只读</option>
+							<option value="no">禁止</option>
+						</select>
+					</div>
+				</div>
+
+
+				<div class="layui-form-item" style="text-align: center;">
+					<button type="button" class="layui-btn layui-btn-normal" onclick="allPermissionOver()">提交</button>
+					<button type="button" class="layui-btn" onclick="layer.closeAll()">关闭</button>
+				</div>
+			</form>
+		</div>
+		
 		
 		<div class="layui-form" id="loadDiv" style="padding: 15px; display: none">
 			<form id="loadForm">

@@ -49,7 +49,7 @@ public class JdbcTemplate {
 
 			return mapList;
 		} catch (SQLException e) {
-			e.printStackTrace();
+			logger.error(e.getMessage(), e);
 		}
 		return null;
 	}
@@ -64,7 +64,7 @@ public class JdbcTemplate {
 			}
 			return builder.toString();
 		} catch (Exception e) {
-			e.printStackTrace();
+			logger.error(e.getMessage(), e);
 		}
 
 		return null;

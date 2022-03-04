@@ -12,12 +12,18 @@ import org.noear.solon.annotation.Inject;
 import org.noear.solon.annotation.Mapping;
 import org.noear.solon.core.handle.Context;
 import org.noear.solon.core.handle.ModelAndView;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.tmatesoft.svn.core.SVNException;
 import org.tmatesoft.svn.core.SVNURL;
 import org.tmatesoft.svn.core.auth.ISVNAuthenticationManager;
 import org.tmatesoft.svn.core.io.SVNRepository;
 import org.tmatesoft.svn.core.io.SVNRepositoryFactory;
+import org.tmatesoft.svn.core.wc.SVNClientManager;
+import org.tmatesoft.svn.core.wc.SVNRevision;
 import org.tmatesoft.svn.core.wc.SVNWCUtil;
+import org.tmatesoft.svn.core.wc.admin.SVNAdminClient;
+import org.tmatesoft.svn.core.wc2.admin.SvnRepositoryDump;
 
 import com.cym.config.HomeConfig;
 import com.cym.config.InitConfig;
@@ -37,6 +43,7 @@ import com.cym.service.SettingService;
 import com.cym.sqlhelper.bean.Page;
 import com.cym.utils.BaseController;
 import com.cym.utils.BeanExtUtil;
+import com.cym.utils.HttpdUtils;
 import com.cym.utils.JsonResult;
 import com.cym.utils.PathUtls;
 import com.cym.utils.SvnAdminUtils;
@@ -52,6 +59,8 @@ import cn.hutool.core.util.StrUtil;
 @Controller
 @Mapping("/adminPage/repository")
 public class RepositoryController extends BaseController {
+	Logger logger = LoggerFactory.getLogger(RepositoryController.class);
+
 	@Inject
 	InitConfig projectConfig;
 	@Inject
@@ -88,27 +97,24 @@ public class RepositoryController extends BaseController {
 		return modelAndView;
 	}
 
-	@Mapping("checkDir")
-	public JsonResult checkDir(String name) {
-		if (name.equalsIgnoreCase("conf")) {
-			return renderError("conf为保留关键字,不可用于仓库名");
-		}
-
-		return renderSuccess(repositoryService.hasDir(name));
-	}
-
 	@Mapping("addOver")
-	public JsonResult addOver(Repository repository, Boolean del) {
-		if (StrUtil.isEmpty(repository.getName())) {
+	public JsonResult addOver(String name) {
+		if (StrUtil.isEmpty(name)) {
 			return renderError("仓库名为空");
 		}
-
-		Repository repositoryOrg = repositoryService.getByName(repository.getName(), repository.getId());
+		if (isSpecialChar(name)) {
+			return renderError("名称包含特殊字符");
+		}
+		Repository repositoryOrg = repositoryService.getByName(name, null);
 		if (repositoryOrg != null) {
 			return renderError("此仓库名已存在");
 		}
 
-		repositoryService.insertOrUpdate(repository, del);
+		if (repositoryService.hasDir(name)) {
+			return renderError("该仓库文件夹已存在, 请使用扫描功能添加");
+		}
+
+		repositoryService.insertOrUpdate(name);
 
 		configService.refresh();
 		return renderSuccess();
@@ -138,11 +144,22 @@ public class RepositoryController extends BaseController {
 		return renderSuccess();
 	}
 
-	@Mapping("userPermission")
-	public ModelAndView userPermission(Page page, String repositoryId) {
-		String port = settingService.get("port");
+	@Mapping("allPermissionOver")
+	public JsonResult allPermissionOver(String id, String allPermission) {
 
-		page = repositoryService.userPermission(page, repositoryId);
+		repositoryService.allPermissionOver(id, allPermission);
+		configService.refresh();
+		return renderSuccess();
+	}
+
+	@Mapping("userPermission")
+	public ModelAndView userPermission(Page page, String keywords, String repositoryId, String order) {
+		String port = settingService.get("port");
+		if (StrUtil.isEmptyIfStr(order)) {
+			order = "time";
+		}
+
+		page = repositoryService.userPermission(page, repositoryId, keywords, order);
 		Repository repository = sqlHelper.findById(repositoryId, Repository.class);
 
 		Page<RepositoryUserExt> pageExt = BeanExtUtil.copyPageByProperties(page, RepositoryUserExt.class);
@@ -162,6 +179,8 @@ public class RepositoryController extends BaseController {
 
 		modelAndView.put("repositoryId", repositoryId);
 		modelAndView.put("page", pageExt);
+		modelAndView.put("keywords", keywords);
+		modelAndView.put("order", order);
 		return modelAndView;
 	}
 
@@ -189,10 +208,13 @@ public class RepositoryController extends BaseController {
 	}
 
 	@Mapping("groupPermission")
-	public ModelAndView groupPermission(Page page, String repositoryId) {
+	public ModelAndView groupPermission(Page page, String keywords, String repositoryId, String order) {
 		String port = settingService.get("port");
+		if (StrUtil.isEmptyIfStr(order)) {
+			order = "time";
+		}
 
-		page = repositoryService.groupPermission(page, repositoryId);
+		page = repositoryService.groupPermission(page, repositoryId, keywords, order);
 		Repository repository = sqlHelper.findById(repositoryId, Repository.class);
 
 		Page<RepositoryGroupExt> pageExt = BeanExtUtil.copyPageByProperties(page, RepositoryGroupExt.class);
@@ -212,10 +234,10 @@ public class RepositoryController extends BaseController {
 
 		modelAndView.put("repositoryId", repositoryId);
 		modelAndView.put("page", pageExt);
+		modelAndView.put("keywords", keywords);
+		modelAndView.put("order", order);
 		return modelAndView;
 	}
-
-
 
 	@Mapping("addGroup")
 	public JsonResult addGroup(RepositoryGroup repositoryGroup) {
@@ -261,15 +283,14 @@ public class RepositoryController extends BaseController {
 
 			rs = RuntimeUtil.execForStr("sh", home + File.separator + "dump.sh");
 		}
-
+		logger.info(rs);
 		FileUtil.del(dirTemp);
-		System.out.println(rs);
 
 		return renderSuccess(rs.replace("\n", "<br>"));
 	}
 
 	@Mapping("dumpOver")
-	public void dumpOver(String id) throws Exception {
+	public void dumpOver(String id, Context context) throws Exception {
 		Repository repository = sqlHelper.findById(id, Repository.class);
 
 		String rs = "";
@@ -294,7 +315,7 @@ public class RepositoryController extends BaseController {
 			rs = RuntimeUtil.execForStr("sh", home + File.separator + "dump.sh");
 		}
 
-		System.out.println(rs);
+		logger.info(rs);
 
 		if (FileUtil.exist(dumpTemp)) {
 			Context.current().outputAsFile(new File(dumpTemp));
@@ -308,27 +329,10 @@ public class RepositoryController extends BaseController {
 		if (StrUtil.isEmpty(id)) {
 			id = url;
 		}
-		// URLcode转码
 		id = URLDecoder.decode(id, Charset.forName("UTF-8"));
+		List<TreeNode> list = pathUtls.getPath(id, svnAdminUtils.adminUserName, svnAdminUtils.adminUserPass);
 
-		List<TreeNode> list = pathUtls.getPath(id);
-
-		// 按文件夹进行排序
-		list.sort(new Comparator<TreeNode>() {
-
-			@Override
-			public int compare(TreeNode o1, TreeNode o2) {
-
-				if (o1.getIsParent().equals("true") && o2.getIsParent().equals("false")) {
-					return -1;
-				}
-				if (o1.getIsParent().equals("false") && o2.getIsParent().equals("true")) {
-					return 1;
-				}
-
-				return o1.getName().compareToIgnoreCase(o2.getName());
-			}
-		});
+		sortFile(list);
 
 		return list;
 	}
@@ -348,14 +352,6 @@ public class RepositoryController extends BaseController {
 		context.headerAdd("Content-Disposition", "attachment;filename=" + URLEncoder.createDefault().encode(fileName, Charset.forName("UTF-8")));
 		svnRepository.getFile(pathUtls.getRelativePath(url), -1, null, context.outputStream());
 
-	}
-
-	private String getFileName(String relativePath) {
-		if (relativePath.contains("/")) {
-			String[] names = relativePath.split("/");
-			return names[names.length - 1];
-		}
-		return relativePath;
 	}
 
 	@Mapping("getUserList")

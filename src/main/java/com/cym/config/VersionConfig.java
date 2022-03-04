@@ -59,7 +59,7 @@ public class VersionConfig {
 			if (basePath.indexOf("/target/") != -1) {
 				basePath = basePath.substring(0, basePath.indexOf("/target/"));
 			}
-			Model model = reader.read(new FileReader(new File(basePath + "\\pom.xml")));
+			Model model = reader.read(new FileReader(new File(basePath + File.separator +"pom.xml")));
 			String version = model.getVersion();
 			return version;
 		}

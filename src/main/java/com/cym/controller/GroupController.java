@@ -54,7 +54,9 @@ public class GroupController extends BaseController {
 		if (StrUtil.isEmpty(group.getName())) {
 			return renderError("小组名为空");
 		}
-		
+		if (isSpecialChar(group.getName())) {
+			return renderError("名称包含特殊字符");
+		}
 		Group groupOrg = groupService.getByName(group.getName(), group.getId());
 		if (groupOrg != null) {
 			return renderError("此小组名已存在");

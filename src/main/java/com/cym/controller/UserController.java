@@ -46,6 +46,9 @@ public class UserController extends BaseController {
 		if (StrUtil.isEmpty(user.getName())) {
 			return renderError("用户名为空");
 		}
+		if (isSpecialChar(user.getName())) {
+			return renderError("名称包含特殊字符");
+		}
 		if (StrUtil.isEmpty(user.getPass())) {
 			return renderError("密码为空");
 		}

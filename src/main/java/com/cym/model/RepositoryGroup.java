@@ -9,8 +9,8 @@ public class RepositoryGroup extends BaseModel {
 	String repositoryId;
 	String groupId;
 
-	@InitValue("r")
-	//权限 'r' 'rw'
+	// 权限 'r' 'rw' 'no'
+	@InitValue("no")
 	String permission;
 
 	@InitValue("/")

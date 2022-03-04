@@ -66,7 +66,7 @@ public class SqlUtils {
 				}
 				logger.info(sql);
 			} catch (Exception e) {
-				e.printStackTrace();
+				logger.error(e.getMessage(), e);
 			}
 		}
 	}
@@ -106,7 +106,7 @@ public class SqlUtils {
 	}
 
 	public void checkOrCreateColumn(Class<?> clazz, String name, Set<String> columns) throws SQLException {
-		if (!columns.contains(StrUtil.toUnderlineCase(name))) {
+		if (!columns.contains(StrUtil.toUnderlineCase(name).toLowerCase())) {
 			String sql = "ALTER TABLE `" + StrUtil.toUnderlineCase(clazz.getSimpleName()) + "` ADD COLUMN `" + StrUtil.toUnderlineCase(name) + "` LONGTEXT";
 			logQuery(formatSql(sql));
 			jdbcTemplate.execute(formatSql(sql));
@@ -119,7 +119,7 @@ public class SqlUtils {
 		logQuery(formatSql(sql));
 		Long count = jdbcTemplate.queryForCount(formatSql(sql));
 		if (count != null && count > 0) {
-			sql = "UPDATE " + StrUtil.toUnderlineCase(clazz.getSimpleName()) + " SET `" + StrUtil.toUnderlineCase(column) + "` = ? WHERE `" + StrUtil.toUnderlineCase(column) + "` IS NULL";
+			sql = "UPDATE `" + StrUtil.toUnderlineCase(clazz.getSimpleName()) + "` SET `" + StrUtil.toUnderlineCase(column) + "` = ? WHERE `" + StrUtil.toUnderlineCase(column) + "` IS NULL";
 			logQuery(formatSql(sql));
 			jdbcTemplate.execute(formatSql(sql), value);
 		}

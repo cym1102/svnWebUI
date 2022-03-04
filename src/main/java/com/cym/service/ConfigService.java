@@ -1,5 +1,6 @@
 package com.cym.service;
 
+import java.io.File;
 import java.nio.charset.Charset;
 import java.util.ArrayList;
 import java.util.List;
@@ -35,7 +36,6 @@ public class ConfigService {
 	@Inject
 	HomeConfig homeConfig;
 
-
 	@Inject
 	SvnAdminUtils svnAdminUtils;
 
@@ -59,7 +59,7 @@ public class ConfigService {
 			passwdLines.add(svnAdminUtils.adminUserName + " = " + svnAdminUtils.adminUserPass);
 		}
 
-		List<User> userList = sqlHelper.findAll(User.class);
+		List<User> userList = sqlHelper.findListByQuery(new ConditionAndWrapper().eq(User::getOpen, 0), User.class);
 		for (User user : userList) {
 			if (SystemTool.inDocker()) {
 				String pass = RuntimeUtil.execForStr("htpasswd -nb " + user.getName() + " " + user.getPass());
@@ -77,9 +77,13 @@ public class ConfigService {
 		for (Group group : groupList) {
 			String groupStr = group.getName() + " = ";
 
-			List<String> names = new ArrayList<>();
 			List<User> users = groupService.getUserList(group.getId());
-			names.addAll(users.stream().map(User::getName).collect(Collectors.toList()));
+			List<String> names = new ArrayList<>();
+			for (User user : users) {
+				if (user.getOpen() != null && user.getOpen() == 0) {
+					names.add(user.getName());
+				}
+			}
 			List<Group> groups = groupService.getGroupList(group.getId());
 			for (Group groupSlave : groups) {
 				names.add("@" + groupSlave.getName());
@@ -93,7 +97,7 @@ public class ConfigService {
 		ClassPathResource resource = new ClassPathResource("file/svnserve.conf");
 		List<Repository> repositories = sqlHelper.findAll(Repository.class);
 		for (Repository repository : repositories) {
-			boolean hasAdmin = false;
+			boolean hasRoot = false; // 是否已配置/的权限
 
 			List<String> paths = getPaths(repository.getId());
 			for (String path : paths) {
@@ -106,7 +110,7 @@ public class ConfigService {
 				for (RepositoryGroup repositoryGroup : repositoryGroups) {
 					Group group = sqlHelper.findById(repositoryGroup.getGroupId(), Group.class);
 					if (group != null) {
-						authzLines.add("@" + group.getName() + " = " + repositoryGroup.getPermission());
+						authzLines.add("@" + group.getName() + " = " + val(repositoryGroup.getPermission()));
 					}
 				}
 
@@ -116,29 +120,47 @@ public class ConfigService {
 						RepositoryUser.class);
 				for (RepositoryUser repositoryUser : repositoryUsers) {
 					User user = sqlHelper.findById(repositoryUser.getUserId(), User.class);
-					if (user != null) {
-						authzLines.add(user.getName() + " = " + repositoryUser.getPermission());
+					if (user.getOpen() != null && user.getOpen() == 0) {
+						authzLines.add(user.getName() + " = " + val(repositoryUser.getPermission()));
 					}
 				}
 
 				if (path.equals("/")) {
 					authzLines.add(svnAdminUtils.adminUserName + " = rw");
-					hasAdmin = true;
+					if (!repository.getAllPermission().equals("no")) { // 全体权限
+						authzLines.add("* = " + val(repository.getAllPermission()));
+					}
+					hasRoot = true;
 				}
 
 			}
 
-			if (!hasAdmin) {
+			if (!hasRoot) {
 				authzLines.add("[" + repository.getName() + ":/]");
 				authzLines.add(svnAdminUtils.adminUserName + " = rw");
+				if (!repository.getAllPermission().equals("no")) { // 全体权限
+					authzLines.add("* = " + val(repository.getAllPermission()));
+				}
 			}
-			
+
 			// 拷贝配置文件
 			String svnserve_conf = homeConfig.home + "/repo/" + repository.getName() + "/conf/svnserve.conf";
 			FileUtil.writeFromStream(resource.getStream(), svnserve_conf);
 		}
-		
+
 		FileUtil.writeLines(authzLines, authz, Charset.forName("UTF-8"));
+
+		// 目录授权
+		if (SystemTool.inDocker()) {
+			RuntimeUtil.execForStr("chown apache.apache -R " + homeConfig.home + File.separator + "repo" + File.separator);
+		}
+	}
+
+	private String val(String permission) {
+		if (permission.equals("no")) {
+			return "";
+		}
+		return permission;
 	}
 
 	// 去掉路径最后的/

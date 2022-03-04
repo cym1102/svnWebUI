@@ -41,6 +41,7 @@ function add() {
 	$("#trueName").val("");
 	$("#pass").val("");
 	$("#type option:first").prop("select", true);
+	$("#open option:first").prop("select", true);
 	form.render();
 	showWindow("添加用户");
 }
@@ -50,7 +51,7 @@ function showWindow(title){
 	layer.open({
 		type : 1,
 		title : title,
-		area : [ '500px', '400px' ], // 宽高
+		area : [ '500px', '420px' ], // 宽高
 		content : $('#windowDiv')
 	});
 }
@@ -109,6 +110,7 @@ function edit(id) {
 				$("#trueName").val(user.trueName);
 				$("#pass").val(user.pass);
 				$("#type").val(user.type);
+				$("#open").val(user.open);
 				form.render();
 				showWindow("编辑用户");
 			}else{

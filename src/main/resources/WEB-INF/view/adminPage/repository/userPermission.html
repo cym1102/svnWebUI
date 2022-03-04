@@ -3,17 +3,39 @@
 <head>
 <#include "/adminPage/common.html"/>
 <style type="text/css">
+.layui-input {
+	height: 30px;
+}
 </style>
 </head>
 <body>
 	<!-- 内容主体区域 -->
 	<div style="padding: 15px">
-		<form action="${ctx}/adminPage/repository/userPermission" id="searchForm" method="post">
+		<form action="${ctx}/adminPage/repository/userPermission" id="searchForm" method="post" class="layui-form">
 			<div class="layui-inline">
 				<button type="button" class="layui-btn layui-btn-danger layui-btn-sm" onclick="add()">添加用户</button>
 			</div>
-			
-			<input type="hidden" name="repositoryId" value="${repositoryId}"> 
+			<div class="layui-inline">
+				<label class="layui-form-label">排序</label>
+			</div>
+			<div class="layui-inline" style="width: 100px;">
+				<select id="order" name="order">
+					<option value="time" ${(order=='time') ? string('selected' , '')}>创建时间</option>
+					<option value="path" ${(order=='path') ? string('selected' , '')}>路径</option>
+				</select>
+			</div>
+			<div class="layui-inline">
+				<label class="layui-form-label">关键字</label>
+			</div>
+			<div class="layui-inline">
+				<input type="text" name="keywords" class="layui-input" style="height: 30px;" value="${keywords}">
+			</div>
+
+			<div class="layui-inline">
+				<button type="button" class="layui-btn layui-btn-sm" onclick="search()">搜索</button>
+			</div>
+
+			<input type="hidden" name="repositoryId" value="${repositoryId}">
 			<input type="hidden" name="curr" value="${page.curr}">
 			<input type="hidden" name="limit" value="${page.limit}">
 		</form>
@@ -31,17 +53,14 @@
 				<#list page.records as repositoryUserExt>
 				<tr>
 					<td>${repositoryUserExt.user.trueName}</td>
-					<td style="width: 600px;word-break: break-all; word-wrap: break-word;">
-						${repositoryUserExt.path}
-						&nbsp;&nbsp; <a style="color: blue;" href="javascript:copyToClipboard('${repositoryUserExt.path}')">复制</a>
+					<td style="width: 600px; word-break: break-all; word-wrap: break-word;">
+						${repositoryUserExt.path} &nbsp;&nbsp;
+						<a style="color: blue;" href="javascript:copyToClipboard('${repositoryUserExt.path}')">复制</a>
 					</td>
 					<td>
-					<#if repositoryUserExt.permission == 'r'>
-						读
-					</#if>
-					<#if repositoryUserExt.permission == 'rw'>
-						读写
-					</#if>
+						<#if repositoryUserExt.permission=='r'> <span class="blue">只读</span> </#if>
+						<#if repositoryUserExt.permission=='rw'> <span class="green">读写</span> </#if>
+						<#if repositoryUserExt.permission=='no'> <span class="red">禁止</span> </#if>
 					</td>
 					<td>
 						<button class="layui-btn layui-btn-sm" onclick="edit('${repositoryUserExt.id}')">编辑</button>
@@ -59,8 +78,8 @@
 		<div class="layui-form" id="windowDiv" style="padding: 15px; display: none">
 			<form id="addForm">
 				<input type="hidden" name="id" id="id">
-				<input type="hidden" name="repositoryId" value="${repositoryId}"> 
-				
+				<input type="hidden" name="repositoryId" value="${repositoryId}">
+
 				<div class="layui-form-item">
 					<label class="layui-form-label">用户</label>
 					<div class="layui-input-inline">
@@ -70,7 +89,7 @@
 				<div class="layui-form-item">
 					<label class="layui-form-label">路径</label>
 					<div class="layui-input-inline">
-						<input type="text" name="path" id="path" class="layui-input" >
+						<input type="text" name="path" id="path" class="layui-input">
 					</div>
 					<div class="layui-input-inline">
 						<button type="button" class="layui-btn" onclick="selectRoot('path','${repositoryId}')">选择</button>
@@ -82,6 +101,7 @@
 						<select type="text" name="permission" id="permission">
 							<option value="rw">读写</option>
 							<option value="r">只读</option>
+							<option value="no">禁止</option>
 						</select>
 					</div>
 				</div>

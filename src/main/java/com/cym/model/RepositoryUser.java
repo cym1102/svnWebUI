@@ -8,15 +8,14 @@ import com.cym.sqlhelper.config.Table;
 public class RepositoryUser extends BaseModel {
 	String repositoryId;
 	String userId;
-	
-	@InitValue("r")
-	//权限 'r' 'rw'
+
+	// 权限 'r' 'rw' 'no'
+	@InitValue("on")
 	String permission;
 
 	@InitValue("/")
 	String path;
-	
-	
+
 	public String getPath() {
 		return path;
 	}

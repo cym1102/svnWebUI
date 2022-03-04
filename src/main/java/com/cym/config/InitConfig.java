@@ -4,6 +4,7 @@ import java.io.BufferedReader;
 import java.io.File;
 import java.io.IOException;
 import java.nio.charset.Charset;
+import java.util.ArrayList;
 import java.util.List;
 
 import org.noear.solon.annotation.Component;
@@ -23,7 +24,6 @@ import com.cym.utils.FilePermissionUtil;
 import com.cym.utils.HttpdUtils;
 import com.cym.utils.SystemTool;
 
-import ch.qos.logback.core.joran.spi.DefaultClass;
 import cn.hutool.core.io.FileUtil;
 import cn.hutool.core.io.resource.ClassPathResource;
 import cn.hutool.core.util.RuntimeUtil;
@@ -78,10 +78,10 @@ public class InitConfig {
 
 		// 判断是否是容器中
 		if (SystemTool.inDocker()) {
-			// 修改端口号
+			// 释放配置文件
+			httpdUtils.releaseFile();
+			// 修改端口号配置文件
 			httpdUtils.modHttpdPort(settingService.get("port"));
-			// 目录授权
-			RuntimeUtil.execForStr("chown apache.apache -R " + homeConfig.home + File.separator + "repo/");
 			// 启动httpd
 			httpdUtils.start();
 			// 客户端启动
@@ -99,8 +99,6 @@ public class InitConfig {
 		} catch (IOException e) {
 			logger.info(e.getMessage(), e);
 		}
-
-	
 		
 		// 刷新配置文件
 		configService.refresh();
@@ -121,7 +119,9 @@ public class InitConfig {
 		
 		// 预热定时任务
 		scheduleTask.hookTasks();
-	}
+		
+		
+ 	}
 
 	/**
 	 * 显示logo

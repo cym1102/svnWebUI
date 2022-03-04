@@ -121,7 +121,7 @@ public class SqlHelper extends SqlUtils {
 				jdbcTemplate.execute(formatSql(sql), paramValues.toArray());
 			}
 		} catch (Exception e) {
-			e.printStackTrace();
+			logger.error(e.getMessage(), e);
 			throw new RuntimeException(e);
 		}
 
@@ -880,7 +880,7 @@ public class SqlHelper extends SqlUtils {
 			}
 
 		} catch (Exception e) {
-			e.printStackTrace();
+			logger.error(e.getMessage(), e);
 		}
 
 		return list;

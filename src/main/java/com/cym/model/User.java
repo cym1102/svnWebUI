@@ -25,7 +25,18 @@ public class User extends BaseModel {
 	// 姓名
 	String trueName;
 
-	
+	// 状态 0:启用 1:停用
+	@InitValue("0")
+	Integer open;
+
+
+	public Integer getOpen() {
+		return open;
+	}
+
+	public void setOpen(Integer open) {
+		this.open = open;
+	}
 
 	public String getTrueName() {
 		return trueName;

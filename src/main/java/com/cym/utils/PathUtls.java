@@ -9,6 +9,8 @@ import java.util.List;
 import org.noear.solon.annotation.Component;
 import org.noear.solon.annotation.Inject;
 import org.noear.solon.core.handle.Context;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.tmatesoft.svn.core.SVNDirEntry;
 import org.tmatesoft.svn.core.SVNException;
 import org.tmatesoft.svn.core.SVNURL;
@@ -28,6 +30,7 @@ import cn.hutool.core.util.StrUtil;
 
 @Component
 public class PathUtls {
+	Logger logger = LoggerFactory.getLogger(getClass());
 	@Inject
 	SqlHelper sqlHelper;
 	@Inject
@@ -39,13 +42,14 @@ public class PathUtls {
 	@Inject
 	SvnAdminUtils svnAdminUtils;
 
-	public List<TreeNode> getPath(String url) {
+	public List<TreeNode> getPath(String url, String userName, String userPass) {
 		String relativePath = getRelativePath(url);
 
 		List<TreeNode> list = new ArrayList<TreeNode>();
 		try {
+			url = transLocalhost(url);
 			SVNRepository svnRepository = SVNRepositoryFactory.create(SVNURL.parseURIEncoded(url));
-			ISVNAuthenticationManager authManager = SVNWCUtil.createDefaultAuthenticationManager(svnAdminUtils.adminUserName, svnAdminUtils.adminUserPass.toCharArray());
+			ISVNAuthenticationManager authManager = SVNWCUtil.createDefaultAuthenticationManager(userName, userPass.toCharArray());
 			svnRepository.setAuthenticationManager(authManager);
 
 			Collection<SVNDirEntry> entries = svnRepository.getDir(relativePath, -1, null, (Collection) null);
@@ -59,9 +63,15 @@ public class PathUtls {
 			}
 
 		} catch (SVNException e) {
-			e.printStackTrace();
+			logger.error(e.getMessage(), e);
 		}
 		return list;
+	}
+
+	private String transLocalhost(String url) {
+		String host = url.split("/")[2].split(":")[0];
+		return url.replace(host, "localhost");
+
 	}
 
 	public String getRelativePath(String url) {
@@ -72,11 +82,6 @@ public class PathUtls {
 		}
 
 		return "/" + StrUtil.join("/", relativePaths);
-	}
-
-	public String baseUrl() {
-		String protocol = SystemTool.inDocker() ? "http" : "svn";
-		return protocol + "://localhost:" + settingService.get("port") + "/";
 	}
 
 	public String buildUrl(String port) {
@@ -103,7 +108,7 @@ public class PathUtls {
 				return uri.getHost();
 			}
 		} catch (URISyntaxException e) {
-			e.printStackTrace();
+			logger.error(e.getMessage(), e);
 		}
 		return "localhost";
 	}
