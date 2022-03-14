@@ -1,5 +1,7 @@
 package com.cym.service;
 
+import java.util.List;
+
 import org.noear.solon.annotation.Inject;
 import org.noear.solon.extend.aspect.annotation.Service;
 
@@ -17,7 +19,9 @@ import cn.hutool.core.util.StrUtil;
 public class UserService {
 	@Inject
 	SqlHelper sqlHelper;
-
+	// 加密盐值
+	String solt = "specalEncode";
+	
 	public User login(String name, String pass) {
 		ConditionAndWrapper conditionAndWrapper = new ConditionAndWrapper().eq(User::getName, name).eq(User::getPass, pass);
 
@@ -63,5 +67,6 @@ public class UserService {
 		}
 
 	}
+
 
 }

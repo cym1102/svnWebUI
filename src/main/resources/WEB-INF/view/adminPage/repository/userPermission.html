@@ -52,7 +52,7 @@
 			<tbody>
 				<#list page.records as repositoryUserExt>
 				<tr>
-					<td>${repositoryUserExt.user.trueName}</td>
+					<td>${repositoryUserExt.user.trueName} (${repositoryUserExt.user.name})</td>
 					<td style="width: 600px; word-break: break-all; word-wrap: break-word;">
 						${repositoryUserExt.path} &nbsp;&nbsp;
 						<a style="color: blue;" href="javascript:copyToClipboard('${repositoryUserExt.path}')">复制</a>

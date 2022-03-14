@@ -127,7 +127,16 @@ function addOver() {
 		layer.msg("小组名为空");
 		return;
 	}
-
+	if ($("#name").val().indexOf(" ") > -1) {
+		layer.msg("小组名不能包含空格");
+		return;
+	}
+	// 判断 name 是否包含特殊字符
+	if (flag.test($("#name").val())) {
+		layer.msg("小组名不能包含特殊字符");
+		return;
+	}
+	
 	showLoad();
 	$.ajax({
 		type: 'POST',

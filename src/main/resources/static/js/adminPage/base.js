@@ -198,3 +198,8 @@ function copyToClipboard(text) {
 
       document.body.removeChild(textArea);
 }
+
+
+// 规则对象(flag)
+var flag = new RegExp("[`~!@#$^&*()=|{}':;',\\[\\].<>《》/?~！@#￥……&*（）——|{}【】‘；：”“'。，、？ ]")
+	

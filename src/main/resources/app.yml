@@ -1,7 +1,8 @@
 server:
   port: 6060
   request:
-    maxRequestSize: 204800mb
+    maxBodySize: 2048mb
+    maxHeaderSize: 20mb
   
 project:
   sqlPrint: false

@@ -80,6 +80,14 @@ function addOver() {
 		layer.msg("仓库名为空");
 		return;
 	}
+	if ($("#name").val().indexOf(" ") > -1) {
+		layer.msg("仓库名不能包含空格");
+		return;
+	}
+	if (flag.test($("#name").val())) {
+		layer.msg("仓库名不能包含特殊字符");
+		return;
+	}
 	
 	$.ajax({
 		type: 'POST',

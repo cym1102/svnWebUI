@@ -54,7 +54,9 @@ public class ConfigService {
 		passwdLines.add("[users]");
 		if (SystemTool.inDocker()) { // 超级用户
 			String pass = RuntimeUtil.execForStr("htpasswd -nb " + svnAdminUtils.adminUserName + " " + svnAdminUtils.adminUserPass);
-			passwdLines.add(pass);
+			if (!pass.contains("Usage:")) {
+				passwdLines.add(pass.trim());
+			}
 		} else {
 			passwdLines.add(svnAdminUtils.adminUserName + " = " + svnAdminUtils.adminUserPass);
 		}

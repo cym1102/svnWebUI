@@ -1,5 +1,5 @@
 var load;
-$(function(){
+$(function() {
 	layui.use('upload', function() {
 		var upload = layui.upload;
 		upload.render({
@@ -36,7 +36,7 @@ function search() {
 }
 
 function add() {
-	$("#id").val(""); 
+	$("#id").val("");
 	$("#name").val("");
 	$("#trueName").val("");
 	$("#pass").val("");
@@ -47,12 +47,12 @@ function add() {
 }
 
 
-function showWindow(title){
+function showWindow(title) {
 	layer.open({
-		type : 1,
-		title : title,
-		area : [ '500px', '420px' ], // 宽高
-		content : $('#windowDiv')
+		type: 1,
+		title: title,
+		area: ['500px', '420px'], // 宽高
+		content: $('#windowDiv')
 	});
 }
 
@@ -61,6 +61,15 @@ function addOver() {
 		layer.msg("登录名为空");
 		return;
 	}
+	if ($("#name").val().indexOf(" ") > -1) {
+		layer.msg("登录名不能包含空格");
+		return;
+	}
+	if (flag.test($("#name").val())) {
+		layer.msg("登录名不能包含特殊字符");
+		return;
+	}
+	
 	if ($("#trueName").val() == "") {
 		layer.msg("姓名为空");
 		return;
@@ -69,13 +78,20 @@ function addOver() {
 		layer.msg("密码为空");
 		return;
 	}
+	if ($("#pass").val().indexOf(" ") > -1) {
+		layer.msg("密码不能包含空格");
+		return;
+	}
+	
+
+
 	showLoad();
 	$.ajax({
-		type : 'POST',
-		url : ctx + '/adminPage/user/addOver',
-		data : $('#addForm').serialize(),
-		dataType : 'json',
-		success : function(data) {
+		type: 'POST',
+		url: ctx + '/adminPage/user/addOver',
+		data: $('#addForm').serialize(),
+		dataType: 'json',
+		success: function(data) {
 			closeLoad();
 			if (data.success) {
 				location.reload();
@@ -83,29 +99,29 @@ function addOver() {
 				layer.msg(data.msg);
 			}
 		},
-		error : function() {
+		error: function() {
 			closeLoad();
 			alert("出错了,请联系技术人员!");
 		}
 	});
-	
-	
+
+
 }
 
 function edit(id) {
 	showLoad();
 	$.ajax({
-		type : 'GET',
-		url : ctx + '/adminPage/user/detail',
-		dataType : 'json',
-		data : {
-			id : id
+		type: 'GET',
+		url: ctx + '/adminPage/user/detail',
+		dataType: 'json',
+		data: {
+			id: id
 		},
-		success : function(data) {
+		success: function(data) {
 			closeLoad();
 			if (data.success) {
 				var user = data.obj;
-				$("#id").val(user.id); 
+				$("#id").val(user.id);
 				$("#name").val(user.name);
 				$("#trueName").val(user.trueName);
 				$("#pass").val(user.pass);
@@ -113,36 +129,36 @@ function edit(id) {
 				$("#open").val(user.open);
 				form.render();
 				showWindow("编辑用户");
-			}else{
+			} else {
 				layer.msg(data.msg);
 			}
 		},
-		error : function() {
+		error: function() {
 			closeLoad();
 			alert("出错了,请联系技术人员!");
 		}
 	});
 }
 
-function del(id){
-	if(confirm("确认删除?")){
+function del(id) {
+	if (confirm("确认删除?")) {
 		showLoad();
 		$.ajax({
-			type : 'POST',
-			url : ctx + '/adminPage/user/del',
-			data : {
-				id : id
+			type: 'POST',
+			url: ctx + '/adminPage/user/del',
+			data: {
+				id: id
 			},
-			dataType : 'json',
-			success : function(data) {
+			dataType: 'json',
+			success: function(data) {
 				closeLoad();
 				if (data.success) {
 					location.reload();
-				}else{
+				} else {
 					layer.msg(data.msg)
 				}
 			},
-			error : function() {
+			error: function() {
 				closeLoad();
 				alert("出错了,请联系技术人员!");
 			}
@@ -163,7 +179,7 @@ function importUser() {
 
 function importOver() {
 	if ($("#dirTemp").val() == '') {
-		layer.alert("未选择passwd文件");
+		layer.alert("未选择passwd或httpdPasswd文件");
 		return;
 	}
 
@@ -174,12 +190,11 @@ function importOver() {
 		dataType: 'json',
 		success: function(data) {
 			if (data.success) {
+				alert("导入成功, 如果导入的是httpdPasswd, 密码均为123456")
 				location.reload();
 			} else {
 				layer.msg(data.msg);
 			}
-
-
 		},
 		error: function() {
 			layer.alert("出错了,请联系技术人员!");

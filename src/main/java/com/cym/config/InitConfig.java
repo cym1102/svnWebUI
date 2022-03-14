@@ -19,6 +19,7 @@ import com.cym.controller.ConfigController;
 import com.cym.model.User;
 import com.cym.service.ConfigService;
 import com.cym.service.SettingService;
+import com.cym.service.UserService;
 import com.cym.sqlhelper.utils.SqlHelper;
 import com.cym.utils.FilePermissionUtil;
 import com.cym.utils.HttpdUtils;
@@ -49,6 +50,8 @@ public class InitConfig {
 	ConfigService configService;
 	@Inject
 	ScheduleTask scheduleTask;
+	@Inject
+	UserService userService;
 
 	@Init
 	public void init() {

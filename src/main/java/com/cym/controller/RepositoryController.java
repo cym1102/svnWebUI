@@ -172,6 +172,7 @@ public class RepositoryController extends BaseController {
 				url = url.substring(0, url.length() - 1);
 			}
 			repositoryUserExt.setPath(url);
+
 		}
 
 		ModelAndView modelAndView = new ModelAndView("/adminPage/repository/userPermission.html");
@@ -362,7 +363,7 @@ public class RepositoryController extends BaseController {
 		List<Select> selects = new ArrayList<>();
 		for (User user : users) {
 			Select select = new Select();
-			select.setName(user.getTrueName());
+			select.setName(user.getTrueName() + " (" + user.getName() + ")");
 			select.setValue(user.getId());
 			selects.add(select);
 		}
