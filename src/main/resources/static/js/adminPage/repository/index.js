@@ -45,8 +45,8 @@ function add() {
 	showWindow("添加仓库");
 }
 
-function scan(){
-	if(confirm("是否扫描 " + $("#home").val() + "repo/ 下已存在仓库?")){
+function scan() {
+	if (confirm("是否扫描 " + $("#home").val() + "repo/ 下已存在仓库?")) {
 		$.ajax({
 			type: 'POST',
 			url: ctx + '/adminPage/repository/scan',
@@ -88,7 +88,7 @@ function addOver() {
 		layer.msg("仓库名不能包含特殊字符");
 		return;
 	}
-	
+
 	$.ajax({
 		type: 'POST',
 		url: ctx + '/adminPage/repository/addOver',
@@ -113,7 +113,7 @@ function addOver() {
 function del(id) {
 	$("#delId").val(id);
 	$("#pass").val("");
-	
+
 	layer.open({
 		type: 1,
 		title: "删除仓库",
@@ -122,7 +122,7 @@ function del(id) {
 	});
 }
 
-function delOver() {	
+function delOver() {
 	showLoad();
 	$.ajax({
 		type: 'POST',
@@ -145,13 +145,13 @@ function delOver() {
 			alert("出错了,请联系技术人员!");
 		}
 	});
-	
+
 }
 
 
 
 
-function groupPermission(id,name) {
+function groupPermission(id, name) {
 	layer.open({
 		type: 2,
 		title: name + '-小组授权',
@@ -160,7 +160,7 @@ function groupPermission(id,name) {
 	});
 }
 
-function userPermission(id,name) {
+function userPermission(id, name) {
 	layer.open({
 		type: 2,
 		title: name + '-用户授权',
@@ -169,7 +169,7 @@ function userPermission(id,name) {
 	});
 }
 
-function allPermission(id, name){
+function allPermission(id, name) {
 	$("#perId").val(id);
 	$.ajax({
 		type: 'POST',
@@ -189,8 +189,8 @@ function allPermission(id, name){
 					area: ['400px', '300px;'],
 					content: $('#allPermissionDiv')
 				});
-	
-	
+
+
 			} else {
 				layer.msg(data.msg)
 			}
@@ -199,17 +199,17 @@ function allPermission(id, name){
 			alert("出错了,请联系技术人员!");
 		}
 	});
-	
+
 }
 
-function allPermissionOver(){
-	
+function allPermissionOver() {
+
 	$.ajax({
 		type: 'POST',
 		url: ctx + '/adminPage/repository/allPermissionOver',
 		data: {
 			id: $("#perId").val(),
-			allPermission : $("#allPermission").val()
+			allPermission: $("#allPermission").val()
 		},
 		dataType: 'json',
 		success: function(data) {
@@ -223,7 +223,7 @@ function allPermissionOver(){
 			alert("出错了,请联系技术人员!");
 		}
 	});
-	
+
 }
 
 
@@ -286,8 +286,42 @@ function download() {
 	}
 }
 
+function mkdir() {
+	layer.prompt({
+		value: '',
+		title: '文件夹名',
+		area: ['300px', '100px'] //自定义文本域宽高
+	}, function(value, index, elem) {
+		//alert(value); //得到value
+		
+		$.ajax({
+			type: 'POST',
+			url: ctx + '/adminPage/repository/addFileDir',
+			data: {
+				svnUrl : svnUrl ,
+				dir: value
+			},
+			dataType: 'json',
+			success: function(data) {
+				if (data.success) {
+					layer.close(index);
+					fileSelect.load();
+				} else {
+					layer.msg(data.msg);
+				}
+			},
+			error: function() {
+				layer.alert("出错了,请联系技术人员!");
+			}
+		});
 
+	});
+
+}
+
+var svnUrl;
 function seeFile(url) {
+	svnUrl = url;
 	url = encodeURIComponent(url);
 	fileSelect.setting.async.url = ctx + '/adminPage/repository/getFileList?url=' + url;
 	fileSelect.load();

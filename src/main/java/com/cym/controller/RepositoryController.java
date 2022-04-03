@@ -338,6 +338,12 @@ public class RepositoryController extends BaseController {
 		return list;
 	}
 
+	@Mapping("addFileDir")
+	public JsonResult addFileDir(String svnUrl, String dir) {
+		pathUtls.createPath(svnUrl, dir, svnAdminUtils.adminUserName, svnAdminUtils.adminUserPass);
+		return renderSuccess();
+	}
+
 	@Mapping("download")
 	public void download(String url, Context context) throws SVNException, IOException {
 		url = URLDecoder.decode(url, Charset.forName("UTF-8"));

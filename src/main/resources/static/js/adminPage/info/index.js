@@ -65,6 +65,7 @@ function download() {
 
 
 function seeFile(url) {
+	$("#mkdir").hide();
 	url = encodeURIComponent(url);
 	fileSelect.setting.async.url = ctx + '/adminPage/info/getFileList?url=' + url;
 	fileSelect.load();

@@ -15,8 +15,10 @@ import org.tmatesoft.svn.core.SVNDirEntry;
 import org.tmatesoft.svn.core.SVNException;
 import org.tmatesoft.svn.core.SVNURL;
 import org.tmatesoft.svn.core.auth.ISVNAuthenticationManager;
+import org.tmatesoft.svn.core.internal.wc.DefaultSVNOptions;
 import org.tmatesoft.svn.core.io.SVNRepository;
 import org.tmatesoft.svn.core.io.SVNRepositoryFactory;
+import org.tmatesoft.svn.core.wc.SVNClientManager;
 import org.tmatesoft.svn.core.wc.SVNWCUtil;
 
 import com.cym.config.HomeConfig;
@@ -26,6 +28,7 @@ import com.cym.service.RepositoryService;
 import com.cym.service.SettingService;
 import com.cym.sqlhelper.utils.SqlHelper;
 
+import cn.hutool.core.io.FileUtil;
 import cn.hutool.core.util.StrUtil;
 
 @Component
@@ -41,6 +44,22 @@ public class PathUtls {
 	HomeConfig homeConfig;
 	@Inject
 	SvnAdminUtils svnAdminUtils;
+
+	public void createPath(String svnUrl,String dir, String userName, String userPass) {
+		try {
+			svnUrl = transLocalhost(svnUrl);
+			SVNRepository svnRepository = SVNRepositoryFactory.create(SVNURL.parseURIEncoded(svnUrl));
+			ISVNAuthenticationManager authManager = SVNWCUtil.createDefaultAuthenticationManager(userName, userPass.toCharArray());
+			svnRepository.setAuthenticationManager(authManager);
+
+			DefaultSVNOptions options = SVNWCUtil.createDefaultOptions(true);
+			SVNClientManager clientManager = SVNClientManager.newInstance(options, authManager);
+			clientManager.getCommitClient().doMkDir(new SVNURL[] { SVNURL.parseURIEncoded(svnUrl + "/" + dir) }, "创建文件夹");
+
+		} catch (SVNException e) {
+			logger.error(e.getMessage(), e);
+		}
+	}
 
 	public List<TreeNode> getPath(String url, String userName, String userPass) {
 		String relativePath = getRelativePath(url);

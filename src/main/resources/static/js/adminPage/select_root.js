@@ -26,8 +26,10 @@ var rootSelect = {
 	}
 }
 
+var svnUrl;
 function selectRoot(id, repositoryId) {
 	rootSelect.id = id;
+
 	$.ajax({
 		type: 'POST',
 		url: ctx + '/adminPage/repository/detail',
@@ -37,6 +39,7 @@ function selectRoot(id, repositoryId) {
 		dataType: 'json',
 		success: function(data) {
 			if (data.success) {
+				svnUrl = data.obj.url;
 				var url = encodeURIComponent(data.obj.url);
 				rootSelect.setting.async.url = ctx + '/adminPage/repository/getFileList?url=' + url;
 				rootSelect.load();
@@ -55,6 +58,42 @@ function selectRoot(id, repositoryId) {
 		}
 	});
 }
+
+
+function mkdir() {
+	layer.prompt({
+		value: '',
+		title: '文件夹名',
+		area: ['300px', '100px'] //自定义文本域宽高
+	}, function(value, index, elem) {
+		//alert(value); //得到value
+		
+		$.ajax({
+			type: 'POST',
+			url: ctx + '/adminPage/repository/addFileDir',
+			data: {
+				svnUrl : svnUrl ,
+				dir: value
+			},
+			dataType: 'json',
+			success: function(data) {
+				if (data.success) {
+					layer.close(index);
+					rootSelect.load();
+				} else {
+					layer.msg(data.msg);
+				}
+			},
+			error: function() {
+				layer.alert("出错了,请联系技术人员!");
+			}
+		});
+
+	});
+
+}
+
+
 
 function selectOver() {
 	var nodes = rootSelect.zTreeObj.getSelectedNodes();
