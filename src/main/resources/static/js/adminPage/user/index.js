@@ -65,7 +65,7 @@ function addOver() {
 		layer.msg("登录名不能包含空格");
 		return;
 	}
-	if (flag.test($("#name").val())) {
+	if (hasSpec($("#name").val())) {
 		layer.msg("登录名不能包含特殊字符");
 		return;
 	}

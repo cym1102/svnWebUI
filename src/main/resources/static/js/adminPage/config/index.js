@@ -6,6 +6,14 @@ $(function() {
 		success: function(data) {
 			if (data.success) {
 				$("#status").html(data.obj);
+				
+				if(data.obj.indexOf('已启动') > -1){
+					$("#start").hide();
+					$("#stop").show();
+				} else {
+					$("#start").show();
+					$("#stop").hide();
+				}
 			} else {
 				alert(data.msg);
 			}
@@ -52,7 +60,9 @@ function start() {
 			type: 'POST',
 			url: ctx + '/adminPage/config/start',
 			data: {
-				port: $("#port").val().trim()
+				port: $("#port").val().trim(),
+				host: $("#host").val().trim(),
+				protocol : $("#protocol").val().trim()
 			},
 			dataType: 'json',
 			success: function(data) {

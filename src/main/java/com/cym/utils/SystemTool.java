@@ -48,6 +48,8 @@ public class SystemTool {
 	 * @return
 	 */
 	public static Boolean inDocker() {
+		
+		
 		if (SystemTool.isLinux()) {
 			if (FileUtil.exist("/usr/local/bin/entrypoint.sh")) {
 				return true;

@@ -45,7 +45,7 @@ public class PathUtls {
 	@Inject
 	SvnAdminUtils svnAdminUtils;
 
-	public void createPath(String svnUrl,String dir, String userName, String userPass) {
+	public void createPath(String svnUrl, String dir, String userName, String userPass) {
 		try {
 			svnUrl = transLocalhost(svnUrl);
 			SVNRepository svnRepository = SVNRepositoryFactory.create(SVNURL.parseURIEncoded(svnUrl));
@@ -105,7 +105,7 @@ public class PathUtls {
 
 	public String buildUrl(String port) {
 		String url = null;
-		if (SystemTool.inDocker()) {
+		if (SystemTool.inDocker() && "http".equals(settingService.get("protocol"))) {
 			url = "http://" + getIP();
 			if (!port.equals("80")) {
 				url += (":" + port);
@@ -120,6 +120,11 @@ public class PathUtls {
 	}
 
 	public String getIP() {
+		String host = settingService.get("host");
+		if (StrUtil.isNotEmpty(host)) {
+			return host;
+		}
+
 		URI uri = null;
 		try {
 			if (Context.current() != null) {

@@ -1,6 +1,5 @@
 package com.cym.controller;
 
-import java.io.File;
 import java.io.IOException;
 import java.nio.charset.Charset;
 import java.util.ArrayList;
@@ -13,6 +12,8 @@ import org.noear.solon.core.handle.Context;
 import org.noear.solon.core.handle.ModelAndView;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.tmatesoft.svn.core.internal.io.dav.DAVRepositoryFactory;
+import org.tmatesoft.svn.core.internal.io.svn.SVNRepositoryFactoryImpl;
 
 import com.cym.config.HomeConfig;
 import com.cym.model.WebHook;
@@ -26,14 +27,12 @@ import com.cym.utils.SystemTool;
 
 import cn.hutool.core.io.FileUtil;
 import cn.hutool.core.util.RuntimeUtil;
-import cn.hutool.json.JSONUtil;
 
 @Controller
 @Mapping("/adminPage/config")
 public class ConfigController extends BaseController {
 	Logger logger = LoggerFactory.getLogger(ConfigController.class);
 
-	
 	@Inject
 	SettingService settingService;
 	@Inject
@@ -65,7 +64,10 @@ public class ConfigController extends BaseController {
 
 		ModelAndView modelAndView = new ModelAndView("/adminPage/config/index.html");
 		modelAndView.put("port", settingService.get("port"));
+		modelAndView.put("host", settingService.get("host"));
+		modelAndView.put("protocol", settingService.get("protocol"));
 		modelAndView.put("hasSvnserve", hasSvnserve);
+		modelAndView.put("inDocker", SystemTool.inDocker());
 		return modelAndView;
 	}
 
@@ -74,7 +76,8 @@ public class ConfigController extends BaseController {
 		Boolean isRun = false;
 		String status = "";
 
-		if (SystemTool.inDocker()) {
+		String protocol = settingService.get("protocol");
+		if (SystemTool.inDocker() && "http".equals(protocol)) {
 			String[] command = { "/bin/sh", "-c", "ps -ef|grep httpd" };
 			String rs = RuntimeUtil.execForStr(command);
 			isRun = rs.contains("httpd -k start");
@@ -117,28 +120,36 @@ public class ConfigController extends BaseController {
 	}
 
 	@Mapping("start")
-	public JsonResult start(String port) {
+	public JsonResult start(String port, String host, String protocol) {
 		settingService.set("port", port);
+		settingService.set("host", host);
+		settingService.set("protocol", protocol);
 
-		if (SystemTool.inDocker()) {
+		if (SystemTool.inDocker() && "http".equals(protocol)) {
 			httpdUtils.modHttpdPort(port);
 			httpdUtils.start();
+			
+			DAVRepositoryFactory.setup();
+
 		} else {
 			if (SystemTool.isWindows()) {
-				String home = homeConfig.home;
-
-				// 释放vbs
-				String cmd = "svnserve.exe -d -r " + (home + File.separator + "repo").replace("/", "\\") + " --listen-port " + port;
+				// 使用vbs后台运行
+				String cmd = "svnserve.exe -d -r " + (homeConfig.home + "repo").replace("/", "\\") + " --listen-port " + port;
 				List<String> vbs = new ArrayList<>();
 				vbs.add("set ws=WScript.CreateObject(\"WScript.Shell\")");
 				vbs.add("ws.Run \"" + cmd + " \",0");
-				FileUtil.writeLines(vbs, home + "/run.vbs", Charset.forName("UTF-8"));
+				FileUtil.writeLines(vbs, homeConfig.home + "run.vbs", Charset.forName("UTF-8"));
 
-				RuntimeUtil.execForStr("wscript " + home + "/run.vbs");
+				RuntimeUtil.execForStr("wscript " + homeConfig.home + "run.vbs");
 			} else {
-				RuntimeUtil.execForStr("svnserve -d -r " + homeConfig.home + "/repo --listen-port " + port);
+				RuntimeUtil.execForStr("svnserve -d -r " + homeConfig.home + "repo --listen-port " + port);
 			}
+			
+			SVNRepositoryFactoryImpl.setup();
 		}
+		
+		configService.refresh();
+		
 		return renderSuccess();
 	}
 
@@ -146,13 +157,14 @@ public class ConfigController extends BaseController {
 	public JsonResult stop() {
 		if (SystemTool.inDocker()) {
 			httpdUtils.stop();
-		} else {
-			if (SystemTool.isWindows()) {
-				RuntimeUtil.execForStr("taskkill /f /im svnserve.exe");
-			} else {
-				RuntimeUtil.execForStr("pkill svnserve");
-			}
 		}
+
+		if (SystemTool.isWindows()) {
+			RuntimeUtil.execForStr("taskkill /f /im svnserve.exe");
+		} else {
+			RuntimeUtil.execForStr("pkill svnserve");
+		}
+
 		return renderSuccess();
 	}
 

@@ -132,7 +132,7 @@ function addOver() {
 		return;
 	}
 	// 判断 name 是否包含特殊字符
-	if (flag.test($("#name").val())) {
+	if (hasSpec($("#name").val())) {
 		layer.msg("小组名不能包含特殊字符");
 		return;
 	}

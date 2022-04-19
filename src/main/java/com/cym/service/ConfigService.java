@@ -35,24 +35,26 @@ public class ConfigService {
 	GroupService groupService;
 	@Inject
 	HomeConfig homeConfig;
+	@Inject
+	SettingService settingService;
 
 	@Inject
 	SvnAdminUtils svnAdminUtils;
 
 	public void refresh() {
 		String passwd = null;
-		if (SystemTool.inDocker()) {
-			passwd = homeConfig.home + "/repo/httpdPasswd";
+		if (SystemTool.inDocker() && "http".equals(settingService.get("protocol"))) {
+			passwd = homeConfig.home + "repo/httpdPasswd";
 		} else {
-			passwd = homeConfig.home + "/repo/passwd";
+			passwd = homeConfig.home + "repo/passwd";
 		}
 
-		String authz = homeConfig.home + "/repo/authz";
+		String authz = homeConfig.home + "repo/authz";
 
 		// 用户名密码
 		List<String> passwdLines = new ArrayList<>();
 		passwdLines.add("[users]");
-		if (SystemTool.inDocker()) { // 超级用户
+		if (SystemTool.inDocker() && "http".equals(settingService.get("protocol"))) { // 超级用户
 			String pass = RuntimeUtil.execForStr("htpasswd -nb " + svnAdminUtils.adminUserName + " " + svnAdminUtils.adminUserPass);
 			if (!pass.contains("Usage:")) {
 				passwdLines.add(pass.trim());
@@ -63,7 +65,7 @@ public class ConfigService {
 
 		List<User> userList = sqlHelper.findListByQuery(new ConditionAndWrapper().eq(User::getOpen, 0), User.class);
 		for (User user : userList) {
-			if (SystemTool.inDocker()) {
+			if (SystemTool.inDocker() && "http".equals(settingService.get("protocol"))) {
 				String pass = RuntimeUtil.execForStr("htpasswd -nb " + user.getName() + " " + user.getPass());
 				passwdLines.add(pass);
 			} else {
@@ -153,7 +155,7 @@ public class ConfigService {
 		FileUtil.writeLines(authzLines, authz, Charset.forName("UTF-8"));
 
 		// 目录授权
-		if (SystemTool.inDocker()) {
+		if (SystemTool.inDocker() && "http".equals(settingService.get("protocol"))) {
 			RuntimeUtil.execForStr("chown apache.apache -R " + homeConfig.home + File.separator + "repo" + File.separator);
 		}
 	}

@@ -84,7 +84,7 @@ function addOver() {
 		layer.msg("仓库名不能包含空格");
 		return;
 	}
-	if (flag.test($("#name").val())) {
+	if (hasSpec($("#name").val())) {
 		layer.msg("仓库名不能包含特殊字符");
 		return;
 	}
@@ -280,6 +280,11 @@ function dumpBak(id) {
 function download() {
 	var nodes = fileSelect.zTreeObj.getSelectedNodes();
 	if (nodes.length > 0) {
+		if(nodes[0].isParent){
+			layer.msg("目录不可下载");
+			return;
+		}
+		
 		window.open(ctx + '/adminPage/repository/download?url=' + encodeURIComponent(nodes[0].id));
 	} else {
 		layer.msg("未选中文件");

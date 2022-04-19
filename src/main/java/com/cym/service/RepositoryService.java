@@ -65,7 +65,7 @@ public class RepositoryService {
 
 	public void deleteById(String repositoryId) {
 		Repository repository = sqlHelper.findById(repositoryId, Repository.class);
-		String dir = homeConfig.home + File.separator + "repo" + File.separator + repository.getName();
+		String dir = homeConfig.home + "repo" + File.separator + repository.getName();
 		FileUtil.del(dir);
 
 		sqlHelper.deleteById(repositoryId, Repository.class);
@@ -77,11 +77,11 @@ public class RepositoryService {
 	public void insertOrUpdate(String name) {
 
 		// 创建仓库
-		String dir = homeConfig.home + File.separator + "repo" + File.separator + name;
+		String dir = homeConfig.home + "repo" + File.separator + name;
 		if (!FileUtil.exist(dir + File.separator + "db")) {
 			ClassPathResource resource = new ClassPathResource("file/repo.zip");
 			InputStream inputStream = resource.getStream();
-			File temp = new File(homeConfig.home + File.separator + "temp" + File.separator + "repo.zip");
+			File temp = new File(homeConfig.home + "temp" + File.separator + "repo.zip");
 			FileUtil.writeFromStream(inputStream, temp);
 			FileUtil.mkdir(dir);
 			ZipUtil.unzip(temp, new File(dir));
@@ -252,14 +252,18 @@ public class RepositoryService {
 	}
 
 	public Boolean hasDir(String name) {
-		String dir = homeConfig.home + File.separator + "repo" + File.separator + name;
+		String dir = homeConfig.home + "repo" + File.separator + name;
 		return FileUtil.exist(dir);
 	}
 
 	public void scan() {
-		File dir = new File(homeConfig.home + File.separator + "repo" + File.separator);
+		File dir = new File(homeConfig.home + "repo" + File.separator);
 		for (File file : dir.listFiles()) {
-			if (FileUtil.isDirectory(file)) {
+			if (FileUtil.isDirectory(file) //
+					&& FileUtil.exist(file.getPath() + File.separator + "conf") //
+					&& FileUtil.exist(file.getPath() + File.separator + "db") //
+					&& FileUtil.exist(file.getPath() + File.separator + "hooks") //
+					&& FileUtil.exist(file.getPath() + File.separator + "locks")) {
 				Long count = sqlHelper.findCountByQuery(new ConditionAndWrapper().eq(Repository::getName, file.getName()), Repository.class);
 				if (count == 0) {
 					insertOrUpdate(file.getName());

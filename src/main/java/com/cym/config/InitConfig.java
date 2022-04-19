@@ -64,9 +64,16 @@ public class InitConfig {
 			System.exit(1);
 		}
 
-		// 初始化svn端口
+		// 初始化svn端口和协议
 		if (settingService.get("port") == null) {
 			settingService.set("port", "3690");
+		}
+		if (settingService.get("protocol") == null) {
+			if (SystemTool.inDocker()) {
+				settingService.set("protocol", "http");
+			} else {
+				settingService.set("protocol", "svn");
+			}
 		}
 
 		// 检查目录读写权限
@@ -76,8 +83,8 @@ public class InitConfig {
 		}
 
 		// 创建仓库目录
-		FileUtil.mkdir(homeConfig.home + File.separator + "repo");
-		FileUtil.mkdir(homeConfig.home + File.separator + "temp");
+		FileUtil.mkdir(homeConfig.home + "repo");
+		FileUtil.mkdir(homeConfig.home + "temp");
 
 		// 判断是否是容器中
 		if (SystemTool.inDocker()) {
@@ -85,66 +92,41 @@ public class InitConfig {
 			httpdUtils.releaseFile();
 			// 修改端口号配置文件
 			httpdUtils.modHttpdPort(settingService.get("port"));
-			// 启动httpd
-			httpdUtils.start();
-			// 客户端启动
-			DAVRepositoryFactory.setup();
-		} else {
-			// 启动svnserve
-			configController.start(settingService.get("port"));
-			// 客户端启动
-			SVNRepositoryFactoryImpl.setup();
 		}
 
-		// 展示logo
-		try {
-			showLogo();
-		} catch (IOException e) {
-			logger.info(e.getMessage(), e);
-		}
-		
-		// 刷新配置文件
-		configService.refresh();
-		
-		// 删除conf文件夹
-		File conf = new File(homeConfig.home + File.separator + "repo" + File.separator + "conf");
-		File passwd = new File(homeConfig.home + File.separator + "repo" + File.separator + "conf" + File.separator + "passwd");
-		File authz = new File(homeConfig.home + File.separator + "repo" + File.separator + "conf" + File.separator + "authz");
-		File httpdPasswd = new File(homeConfig.home + File.separator + "repo" + File.separator + "conf" + File.separator + "httpdPasswd");
+		// 服务端启动
+		configController.start(settingService.get("port"), settingService.get("host"), settingService.get("protocol"));
 
-		passwd.delete();
-		authz.delete();
-		httpdPasswd.delete();
-
-		if (conf.exists() && FileUtil.isDirEmpty(conf)) {
-			conf.delete();
-		}
-		
 		// 预热定时任务
 		scheduleTask.hookTasks();
-		
-		
- 	}
+
+		// 展示logo
+		showLogo();
+
+	}
 
 	/**
 	 * 显示logo
 	 * 
 	 * @throws IOException
 	 */
-	private void showLogo() throws IOException {
-		ClassPathResource resource = new ClassPathResource("banner.txt");
-		BufferedReader reader = resource.getReader(Charset.forName("utf-8"));
-		String str = null;
-		StringBuilder stringBuilder = new StringBuilder();
-		// 使用readLine() 比较方便的读取一行
-		while (null != (str = reader.readLine())) {
-			stringBuilder.append(str + "\n");
+	private void showLogo() {
+		try {
+			ClassPathResource resource = new ClassPathResource("banner.txt");
+			BufferedReader reader = resource.getReader(Charset.forName("utf-8"));
+			String str = null;
+			StringBuilder stringBuilder = new StringBuilder();
+			// 使用readLine() 比较方便的读取一行
+			while (null != (str = reader.readLine())) {
+				stringBuilder.append(str + "\n");
+			}
+			reader.close();// 关闭流
+
+			stringBuilder.append("svnWebUI " + versionConfig.currentVersion + "\n");
+
+			logger.info(stringBuilder.toString());
+		} catch (IOException e) {
+			logger.info(e.getMessage(), e);
 		}
-		reader.close();// 关闭流
-
-		stringBuilder.append("svnWebUI " + versionConfig.currentVersion + "\n");
-
-		logger.info(stringBuilder.toString());
-
 	}
 }

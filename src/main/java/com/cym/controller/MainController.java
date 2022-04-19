@@ -42,7 +42,7 @@ public class MainController extends BaseController {
 			file.transferTo(temp);
 
 			// 移动文件
-			File dest = new File(homeConfig.home + "/temp/" + file.name.replace(" ", "_")); 
+			File dest = new File(homeConfig.home + "temp/" + file.name.replace(" ", "_")); 
 			FileUtil.move(temp, dest, true);
 
 			String path = dest.getPath();

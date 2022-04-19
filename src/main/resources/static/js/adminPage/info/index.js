@@ -57,6 +57,11 @@ function changeOver() {
 function download() {
 	var nodes = fileSelect.zTreeObj.getSelectedNodes();
 	if (nodes.length > 0) {
+		if(nodes[0].isParent){
+			layer.msg("目录不可下载");
+			return;
+		}
+		
 		window.open(ctx + '/adminPage/info/download?url=' + encodeURIComponent(nodes[0].id));
 	} else {
 		layer.msg("未选中文件");

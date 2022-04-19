@@ -201,5 +201,23 @@ function copyToClipboard(text) {
 
 
 // 规则对象(flag)
-var flag = new RegExp("[`~!@#$^&*()=|{}':;',\\[\\].<>《》/?~！@#￥……&*（）——|{}【】‘；：”“'。，、？ ]")
+//var flag = new RegExp("[=~*:><^()]")
+
+function hasSpec(str){
+	if(str.indexOf("=") > -1 
+	|| str.indexOf("*") > -1
+	|| str.indexOf(":") > -1
+	|| str.indexOf("~") > -1
+	|| str.indexOf("\\") > -1
+	|| str.indexOf("/") > -1
+	|| str.indexOf("<") > -1
+	|| str.indexOf(">") > -1
+	|| str.indexOf("|") > -1
+	|| str.indexOf("?") > -1
+	){
+		return true;
+	}
+	
+	return false;
+}
 	
