@@ -3,8 +3,6 @@ package com.cym.controller;
 import java.nio.charset.Charset;
 import java.util.List;
 
-import javax.naming.NamingException;
-
 import org.noear.solon.annotation.Controller;
 import org.noear.solon.annotation.Inject;
 import org.noear.solon.annotation.Mapping;
@@ -17,6 +15,7 @@ import com.cym.service.UserService;
 import com.cym.sqlhelper.bean.Page;
 import com.cym.utils.BaseController;
 import com.cym.utils.JsonResult;
+import com.cym.utils.SvnAdminUtils;
 
 import cn.hutool.core.io.FileUtil;
 import cn.hutool.core.util.StrUtil;
@@ -30,6 +29,8 @@ public class UserController extends BaseController {
 	ConfigService configService;
 	@Inject
 	InitConfig projectConfig;
+	@Inject
+	SvnAdminUtils svnAdminUtils;
 
 	@Mapping("")
 	public ModelAndView index(Page page, String keywords) {
@@ -52,7 +53,9 @@ public class UserController extends BaseController {
 		if (StrUtil.isEmpty(user.getPass())) {
 			return renderError("密码为空");
 		}
-
+		if (svnAdminUtils.adminUserName.equals(user.getName())) {
+			return renderError("特殊用户名不可使用");
+		}
 		User userOrg = userService.getByName(user.getName(), user.getId());
 		if (userOrg != null) {
 			return renderError("此登录名已存在");
@@ -87,14 +90,14 @@ public class UserController extends BaseController {
 
 				userService.importUser(name, pass);
 			}
-			
-			if(line.contains(":$apr1")) {
+
+			if (line.contains(":$apr1")) {
 				String name = line.split(":")[0].trim();
 				String pass = "123456";
 
 				userService.importUser(name, pass);
 			}
-				
+
 		}
 
 		FileUtil.del(dirTemp);

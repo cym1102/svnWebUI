@@ -4,17 +4,21 @@ import java.io.File;
 import java.nio.charset.Charset;
 import java.util.ArrayList;
 import java.util.List;
-import java.util.stream.Collectors;
 
 import org.noear.solon.annotation.Inject;
 import org.noear.solon.extend.aspect.annotation.Service;
 
 import com.cym.config.HomeConfig;
+import com.cym.ext.AsycPack;
 import com.cym.model.Group;
+import com.cym.model.GroupGroup;
+import com.cym.model.GroupUser;
 import com.cym.model.Repository;
 import com.cym.model.RepositoryGroup;
 import com.cym.model.RepositoryUser;
+import com.cym.model.Setting;
 import com.cym.model.User;
+import com.cym.model.WebHook;
 import com.cym.sqlhelper.utils.ConditionAndWrapper;
 import com.cym.sqlhelper.utils.SqlHelper;
 import com.cym.utils.SvnAdminUtils;
@@ -186,6 +190,43 @@ public class ConfigService {
 			}
 		}
 		return paths;
+	}
+
+	public AsycPack getAsycPack() {
+		AsycPack asycPack = new AsycPack();
+		asycPack.setGroupGroupList(sqlHelper.findAll(GroupGroup.class));
+		asycPack.setGroupList(sqlHelper.findAll(Group.class));
+		asycPack.setGroupUserList(sqlHelper.findAll(GroupUser.class));
+		asycPack.setRepositoryGroupList(sqlHelper.findAll(RepositoryGroup.class));
+		asycPack.setRepositoryList(sqlHelper.findAll(Repository.class));
+		asycPack.setRepositoryUserList(sqlHelper.findAll(RepositoryUser.class));
+		asycPack.setSettingList(sqlHelper.findAll(Setting.class));
+		asycPack.setUserList(sqlHelper.findAll(User.class));
+		asycPack.setWebHookList(sqlHelper.findAll(WebHook.class));
+
+		return asycPack;
+	}
+
+	public void setAsycPack(AsycPack asycPack) {
+		sqlHelper.deleteByQuery(new ConditionAndWrapper(), GroupGroup.class);
+		sqlHelper.deleteByQuery(new ConditionAndWrapper(), Group.class);
+		sqlHelper.deleteByQuery(new ConditionAndWrapper(), GroupUser.class);
+		sqlHelper.deleteByQuery(new ConditionAndWrapper(), RepositoryGroup.class);
+		sqlHelper.deleteByQuery(new ConditionAndWrapper(), Repository.class);
+		sqlHelper.deleteByQuery(new ConditionAndWrapper(), RepositoryUser.class);
+		sqlHelper.deleteByQuery(new ConditionAndWrapper(), Setting.class);
+		sqlHelper.deleteByQuery(new ConditionAndWrapper(), User.class);
+		sqlHelper.deleteByQuery(new ConditionAndWrapper(), WebHook.class);
+
+		sqlHelper.insertAll(asycPack.getGroupGroupList());
+		sqlHelper.insertAll(asycPack.getGroupList());
+		sqlHelper.insertAll(asycPack.getGroupUserList());
+		sqlHelper.insertAll(asycPack.getRepositoryGroupList());
+		sqlHelper.insertAll(asycPack.getRepositoryList());
+		sqlHelper.insertAll(asycPack.getRepositoryUserList());
+		sqlHelper.insertAll(asycPack.getSettingList());
+		sqlHelper.insertAll(asycPack.getUserList());
+		sqlHelper.insertAll(asycPack.getWebHookList());
 	}
 
 }

@@ -20,9 +20,12 @@
 
 				<form action="${ctx}/adminPage/group" id="searchForm" method="post">
 					<div class="layui-form search">
-						<button type="button" class="layui-btn layui-btn-normal layui-btn-sm" onclick="add()">添加小组</button>
-						<button type="button" class="layui-btn layui-btn-normal layui-btn-sm" onclick="importGroup()">导入小组</button>
-
+						<div class="layui-inline">
+							<button type="button" class="layui-btn layui-btn-normal layui-btn-sm" onclick="add()">添加小组</button>
+						</div>
+						<div class="layui-inline">
+							<button type="button" class="layui-btn layui-btn-normal layui-btn-sm" onclick="importGroup()">导入小组</button>
+						</div>
 						<div class="layui-inline">
 							<label class="layui-form-label">关键字</label>
 						</div>
@@ -57,10 +60,12 @@
 							<td><#list groupExt.userList as user> ${user.trueName} </#list></td>
 							<td><#list groupExt.groupList as group> ${group.name} </#list></td>
 							<td>
+								<div class="layui-input-inline" >
 								<button class="layui-btn layui-btn-sm" onclick="edit('${groupExt.id}')">编辑</button>
-
+								</div>
+								<div class="layui-input-inline" >
 								<button class="layui-btn layui-btn-danger layui-btn-sm" onclick="del('${groupExt.id}')">删除</button>
-
+								</div>
 							</td>
 						</tr>
 						</#list>

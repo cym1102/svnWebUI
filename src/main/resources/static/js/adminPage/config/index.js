@@ -1,4 +1,8 @@
 $(function() {
+	if (getQueryString("over") == 'true') {
+		layer.msg("导入成功");
+	}
+
 	$.ajax({
 		type: 'POST',
 		url: ctx + '/adminPage/config/getStatus',
@@ -6,8 +10,8 @@ $(function() {
 		success: function(data) {
 			if (data.success) {
 				$("#status").html(data.obj);
-				
-				if(data.obj.indexOf('已启动') > -1){
+
+				if (data.obj.indexOf('已启动') > -1) {
 					$("#start").hide();
 					$("#stop").show();
 				} else {
@@ -62,7 +66,7 @@ function start() {
 			data: {
 				port: $("#port").val().trim(),
 				host: $("#host").val().trim(),
-				protocol : $("#protocol").val().trim()
+				protocol: $("#protocol").val() != null ? $("#protocol").val().trim() : ""
 			},
 			dataType: 'json',
 			success: function(data) {
@@ -150,4 +154,24 @@ POST: {
 </pre>
 	`);
 
+}
+
+function dExport() {
+	window.open(ctx + "/adminPage/config/dataExport")
+}
+
+
+function dImport() {
+	$("#file").click();
+}
+
+function dImportOver() {
+	var files = $('#file').prop('files');// 获取到文件列表
+	if (files.length == 0) {
+		layer.alert("请选择json文件!");
+	} else {
+		if (confirm("确定导入该文件?")) {
+			$("#dataImport").submit();
+		}
+	}
 }

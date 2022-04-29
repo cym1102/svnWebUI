@@ -1,6 +1,5 @@
 package com.cym.test;
 
-import org.junit.Test;
 import org.noear.solon.annotation.Component;
 import org.noear.solon.annotation.Init;
 import org.noear.solon.annotation.Inject;

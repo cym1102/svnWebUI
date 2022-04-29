@@ -19,38 +19,52 @@
 
 				<#if hasSvnserve>
 				<div class="layui-form">
-					<div class="layui-inline">
-						<button type="button" id="start" style="display: none;" class="layui-btn layui-btn-sm" onclick="start()">启动svn服务</button>
+					<div class="layui-form-item">
+						<label class="layui-form-label"> svn服务 </label>
+						<div class="layui-input-block">
+							<div class="layui-form-mid layui-word-aux">
+								<span id='status'> </span>
+							</div>
+						</div>
 					</div>
-					<div class="layui-inline">
-						<button type="button" id="stop" style="display: none;"  class="layui-btn layui-btn-sm layui-btn-danger" onclick="stop()">停止svn服务</button>
-					</div>
-					<div class="layui-inline">&nbsp;&nbsp;&nbsp;&nbsp;域名或ip:</div>
-					<div class="layui-inline">
-						<input type="text" class="layui-input" style="width: 170px; height: 30px;" id="host" value="${host}" placeholder="不填为当前域名或ip">
-					</div>
-					<div class="layui-inline">&nbsp;&nbsp;&nbsp;&nbsp;svn端口:</div>
-					<div class="layui-inline">
-						<input type="number" class="layui-input" style="width: 80px; height: 30px;" id="port" value="${port}">
-					</div>
+
 					<#if inDocker>
-					<div class="layui-inline">&nbsp;&nbsp;&nbsp;&nbsp;访问协议:</div>
-					<div class="layui-inline" style="width: 70px;">
-						<select name="protocol" id="protocol"  >
-							<option ${(protocol=='http')?string('selected','')}>http</option>
-							<option ${(protocol=='svn')?string('selected','')}>svn</option>
-						</select>
+					<div class="layui-form-item">
+						<label class="layui-form-label"> 访问协议 </label>
+						<div class="layui-input-block">
+							<select name="protocol" id="protocol">
+								<option ${(protocol=='http')?string('selected','')}>http</option>
+								<option ${(protocol=='svn')?string('selected','')}>svn</option>
+							</select>
+						</div>
 					</div>
 					</#if>
-					<div class="layui-inline">
-						&nbsp;&nbsp;&nbsp;&nbsp;svn服务运行状态：
-						<span id='status'> </span>
+
+					<div class="layui-form-item">
+						<label class="layui-form-label"> svn端口 </label>
+						<div class="layui-input-block">
+							<input type="number" class="layui-input" style="width: 80px;" id="port" value="${port}">
+						</div>
+					</div>
+
+					<div class="layui-form-item">
+						<label class="layui-form-label"> 绑定域名ip </label>
+						<div class="layui-input-block">
+							<input type="text" class="layui-input" style="width: 170px;" id="host" value="${host}" placeholder="不填为当前域名或ip">
+						</div>
+					</div>
+
+
+					<div class="layui-form-item" style="height: 35px;">
+						<div class="layui-inline" id="start" style="display: none;">
+							<button type="button" class="layui-btn layui-btn-sm" onclick="start()">启动svn服务</button>
+						</div>
+						<div class="layui-inline" id="stop" style="display: none;">
+							<button type="button" class="layui-btn layui-btn-sm layui-btn-danger" onclick="stop()">停止svn服务</button>
+						</div>
 					</div>
 				</div>
 				</#if>
-				
-				
-				
 
 				<#if !hasSvnserve>
 				<div style="color: gray; padding-left: 30px;">
@@ -66,16 +80,36 @@
 
 			</div>
 
+			<div style="padding: 15px">
+				<fieldset class="layui-elem-field layui-field-title">
+					<legend>数据导入导出</legend>
+				</fieldset>
+
+				<div class="layui-form" style="width: 500px;">
+					<div class="layui-form-item">
+						<button type="button" class="layui-btn layui-btn-sm layui-btn-normal" onclick="dExport()">导出数据</button>
+						<button type="button" class="layui-btn layui-btn-sm" onclick="dImport()">导入数据</button>
+					</div>
+				</div>
+				
+				
+				<form style="display: none;" action="${ctx}/adminPage/config/dataImport" enctype="multipart/form-data" id="dataImport" method="post">
+					<input type="file" id="file" name="file" onchange="dImportOver()">
+				</form>
+
+			</div>
+
+
 
 			<div style="padding: 15px">
 				<fieldset class="layui-elem-field layui-field-title">
 					<legend>WebHook配置</legend>
 				</fieldset>
 
-				<div class="layui-form" style="width: 500px;">
+				<div class="layui-form">
 					<div class="layui-form-item">
 						<label class="layui-form-label"> 状态 </label>
-						<div class="layui-input-block">
+						<div class="layui-input-block" style="width: 100px;">
 							<select name="open" id="open">
 								<option value="false">关闭</option>
 								<option value="true">开启</option>
@@ -87,20 +121,20 @@
 					<div class="layui-form-item">
 						<label class="layui-form-label"> Url链接 </label>
 						<div class="layui-input-block">
-							<input type="text" name="url" id="url" class="layui-input">
+							<input type="text" name="url" id="url" style="width: 300px;" class="layui-input">
 						</div>
 					</div>
 
 					<div class="layui-form-item">
 						<label class="layui-form-label"> 验证密码 </label>
 						<div class="layui-input-block">
-							<input type="text" name="password" id="password" class="layui-input">
+							<input type="text" name="password" style="width: 300px;" id="password" class="layui-input">
 						</div>
 					</div>
 
 					<div class="layui-form-item">
-						<button type="button" class="layui-btn layui-btn-normal" style="margin-left: 150px;" onclick="save()">保存</button>
-						<button type="button" class="layui-btn" onclick="readme()">说明</button>
+						<button type="button" class="layui-btn layui-btn-sm  layui-btn-normal" onclick="save()">保存</button>
+						<button type="button" class="layui-btn layui-btn-sm " onclick="readme()">说明</button>
 					</div>
 				</div>
 

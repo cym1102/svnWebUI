@@ -2,7 +2,7 @@
 	<modelVersion>4.0.0</modelVersion>
 	<groupId>com.cym</groupId>
 	<artifactId>svnWebUI</artifactId>
-	<version>1.6.1</version>
+	<version>1.6.4</version>
 
 	<properties>
 		<project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
@@ -13,7 +13,7 @@
 	<parent>
 		<groupId>org.noear</groupId>
 		<artifactId>solon-parent</artifactId>
-		<version>1.7.1</version>
+		<version>1.7.2</version>
 	</parent>
 
 	<dependencies>
@@ -79,7 +79,6 @@
 			<artifactId>maven-model</artifactId>
 			<version>3.0</version>
 		</dependency>
-		<!-- https://mvnrepository.com/artifact/org.tmatesoft.svnkit/svnkit -->
 		<dependency>
 			<groupId>org.tmatesoft.svnkit</groupId>
 			<artifactId>svnkit</artifactId>

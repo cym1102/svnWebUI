@@ -2,11 +2,7 @@
 <html>
 <head>
 <#include "/adminPage/common.html"/>
-<style type="text/css">
-.layui-input {
-	height: 30px;
-}
-</style>
+
 </head>
 <body>
 	<!-- 内容主体区域 -->
@@ -89,7 +85,7 @@
 				<div class="layui-form-item">
 					<label class="layui-form-label">路径</label>
 					<div class="layui-input-inline">
-						<input type="text" name="path" id="path" class="layui-input">
+						<input type="text" name="path" id="path" class="layui-input" readonly="readonly">
 					</div>
 					<div class="layui-input-inline">
 						<button type="button" class="layui-btn" onclick="selectRoot('path','${repositoryId}')">选择</button>

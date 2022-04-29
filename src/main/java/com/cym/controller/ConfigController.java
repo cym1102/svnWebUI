@@ -1,21 +1,27 @@
 package com.cym.controller;
 
+import java.io.ByteArrayInputStream;
+import java.io.File;
 import java.io.IOException;
 import java.nio.charset.Charset;
 import java.util.ArrayList;
+import java.util.Date;
 import java.util.List;
 
 import org.noear.solon.annotation.Controller;
 import org.noear.solon.annotation.Inject;
 import org.noear.solon.annotation.Mapping;
 import org.noear.solon.core.handle.Context;
+import org.noear.solon.core.handle.DownloadedFile;
 import org.noear.solon.core.handle.ModelAndView;
+import org.noear.solon.core.handle.UploadedFile;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.tmatesoft.svn.core.internal.io.dav.DAVRepositoryFactory;
 import org.tmatesoft.svn.core.internal.io.svn.SVNRepositoryFactoryImpl;
 
 import com.cym.config.HomeConfig;
+import com.cym.ext.AsycPack;
 import com.cym.model.WebHook;
 import com.cym.service.ConfigService;
 import com.cym.service.SettingService;
@@ -25,8 +31,10 @@ import com.cym.utils.HttpdUtils;
 import com.cym.utils.JsonResult;
 import com.cym.utils.SystemTool;
 
+import cn.hutool.core.date.DateUtil;
 import cn.hutool.core.io.FileUtil;
 import cn.hutool.core.util.RuntimeUtil;
+import cn.hutool.json.JSONUtil;
 
 @Controller
 @Mapping("/adminPage/config")
@@ -132,6 +140,7 @@ public class ConfigController extends BaseController {
 			DAVRepositoryFactory.setup();
 
 		} else {
+			String rs = null;
 			if (SystemTool.isWindows()) {
 				// 使用vbs后台运行
 				String cmd = "svnserve.exe -d -r " + (homeConfig.home + "repo").replace("/", "\\") + " --listen-port " + port;
@@ -140,11 +149,11 @@ public class ConfigController extends BaseController {
 				vbs.add("ws.Run \"" + cmd + " \",0");
 				FileUtil.writeLines(vbs, homeConfig.home + "run.vbs", Charset.forName("UTF-8"));
 
-				RuntimeUtil.execForStr("wscript " + homeConfig.home + "run.vbs");
+				rs = RuntimeUtil.execForStr("wscript " + homeConfig.home + "run.vbs");
 			} else {
-				RuntimeUtil.execForStr("svnserve -d -r " + homeConfig.home + "repo --listen-port " + port);
+				rs = RuntimeUtil.execForStr("svnserve -d -r " + homeConfig.home + "repo --listen-port " + port);
 			}
-			
+			logger.info(rs);
 			SVNRepositoryFactoryImpl.setup();
 		}
 		
@@ -174,4 +183,31 @@ public class ConfigController extends BaseController {
 		return renderSuccess();
 	}
 
+	
+
+	@Mapping("dataExport")
+	public DownloadedFile dataExport(Context context) throws IOException {
+		AsycPack asycPack = configService.getAsycPack();
+		
+		String json = JSONUtil.toJsonPrettyStr(asycPack);
+
+		String date = DateUtil.format(new Date(), "yyyy-MM-dd_HH-mm-ss");
+		DownloadedFile downloadedFile = new DownloadedFile("application/octet-stream", new ByteArrayInputStream(json.getBytes(Charset.forName("UTF-8"))), date + ".json");
+		return downloadedFile;
+	}
+
+	@Mapping(value = "dataImport")
+	public void dataImport(UploadedFile file, Context context) throws IOException {
+		if (file != null) {
+			File tempFile = new File(homeConfig.home + "temp" + File.separator + file.name);
+			FileUtil.mkdir(tempFile.getParentFile());
+			file.transferTo(tempFile);
+			String json = FileUtil.readString(tempFile, Charset.forName("UTF-8"));
+			tempFile.delete();
+
+			AsycPack asycPack = JSONUtil.toBean(json, AsycPack.class);
+			configService.setAsycPack(asycPack);
+		}
+		context.redirect("/adminPage/config?over=true");
+	}
 }

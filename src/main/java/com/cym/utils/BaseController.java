@@ -7,7 +7,7 @@ import org.noear.solon.annotation.Inject;
 import org.noear.solon.core.handle.Context;
 
 import com.cym.config.VersionConfig;
-import com.cym.model.TreeNode;
+import com.cym.ext.TreeNode;
 import com.cym.model.User;
 import com.cym.sqlhelper.utils.SqlHelper;
 

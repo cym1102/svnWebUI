@@ -62,6 +62,7 @@ public class User extends BaseModel {
 		this.pass = pass;
 	}
 
+
 	public Integer getType() {
 		return type;
 	}

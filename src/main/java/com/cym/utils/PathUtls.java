@@ -23,7 +23,7 @@ import org.tmatesoft.svn.core.wc.SVNWCUtil;
 
 import com.cym.config.HomeConfig;
 import com.cym.config.InitConfig;
-import com.cym.model.TreeNode;
+import com.cym.ext.TreeNode;
 import com.cym.service.RepositoryService;
 import com.cym.service.SettingService;
 import com.cym.sqlhelper.utils.SqlHelper;
@@ -55,6 +55,22 @@ public class PathUtls {
 			DefaultSVNOptions options = SVNWCUtil.createDefaultOptions(true);
 			SVNClientManager clientManager = SVNClientManager.newInstance(options, authManager);
 			clientManager.getCommitClient().doMkDir(new SVNURL[] { SVNURL.parseURIEncoded(svnUrl + "/" + dir) }, "创建文件夹");
+
+		} catch (SVNException e) {
+			logger.error(e.getMessage(), e);
+		}
+	}
+
+	public void removePath(String svnUrl, String dir, String userName, String userPass) {
+		try {
+			svnUrl = transLocalhost(svnUrl);
+			SVNRepository svnRepository = SVNRepositoryFactory.create(SVNURL.parseURIEncoded(svnUrl));
+			ISVNAuthenticationManager authManager = SVNWCUtil.createDefaultAuthenticationManager(userName, userPass.toCharArray());
+			svnRepository.setAuthenticationManager(authManager);
+
+			DefaultSVNOptions options = SVNWCUtil.createDefaultOptions(true);
+			SVNClientManager clientManager = SVNClientManager.newInstance(options, authManager);
+			clientManager.getCommitClient().doDelete(new SVNURL[] { SVNURL.parseURIEncoded(svnUrl + "/" + dir) }, "删除文件");
 
 		} catch (SVNException e) {
 			logger.error(e.getMessage(), e);

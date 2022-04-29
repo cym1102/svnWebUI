@@ -6,11 +6,22 @@ import com.cym.sqlhelper.config.Table;
 
 @Table
 public class Repository extends BaseModel {
-	String name;
 
+	// 名称
+	String name;
 	// 全体权限 'r' 'rw' 'no'
 	@InitValue("no")
 	String allPermission;
+	// 文件夹大小
+	String size;
+
+	public String getSize() {
+		return size;
+	}
+
+	public void setSize(String size) {
+		this.size = size;
+	}
 
 	public String getAllPermission() {
 		return allPermission;

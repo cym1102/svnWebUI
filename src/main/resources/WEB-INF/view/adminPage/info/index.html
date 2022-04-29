@@ -18,7 +18,9 @@
 				</fieldset>
 
 				<div class="layui-form">
-					<button type="button" class="layui-btn layui-btn-normal layui-btn-sm" onclick="changePass()">修改登录密码</button>
+					<div class="layui-inline">
+						<button type="button" class="layui-btn layui-btn-normal layui-btn-sm" onclick="changePass()">修改登录密码</button>
+					</div>
 				</div>
 
 				<table class="layui-table"  lay-size="sm">
@@ -36,9 +38,12 @@
 							<td>${repositoryUserExt.repository.name}</td>
 							<td>${repositoryUserExt.path} &nbsp;&nbsp; <a style="color: blue;" href="javascript:copyToClipboard('${repositoryUserExt.path}')">复制</a>
 							</td>
-							<td><#if repositoryUserExt.permission=='r'> 读 </#if> <#if repositoryUserExt.permission=='rw'> 读写 </#if></td>
 							<td>
-								<button class="layui-btn layui-btn-sm" onclick="seeFile('${repositoryUserExt.path}')">查看文件</button>
+								<#if repositoryUserExt.permission=='r'> 读 </#if> 
+								<#if repositoryUserExt.permission=='rw'> 读写 </#if>
+							</td>
+							<td>
+								<button class="layui-btn layui-btn-sm" onclick="seeFile('${repositoryUserExt.path}', '${repositoryUserExt.permission}')">查看文件</button>
 							</td>
 						</tr>
 						</#list>
@@ -88,7 +93,7 @@
 
 	</div>
 	
-	<#include "/adminPage/select_file.html"/>
+	<#include "/adminPage/select_root.html"/>
 	<script src="${ctx}/js/adminPage/info/index.js?v=${jsrandom}" type="text/javascript"></script>
 </body>
 

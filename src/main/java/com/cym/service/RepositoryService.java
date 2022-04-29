@@ -286,7 +286,7 @@ public class RepositoryService {
 		sqlHelper.updateById(repository);
 	}
 
-	public List<Repository> getListByAll() {
+	public List<Repository> getListByAllPermission() {
 
 		return sqlHelper.findListByQuery(new ConditionOrWrapper().eq(Repository::getAllPermission, "r").eq(Repository::getAllPermission, "rw"), Repository.class);
 	}
