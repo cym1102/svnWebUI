@@ -4,21 +4,28 @@ import java.net.URI;
 import java.net.URISyntaxException;
 import java.util.ArrayList;
 import java.util.Collection;
+import java.util.LinkedList;
 import java.util.List;
 
 import org.noear.solon.annotation.Component;
+import org.noear.solon.annotation.Init;
 import org.noear.solon.annotation.Inject;
+import org.noear.solon.annotation.Mapping;
 import org.noear.solon.core.handle.Context;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.tmatesoft.svn.core.ISVNDirEntryHandler;
 import org.tmatesoft.svn.core.SVNDirEntry;
 import org.tmatesoft.svn.core.SVNException;
+import org.tmatesoft.svn.core.SVNLogEntry;
 import org.tmatesoft.svn.core.SVNURL;
 import org.tmatesoft.svn.core.auth.ISVNAuthenticationManager;
 import org.tmatesoft.svn.core.internal.wc.DefaultSVNOptions;
 import org.tmatesoft.svn.core.io.SVNRepository;
 import org.tmatesoft.svn.core.io.SVNRepositoryFactory;
 import org.tmatesoft.svn.core.wc.SVNClientManager;
+import org.tmatesoft.svn.core.wc.SVNLogClient;
+import org.tmatesoft.svn.core.wc.SVNRevision;
 import org.tmatesoft.svn.core.wc.SVNWCUtil;
 
 import com.cym.config.HomeConfig;
@@ -26,10 +33,12 @@ import com.cym.config.InitConfig;
 import com.cym.ext.TreeNode;
 import com.cym.service.RepositoryService;
 import com.cym.service.SettingService;
+import com.cym.sqlhelper.bean.Page;
 import com.cym.sqlhelper.utils.SqlHelper;
 
 import cn.hutool.core.io.FileUtil;
 import cn.hutool.core.util.StrUtil;
+import cn.hutool.json.JSONUtil;
 
 @Component
 public class PathUtls {
@@ -48,9 +57,7 @@ public class PathUtls {
 	public void createPath(String svnUrl, String dir, String userName, String userPass) {
 		try {
 			svnUrl = transLocalhost(svnUrl);
-			SVNRepository svnRepository = SVNRepositoryFactory.create(SVNURL.parseURIEncoded(svnUrl));
 			ISVNAuthenticationManager authManager = SVNWCUtil.createDefaultAuthenticationManager(userName, userPass.toCharArray());
-			svnRepository.setAuthenticationManager(authManager);
 
 			DefaultSVNOptions options = SVNWCUtil.createDefaultOptions(true);
 			SVNClientManager clientManager = SVNClientManager.newInstance(options, authManager);
@@ -64,9 +71,7 @@ public class PathUtls {
 	public void removePath(String svnUrl, String dir, String userName, String userPass) {
 		try {
 			svnUrl = transLocalhost(svnUrl);
-			SVNRepository svnRepository = SVNRepositoryFactory.create(SVNURL.parseURIEncoded(svnUrl));
 			ISVNAuthenticationManager authManager = SVNWCUtil.createDefaultAuthenticationManager(userName, userPass.toCharArray());
-			svnRepository.setAuthenticationManager(authManager);
 
 			DefaultSVNOptions options = SVNWCUtil.createDefaultOptions(true);
 			SVNClientManager clientManager = SVNClientManager.newInstance(options, authManager);
@@ -75,6 +80,36 @@ public class PathUtls {
 		} catch (SVNException e) {
 			logger.error(e.getMessage(), e);
 		}
+	}
+
+	public Page<SVNLogEntry> seeLog(String svnUrl, String userName, String userPass, Page page) throws SVNException {
+
+		svnUrl = transLocalhost(svnUrl);
+		SVNRepository svnRepository = SVNRepositoryFactory.create(SVNURL.parseURIEncoded(svnUrl));
+		ISVNAuthenticationManager authManager = SVNWCUtil.createDefaultAuthenticationManager(userName, userPass.toCharArray());
+		svnRepository.setAuthenticationManager(authManager);
+
+		// 查询出一共的条数
+		Long count = svnRepository.getLatestRevision();
+		page.setCount(count);
+
+		if (count == 0) {
+			return page;
+		}
+
+		Long start = svnRepository.getLatestRevision() - ((page.getCurr() - 1) * page.getLimit());
+		Long end = start - page.getLimit() + 1;
+
+		if (end < 1l) {
+			end = 1l;
+		}
+
+		LinkedList logs = (LinkedList) svnRepository.log(new String[] { "" }, null, //
+				start, // 起始index
+				end, // 结束index
+				true, true);
+		page.setRecords(new ArrayList(logs));
+		return page;
 	}
 
 	public List<TreeNode> getPath(String url, String userName, String userPass) {

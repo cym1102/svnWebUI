@@ -43,8 +43,14 @@
 								<#if repositoryUserExt.permission=='rw'> 读写 </#if>
 							</td>
 							<td>
-								<button class="layui-btn layui-btn-sm" onclick="seeFile('${repositoryUserExt.path}', '${repositoryUserExt.permission}')">查看文件</button>
+								<div class="layui-inline">
+									<button class="layui-btn layui-btn-sm" onclick="seeFile('${repositoryUserExt.path}', '${repositoryUserExt.permission}')">查看文件</button>
+								</div>
+								<div class="layui-inline">
+									<button class="layui-btn layui-btn-sm" onclick="seeLog('${repositoryUserExt.path}')">查看日志</button>
+								</div>
 							</td>
+							
 						</tr>
 						</#list>
 					</tbody>
@@ -92,7 +98,6 @@
 		</div>
 
 	</div>
-	
 	<#include "/adminPage/select_root.html"/>
 	<script src="${ctx}/js/adminPage/info/index.js?v=${jsrandom}" type="text/javascript"></script>
 </body>

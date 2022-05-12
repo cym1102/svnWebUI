@@ -14,9 +14,6 @@ solon:
   app.name: svnWebUI
   view.mapping.html: FreemarkerRender
   logging:
-    logger:
-      "com.zaxxer":
-        level: "WARN"
     appender:
       file:
         name: ${project.home}/log/${solon.app.name}

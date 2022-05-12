@@ -49,12 +49,14 @@
 
 				</form>
 
-				<table class="layui-table" lay-size="sm">
+				<table class="layui-table layui-form" lay-size="sm">
 					<thead>
 						<tr>
 							<th>仓库名</th>
 							<th>url</th>
+							<th>启用</th>
 							<th>仓库大小</th>
+							<th>描述</th>
 							<th>全体授权</th>
 							<th>授权</th>
 							<th>操作</th>
@@ -68,7 +70,21 @@
 								${repositoryExt.url} &nbsp;&nbsp;
 								<a style="color: blue;" href="javascript:copyToClipboard('${repositoryExt.url}')">复制</a>
 							</td>
+							<td>
+								<div class="layui-inline">
+									<input type="checkbox" name="enable" lay-filter="enable" value="${repositoryExt.id}" lay-text="ON|OFF" lay-skin="switch" ${(repositoryExt.enable)?string('checked','')}>
+								</div>
+							</td>
+							
 							<td>${repositoryExt.size}</td>
+							<td>
+								<#if repositoryExt.mark != null && repositoryExt.mark != "">
+									<a href="javascript:editMark('${repositoryExt.id}')" style="color: #bbbbbb; text-decoration: underline;">${repositoryExt.mark}</a>
+								</#if>
+								<#if repositoryExt.mark == null || repositoryExt.mark == "">
+									<a href="javascript:editMark('${repositoryExt.id}')" style="color: #bbbbbb; text-decoration: underline;">编辑</a>
+								</#if>
+							</td>
 							<td>
 								<#if repositoryExt.allPermission=='r'> <span class="blue">只读</span> </#if>
 								<#if repositoryExt.allPermission=='rw'> <span class="green">读写</span> </#if>
@@ -88,6 +104,9 @@
 							<td>
 								<div class="layui-inline">
 									<button class="layui-btn layui-btn-sm" onclick="seeFile('${repositoryExt.url}','rw')">查看文件</button>
+								</div>
+								<div class="layui-inline">
+									<button class="layui-btn layui-btn-sm" onclick="seeLog('${repositoryExt.url}')">查看日志</button>
 								</div>
 								<div class="layui-inline">
 									<button class="layui-btn layui-btn-sm layui-btn-normal" onclick="loadBak('${repositoryExt.id}', '${repositoryExt.name}')">导入备份</button>
@@ -211,10 +230,25 @@
 				</div>
 			</form>
 		</div>
+		
+		
+		<div class="layui-form" id="markDiv" style="padding: 15px; display: none">
+			<input type="hidden" id="repositoryId" name="repositoryId">
+			<div class="layui-form-item">
+				<div class="layui-input-inline" style="width: 100%;">
+					<textarea id="mark" name="mark" class="layui-textarea" style="height: 200px;"></textarea>
+				</div>
+			</div>
+			<div class="layui-form-item" style="text-align: center;">
+				<button type="button" class="layui-btn layui-btn-normal" onclick="editMarkOver()">确定</button>
+				<button type="button" class="layui-btn" onclick="layer.closeAll()">关闭</button>
+			</div>
+		</div>
 
 	</div>
 
 	<#include "/adminPage/select_root.html"/>
+	
 	<script src="${ctx}/js/adminPage/repository/index.js?v=${jsrandom}" type="text/javascript"></script>
 </body>
 

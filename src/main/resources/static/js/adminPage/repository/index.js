@@ -1,6 +1,25 @@
 var load;
 
 $(function() {
+	form.on('switch(enable)', function(data) {
+
+		$.ajax({
+			type: 'POST',
+			url: ctx + '/adminPage/repository/setEnable',
+			data: {
+				enable: data.elem.checked ? 1 : 0,
+				id: data.elem.value
+			},
+			dataType: 'json',
+			success: function(data) {
+
+			},
+			error: function() {
+				layer.alert(commonStr.errorInfo);
+			}
+		});
+	});
+	
 	layui.use('upload', function() {
 		var upload = layui.upload;
 		upload.render({
@@ -277,4 +296,63 @@ function dumpBak(id) {
 }
 
 
+function editMark(id) {
+	$.ajax({
+		type: 'POST',
+		url: ctx + '/adminPage/repository/detail',
+		data: {
+			id: id
+		},
+		dataType: 'json',
+		success: function(data) {
+			if (data.success) {
+				$("#repositoryId").val(id);
+				$("#mark").val(data.obj.mark != null ? data.obj.mark : '');
 
+				layer.open({
+					type: 1,
+					title: "描述",
+					area: ['500px', '360px'], // 宽高
+					content: $('#markDiv')
+				});
+			} else {
+				layer.msg(data.msg);
+			}
+		},
+		error: function() {
+			layer.alert("出错了,请联系技术人员!");
+		}
+	});
+}
+
+
+function editMarkOver(){
+	$.ajax({
+		type: 'POST',
+		url: ctx + '/adminPage/repository/editMark',
+		data: {
+			id: $("#repositoryId").val(),
+			mark: $("#mark").val()
+		},
+		dataType: 'json',
+		success: function(data) {
+			if (data.success) {
+				location.reload();
+			} else {
+				layer.msg(data.msg);
+			}
+		},
+		error: function() {
+			layer.alert("出错了,请联系技术人员!");
+		}
+	});
+}
+
+function seeLog(url){
+	layer.open({
+		type: 2,
+		title: '查看日志 ' + url,
+		area: ['1000px', '630px;'],
+		content: ctx + "/adminPage/seeLog?url=" + url
+	});
+}

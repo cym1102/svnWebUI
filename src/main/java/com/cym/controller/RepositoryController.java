@@ -1,10 +1,7 @@
 package com.cym.controller;
 
 import java.io.File;
-import java.io.IOException;
-import java.nio.charset.Charset;
 import java.util.ArrayList;
-import java.util.Comparator;
 import java.util.List;
 
 import org.noear.solon.annotation.Controller;
@@ -14,16 +11,6 @@ import org.noear.solon.core.handle.Context;
 import org.noear.solon.core.handle.ModelAndView;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.tmatesoft.svn.core.SVNException;
-import org.tmatesoft.svn.core.SVNURL;
-import org.tmatesoft.svn.core.auth.ISVNAuthenticationManager;
-import org.tmatesoft.svn.core.io.SVNRepository;
-import org.tmatesoft.svn.core.io.SVNRepositoryFactory;
-import org.tmatesoft.svn.core.wc.SVNClientManager;
-import org.tmatesoft.svn.core.wc.SVNRevision;
-import org.tmatesoft.svn.core.wc.SVNWCUtil;
-import org.tmatesoft.svn.core.wc.admin.SVNAdminClient;
-import org.tmatesoft.svn.core.wc2.admin.SvnRepositoryDump;
 
 import com.cym.config.HomeConfig;
 import com.cym.config.InitConfig;
@@ -31,7 +18,6 @@ import com.cym.ext.RepositoryExt;
 import com.cym.ext.RepositoryGroupExt;
 import com.cym.ext.RepositoryUserExt;
 import com.cym.ext.Select;
-import com.cym.ext.TreeNode;
 import com.cym.model.Group;
 import com.cym.model.Repository;
 import com.cym.model.RepositoryGroup;
@@ -43,15 +29,12 @@ import com.cym.service.SettingService;
 import com.cym.sqlhelper.bean.Page;
 import com.cym.utils.BaseController;
 import com.cym.utils.BeanExtUtil;
-import com.cym.utils.HttpdUtils;
 import com.cym.utils.JsonResult;
 import com.cym.utils.PathUtls;
 import com.cym.utils.SvnAdminUtils;
 import com.cym.utils.SystemTool;
 
 import cn.hutool.core.io.FileUtil;
-import cn.hutool.core.net.URLDecoder;
-import cn.hutool.core.net.URLEncoder;
 import cn.hutool.core.util.CharsetUtil;
 import cn.hutool.core.util.RuntimeUtil;
 import cn.hutool.core.util.StrUtil;
@@ -92,6 +75,9 @@ public class RepositoryController extends BaseController {
 			String path = homeConfig.home + "repo" + File.separator + repositoryExt.getName();
 			File file = new File(path);
 			repositoryExt.setSize(FileUtil.readableFileSize(FileUtil.size(file)));
+			if (StrUtil.isNotEmpty(repositoryExt.getMark())) {
+				repositoryExt.setMark(repositoryExt.getMark().replace("\n", "<br>").replace(" ", "&nbsp;"));
+			}
 		}
 
 		ModelAndView modelAndView = new ModelAndView("/adminPage/repository/index.html");
@@ -329,18 +315,12 @@ public class RepositoryController extends BaseController {
 
 	}
 
-//	@Mapping("getFileList")
-//	public List<TreeNode> getFileList(String id, String url) {
-//		if (StrUtil.isEmpty(id)) {
-//			id = url;
-//		}
-//		id = URLDecoder.decode(id, Charset.forName("UTF-8"));
-//		List<TreeNode> list = pathUtls.getPath(id, svnAdminUtils.adminUserName, svnAdminUtils.adminUserPass);
-//
-//		sortFile(list);
-//
-//		return list;
-//	}
+	@Mapping("setEnable")
+	public JsonResult setEnable(Repository repository) {
+		sqlHelper.updateById(repository);
+		configService.refresh();
+		return renderSuccess();
+	}
 
 	@Mapping("getUserList")
 	public JsonResult getUserList() {
@@ -380,5 +360,18 @@ public class RepositoryController extends BaseController {
 		configService.refresh();
 		return renderSuccess();
 	}
+
+	@Mapping("editMark")
+	public JsonResult editMark(String id, String mark) {
+
+		Repository repository = new Repository();
+		repository.setId(id);
+		repository.setMark(mark);
+		sqlHelper.updateById(repository);
+
+		return renderSuccess();
+	}
+
+	
 
 }

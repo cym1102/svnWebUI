@@ -1,27 +1,28 @@
-.red{
+.red {
 	color: red;
 }
 
-.green{
+.green {
 	color: green;
 }
 
-.blue{
+.blue {
 	color: blue;
 }
-.gray{
+
+.gray {
 	color: gray;
 }
 
-
 .ck-editor {
-   width: 100% !important;
-}
-.ck-content {
-   height: 400px;
+	width: 100% !important;
 }
 
-.img{
+.ck-content {
+	height: 400px;
+}
+
+.img {
 	height: 80px;
 }
 
@@ -29,10 +30,21 @@
 	bottom: 0px;
 }
 
-
-.redPoint{
+.redPoint {
 	color: red;
-	font-weight:bolder;
+	font-weight: bolder;
 	display: inline-block;
 	margin-left: 10px;
+}
+
+.layui-form-switch {
+	margin-top: 3px;
+	margin-bottom: 3px;
+}
+
+.file_D {
+	color: red;
+}
+.file_A {
+	color: blue;
 }

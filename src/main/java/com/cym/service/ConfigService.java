@@ -107,48 +107,44 @@ public class ConfigService {
 		for (Repository repository : repositories) {
 			boolean hasRoot = false; // 是否已配置/的权限
 
-			List<String> paths = getPaths(repository.getId());
-			for (String path : paths) {
-				authzLines.add("[" + repository.getName() + ":" + replaceEnd(path) + "]");
+			if (repository.getEnable()) {
+				List<String> paths = getPaths(repository.getId());
+				for (String path : paths) {
+					authzLines.add("[" + repository.getName() + ":" + replaceEnd(path) + "]");
 
-				List<RepositoryGroup> repositoryGroups = sqlHelper.findListByQuery(new ConditionAndWrapper()//
-						.eq(RepositoryGroup::getRepositoryId, repository.getId())//
-						.eq(RepositoryGroup::getPath, path), //
-						RepositoryGroup.class);
-				for (RepositoryGroup repositoryGroup : repositoryGroups) {
-					Group group = sqlHelper.findById(repositoryGroup.getGroupId(), Group.class);
-					if (group != null) {
-						authzLines.add("@" + group.getName() + " = " + val(repositoryGroup.getPermission()));
+					List<RepositoryGroup> repositoryGroups = sqlHelper.findListByQuery(new ConditionAndWrapper()//
+							.eq(RepositoryGroup::getRepositoryId, repository.getId())//
+							.eq(RepositoryGroup::getPath, path), //
+							RepositoryGroup.class);
+					for (RepositoryGroup repositoryGroup : repositoryGroups) {
+						Group group = sqlHelper.findById(repositoryGroup.getGroupId(), Group.class);
+						if (group != null) {
+							authzLines.add("@" + group.getName() + " = " + val(repositoryGroup.getPermission()));
+						}
 					}
-				}
 
-				List<RepositoryUser> repositoryUsers = sqlHelper.findListByQuery(new ConditionAndWrapper()//
-						.eq(RepositoryUser::getRepositoryId, repository.getId())//
-						.eq(RepositoryUser::getPath, path), //
-						RepositoryUser.class);
-				for (RepositoryUser repositoryUser : repositoryUsers) {
-					User user = sqlHelper.findById(repositoryUser.getUserId(), User.class);
-					if (user.getOpen() != null && user.getOpen() == 0) {
-						authzLines.add(user.getName() + " = " + val(repositoryUser.getPermission()));
+					List<RepositoryUser> repositoryUsers = sqlHelper.findListByQuery(new ConditionAndWrapper()//
+							.eq(RepositoryUser::getRepositoryId, repository.getId())//
+							.eq(RepositoryUser::getPath, path), //
+							RepositoryUser.class);
+					for (RepositoryUser repositoryUser : repositoryUsers) {
+						User user = sqlHelper.findById(repositoryUser.getUserId(), User.class);
+						if (user.getOpen() != null && user.getOpen() == 0) {
+							authzLines.add(user.getName() + " = " + val(repositoryUser.getPermission()));
+						}
 					}
-				}
 
-				if (path.equals("/")) {
-					authzLines.add(svnAdminUtils.adminUserName + " = rw");
-					if (!repository.getAllPermission().equals("no")) { // 全体权限
-						authzLines.add("* = " + val(repository.getAllPermission()));
+					if (path.equals("/")) {
+						setSpecialPermission(authzLines, repository);
+						hasRoot = true;
 					}
-					hasRoot = true;
-				}
 
+				}
 			}
 
 			if (!hasRoot) {
 				authzLines.add("[" + repository.getName() + ":/]");
-				authzLines.add(svnAdminUtils.adminUserName + " = rw");
-				if (!repository.getAllPermission().equals("no")) { // 全体权限
-					authzLines.add("* = " + val(repository.getAllPermission()));
-				}
+				setSpecialPermission(authzLines, repository);
 			}
 
 			// 拷贝配置文件
@@ -161,6 +157,14 @@ public class ConfigService {
 		// 目录授权
 		if (SystemTool.inDocker() && "http".equals(settingService.get("protocol"))) {
 			RuntimeUtil.execForStr("chown apache.apache -R " + homeConfig.home + File.separator + "repo" + File.separator);
+		}
+	}
+
+	// 设置特殊权限
+	private void setSpecialPermission(List<String> authzLines, Repository repository) {
+		authzLines.add(svnAdminUtils.adminUserName + " = rw");
+		if (!repository.getAllPermission().equals("no") && repository.getEnable()) { // 全体权限
+			authzLines.add("* = " + val(repository.getAllPermission()));
 		}
 	}
 

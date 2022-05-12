@@ -1,0 +1,92 @@
+<!DOCTYPE HTML>
+<html>
+<head>
+<#include "/adminPage/common.html"/>
+
+</head>
+<body>
+	<!-- 内容主体区域 -->
+	<div style="padding: 15px">
+		<form action="${ctx}/adminPage/seeLog" id="searchForm" method="post" class="layui-form">
+
+			<input type="hidden" name="url" value="${url}">
+			<input type="hidden" name="curr" value="${page.curr}">
+			<input type="hidden" name="limit" value="${page.limit}">
+		</form>
+
+		<table class="layui-table" lay-size="sm">
+			<thead>
+				<tr>
+					<th>版本号</th>
+					<th>提交人</th>
+					<th>提交时间</th>
+					<th>提交信息</th>
+					<th>文件变化</th>
+				</tr>
+			</thead>
+			<tbody>
+				<#list page.records as svnCommitLog>
+				<tr>
+					<td>
+						${svnCommitLog.revision}
+					</td>
+					<td>
+						${svnCommitLog.author}
+					</td>
+					<td>
+						${svnCommitLog.commitDate}
+					</td>
+					<td>
+						${svnCommitLog.message}
+					</td>
+					<td>
+						<a class="blue" href="javascript:seeLogFile(${svnCommitLog.revision})">查看</a>
+						<div style="height: 0px; width: 0px; overflow: hidden;">
+							<div id="seeLogFileDiv_${svnCommitLog.revision}" style="padding: 15px; display: none;">
+								<#list svnCommitLog.fileList as svnFileEntry>
+									<div class="file_${svnFileEntry.type}">${svnFileEntry.type}&nbsp;&nbsp;&nbsp;${svnFileEntry.path}</div>
+								</#list>
+							</div>
+						</div>
+					</td>
+				</tr>
+				</#list>
+			</tbody>
+		</table>
+		<div id="pageInfo"></div>
+	</div>
+
+	<script src="${ctx}/js/adminPage/see_log.js?v=${jsrandom}" type="text/javascript"></script>
+</body>
+
+
+</html>
+
+
+
+<!-- 
+<script src="" type="text/javascript"></script>
+<div style="height: 0px; width: 0px; overflow: hidden;">
+	弹出框
+	<div id="seeLogDiv" style="padding: 15px; display: none;">
+
+		<table class="layui-table" lay-size="sm">
+			<thead>
+				<tr>
+					<th>版本号</th>
+					<th>提交人</th>
+					<th>提交时间</th>
+					<th>提交信息</th>
+					<th>文件变化</th>
+				</tr>
+			</thead>
+			<tbody id="logTable">
+				
+			</tbody>
+			
+			<div id="pageInfo"></div>
+		</table>
+
+	</div>
+	
+</div> -->

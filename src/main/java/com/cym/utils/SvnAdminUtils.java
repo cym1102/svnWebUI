@@ -15,7 +15,7 @@ public class SvnAdminUtils {
 	
 	@Init
 	public void init() throws UnknownHostException, SocketException {
-		adminUserName = "svnAdmin";
+		adminUserName = "svnWebUI";
 		adminUserPass = UUID.randomUUID().toString();
 	}
 

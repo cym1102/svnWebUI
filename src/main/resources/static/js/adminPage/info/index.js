@@ -53,3 +53,13 @@ function changeOver() {
 	});
 
 }
+
+
+function seeLog(url){
+	layer.open({
+		type: 2,
+		title: '查看日志 ' + url,
+		area: ['1000px', '630px;'],
+		content: ctx + "/adminPage/seeLog?url=" + url
+	});
+}
