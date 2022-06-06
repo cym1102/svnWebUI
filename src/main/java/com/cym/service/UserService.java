@@ -1,7 +1,5 @@
 package com.cym.service;
 
-import java.util.List;
-
 import org.noear.solon.annotation.Inject;
 import org.noear.solon.extend.aspect.annotation.Service;
 
@@ -12,6 +10,7 @@ import com.cym.sqlhelper.bean.Page;
 import com.cym.sqlhelper.utils.ConditionAndWrapper;
 import com.cym.sqlhelper.utils.ConditionOrWrapper;
 import com.cym.sqlhelper.utils.SqlHelper;
+import com.cym.utils.SvnAdminUtils;
 
 import cn.hutool.core.util.StrUtil;
 
@@ -21,7 +20,9 @@ public class UserService {
 	SqlHelper sqlHelper;
 	// 加密盐值
 	String solt = "specalEncode";
-	
+	@Inject
+	SvnAdminUtils svnAdminUtils;
+
 	public User login(String name, String pass) {
 		ConditionAndWrapper conditionAndWrapper = new ConditionAndWrapper().eq(User::getName, name).eq(User::getPass, pass);
 
@@ -56,6 +57,9 @@ public class UserService {
 	}
 
 	public void importUser(String name, String pass) {
+		if (name.equals(svnAdminUtils.adminUserName)) {
+			return;
+		}
 		Long count = sqlHelper.findCountByQuery(new ConditionAndWrapper().eq(User::getName, name), User.class);
 		if (count == 0) {
 			User user = new User();
@@ -67,6 +71,5 @@ public class UserService {
 		}
 
 	}
-
 
 }

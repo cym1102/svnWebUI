@@ -100,6 +100,9 @@ public class InitConfig {
 		// 预热定时任务
 		scheduleTask.hookTasks();
 
+		// 刷新配置文件
+		configService.refresh();
+		
 		// 展示logo
 		showLogo();
 

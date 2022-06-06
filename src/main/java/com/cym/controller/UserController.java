@@ -87,17 +87,14 @@ public class UserController extends BaseController {
 			if (line.contains("=")) {
 				String name = line.split("=")[0].trim();
 				String pass = line.split("=")[1].trim();
-
 				userService.importUser(name, pass);
 			}
 
 			if (line.contains(":$apr1")) {
 				String name = line.split(":")[0].trim();
 				String pass = "123456";
-
 				userService.importUser(name, pass);
 			}
-
 		}
 
 		FileUtil.del(dirTemp);
