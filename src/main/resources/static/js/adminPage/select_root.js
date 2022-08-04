@@ -17,6 +17,11 @@ var rootSelect = {
 				pIdKey: 'pid',
 				rootPId: ''
 			}
+		},
+		check: {
+			enable: true,
+			chkStyle: "checkbox",
+			chkboxType: { "Y": "ps", "N": "ps" }
 		}
 	},
 	load: function() {
@@ -183,17 +188,24 @@ function rmfile() {
 
 
 function selectOver() {
-	var nodes = rootSelect.zTreeObj.getSelectedNodes();
+	var nodes = rootSelect.zTreeObj.getCheckedNodes();
 	if (nodes.length > 0) {
-		var url = decodeURIComponent(nodes[0].id);
+		var arrays = [];
+		for (let i = 0; i < nodes.length; i++) {
+			if (!nodes[i].getCheckStatus().half) {
 
-		var relativePaths = [];
-		var urls = url.split("/");
-		for (let i = 4; i < urls.length; i++) {
-			relativePaths.push(urls[i]);
+				var url = decodeURIComponent(nodes[i].id);
+
+				var relativePaths = [];
+				var urls = url.split("/");
+				for (let i = 4; i < urls.length; i++) {
+					relativePaths.push(urls[i]);
+				}
+				arrays.push("/" + relativePaths.join("/"));
+			}
 		}
 
-		$("#" + rootSelect.id).val("/" + relativePaths.join("/"));
+		$("#" + rootSelect.id).val(arrays.join(";"));
 	}
 	layer.close(rootSelect.index);
 }

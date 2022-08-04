@@ -23,7 +23,7 @@ import com.cym.utils.PathUtls;
 import com.cym.utils.SvnAdminUtils;
 
 import cn.hutool.core.net.URLDecoder;
-import cn.hutool.core.net.URLEncoder;
+import cn.hutool.core.net.URLEncodeUtil;
 import cn.hutool.core.util.StrUtil;
 
 @Controller
@@ -107,7 +107,7 @@ public class SelectRootController extends BaseController{
 
 		context.headerAdd("Accept-Ranges", "bytes");
 		context.headerAdd("Content-Type", "application/octet-stream");
-		context.headerAdd("Content-Disposition", "attachment;filename=" + URLEncoder.createDefault().encode(fileName, Charset.forName("UTF-8")));
+		context.headerAdd("Content-Disposition", "attachment;filename=" + URLEncodeUtil.encode(fileName, Charset.forName("UTF-8")));
 		svnRepository.getFile(pathUtls.getRelativePath(url), -1, null, context.outputStream());
 
 	}

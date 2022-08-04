@@ -6,7 +6,7 @@ import java.util.ArrayList;
 import java.util.List;
 
 import org.noear.solon.annotation.Inject;
-import org.noear.solon.extend.aspect.annotation.Service;
+import org.noear.solon.aspect.annotation.Service;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -190,20 +190,12 @@ public class RepositoryService {
 		return repositoryGroup.getPermission();
 	}
 
-	public void addUser(RepositoryUser repositoryUser) {
-		sqlHelper.insertOrUpdate(repositoryUser);
-
-	}
 
 	public void delUser(String repositoryUserId) {
 		sqlHelper.deleteById(repositoryUserId, RepositoryUser.class);
 
 	}
 
-	public void addGroup(RepositoryGroup repositoryGroup) {
-		sqlHelper.insertOrUpdate(repositoryGroup);
-
-	}
 
 	public void delGroup(String repositoryGroupId) {
 		sqlHelper.deleteById(repositoryGroupId, RepositoryGroup.class);

@@ -177,10 +177,15 @@ public class RepositoryController extends BaseController {
 
 	@Mapping("addUser")
 	public JsonResult addUser(RepositoryUser repositoryUser) {
-		if (repositoryService.hasUser(repositoryUser.getUserId(), repositoryUser.getPath(), repositoryUser.getRepositoryId(), repositoryUser.getId())) {
-			return renderError("该用户路径授权已存在");
+		String[] paths = repositoryUser.getPath().split(";");
+
+		for (String path : paths) {
+			if (!repositoryService.hasUser(repositoryUser.getUserId(), path, repositoryUser.getRepositoryId(), repositoryUser.getId())) {
+				repositoryUser.setPath(path);
+				sqlHelper.insert(repositoryUser);
+			}
 		}
-		repositoryService.addUser(repositoryUser);
+
 		configService.refresh();
 		return renderSuccess();
 	}
@@ -192,11 +197,11 @@ public class RepositoryController extends BaseController {
 		return renderSuccess();
 	}
 
-	@Mapping("userDetail")
-	public JsonResult userDetail(String id) {
-
-		return renderSuccess(sqlHelper.findById(id, RepositoryUser.class));
-	}
+//	@Mapping("userDetail")
+//	public JsonResult userDetail(String id) {
+//
+//		return renderSuccess(sqlHelper.findById(id, RepositoryUser.class));
+//	}
 
 	@Mapping("groupPermission")
 	public ModelAndView groupPermission(Page page, String keywords, String repositoryId, String order) {
@@ -232,11 +237,15 @@ public class RepositoryController extends BaseController {
 
 	@Mapping("addGroup")
 	public JsonResult addGroup(RepositoryGroup repositoryGroup) {
-		if (repositoryService.hasGroup(repositoryGroup.getGroupId(), repositoryGroup.getPath(), repositoryGroup.getRepositoryId(), repositoryGroup.getId())) {
-			return renderError("该小组路径授权已存在");
-		}
+		String[] paths = repositoryGroup.getPath().split(";");
 
-		repositoryService.addGroup(repositoryGroup);
+		for (String path : paths) {
+			if (!repositoryService.hasGroup(repositoryGroup.getGroupId(), path, repositoryGroup.getRepositoryId(), repositoryGroup.getId())) {
+				repositoryGroup.setPath(path);
+				sqlHelper.insert(repositoryGroup);
+			}
+		}
+	
 		configService.refresh();
 		return renderSuccess();
 	}
@@ -248,11 +257,11 @@ public class RepositoryController extends BaseController {
 		return renderSuccess();
 	}
 
-	@Mapping("groupDetail")
-	public JsonResult groupDetail(String id) {
-
-		return renderSuccess(sqlHelper.findById(id, RepositoryGroup.class));
-	}
+//	@Mapping("groupDetail")
+//	public JsonResult groupDetail(String id) {
+//
+//		return renderSuccess(sqlHelper.findById(id, RepositoryGroup.class));
+//	}
 
 	@Mapping("loadOver")
 	public JsonResult loadOver(String id, String dirTemp) {
@@ -371,7 +380,5 @@ public class RepositoryController extends BaseController {
 
 		return renderSuccess();
 	}
-
-	
 
 }

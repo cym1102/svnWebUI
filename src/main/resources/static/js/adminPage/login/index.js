@@ -51,11 +51,6 @@ function refreshCode(id) {
 	$("#" + id).attr("src", ctx + "/adminPage/login/getCode?t=" + (new Date()).getTime());
 }
 
-
-function addAdmin(){
-	
-}
-
 function getKey() {
 	if (event.keyCode == 13) {
 		login();

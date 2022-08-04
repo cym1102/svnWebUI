@@ -91,6 +91,7 @@ function addOver() {
 	
 }
 
+/*
 function edit(id) {
 	showLoad();
 	$.ajax({
@@ -121,6 +122,7 @@ function edit(id) {
 		}
 	});
 }
+*/
 
 function del(id){
 	if(confirm("确认删除?")){

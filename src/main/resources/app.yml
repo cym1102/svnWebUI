@@ -14,11 +14,14 @@ solon:
   app.name: svnWebUI
   view.mapping.html: FreemarkerRender
   logging:
+    "io.undertow":
+        level: "WARN"
     appender:
       file:
         name: ${project.home}/log/${solon.app.name}
         level: INFO
-
+        maxFileSize: "100 MB"
+        maxHistory: "7"
 database:
   type: h2
   url: 
