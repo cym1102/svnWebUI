@@ -50,6 +50,7 @@ public class GroupService {
 	public void deleteById(String groupId) {
 		sqlHelper.deleteById(groupId, Group.class);
 		sqlHelper.deleteByQuery(new ConditionAndWrapper().eq(GroupUser::getGroupId, groupId), GroupUser.class);
+		sqlHelper.deleteByQuery(new ConditionAndWrapper().eq(GroupGroup::getSlaveGroupId, groupId), GroupGroup.class);
 		sqlHelper.deleteByQuery(new ConditionAndWrapper().eq(RepositoryGroup::getGroupId, groupId), RepositoryGroup.class);
 	}
 

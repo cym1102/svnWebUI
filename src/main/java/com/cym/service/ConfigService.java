@@ -129,7 +129,7 @@ public class ConfigService {
 							RepositoryUser.class);
 					for (RepositoryUser repositoryUser : repositoryUsers) {
 						User user = sqlHelper.findById(repositoryUser.getUserId(), User.class);
-						if (user.getOpen() != null && user.getOpen() == 0) {
+						if (user != null && user.getOpen() != null && user.getOpen() == 0) {
 							authzLines.add(user.getName() + " = " + val(repositoryUser.getPermission()));
 						}
 					}

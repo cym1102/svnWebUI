@@ -21,7 +21,7 @@
 				<div class="layui-form">
 					<div class="layui-form-item">
 						<label class="layui-form-label"> svn服务 </label>
-						<div class="layui-input-block">
+						<div class="layui-input-inline">
 							<div class="layui-form-mid layui-word-aux">
 								<span id='status'> </span>
 							</div>
@@ -31,7 +31,7 @@
 					<#if inDocker>
 					<div class="layui-form-item">
 						<label class="layui-form-label"> 访问协议 </label>
-						<div class="layui-input-block">
+						<div class="layui-input-inline">
 							<select name="protocol" id="protocol">
 								<option ${(protocol=='http')?string('selected','')}>http</option>
 								<option ${(protocol=='svn')?string('selected','')}>svn</option>
@@ -42,15 +42,15 @@
 
 					<div class="layui-form-item">
 						<label class="layui-form-label"> svn端口 </label>
-						<div class="layui-input-block">
+						<div class="layui-input-inline">
 							<input type="number" class="layui-input" style="width: 80px;" id="port" value="${port}">
 						</div>
 					</div>
 
 					<div class="layui-form-item">
 						<label class="layui-form-label"> 绑定域名ip </label>
-						<div class="layui-input-block">
-							<input type="text" class="layui-input" style="width: 170px;" id="host" value="${host}" placeholder="不填为当前域名或ip">
+						<div class="layui-input-inline">
+							<input type="text" class="layui-input" id="host" value="${host}" placeholder="不填为当前域名或ip">
 						</div>
 					</div>
 
