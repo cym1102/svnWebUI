@@ -52,7 +52,10 @@ function selectRoot(id, repositoryId) {
 				$("#selectRootOver").show();
 				$("#mkdir").show();
 				$("#rmfile").show();
-				showTree(data.obj.url);
+				$("#download").hide();
+				$("#rmfile").hide();
+				
+				showTree(data.obj.url, true);
 			} else {
 				layer.msg(data.msg);
 			}
@@ -66,7 +69,9 @@ function selectRoot(id, repositoryId) {
 function seeFile(url, permission) {
 	$("#selectOver").hide();
 	$("#selectRootOver").hide();
-
+	$("#download").show();
+	$("#rmfile").show();
+	
 	if (permission == 'rw') {
 		$("#mkdir").show();
 		$("#rmfile").show();
@@ -74,12 +79,13 @@ function seeFile(url, permission) {
 		$("#mkdir").hide();
 		$("#rmfile").hide();
 	}
-	showTree(url);
+	showTree(url, false);
 }
 
-function showTree(url) {
+function showTree(url, check) {
 	svnUrl = url;
 	rootSelect.setting.async.url = ctx + '/adminPage/selectRoot/getFileList?url=' + encodeURIComponent(url);
+	rootSelect.setting.check.enable = check;
 	rootSelect.load();
 	rootSelect.index = layer.open({
 		type: 1,

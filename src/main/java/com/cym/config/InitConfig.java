@@ -94,7 +94,8 @@ public class InitConfig {
 			httpdUtils.modHttpdPort(settingService.get("port"));
 		}
 
-		// 服务端启动
+		// 服务端先杀掉启动
+		configController.stop();
 		configController.start(settingService.get("port"), settingService.get("host"), settingService.get("protocol"));
 
 		// 预热定时任务

@@ -72,9 +72,6 @@ public class RepositoryController extends BaseController {
 			url += "/" + repositoryExt.getName();
 			repositoryExt.setUrl(url);
 
-			String path = homeConfig.home + "repo" + File.separator + repositoryExt.getName();
-			File file = new File(path);
-			repositoryExt.setSize(FileUtil.readableFileSize(FileUtil.size(file)));
 			if (StrUtil.isNotEmpty(repositoryExt.getMark())) {
 				repositoryExt.setMark(repositoryExt.getMark().replace("\n", "<br>").replace(" ", "&nbsp;"));
 			}

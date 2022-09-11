@@ -12,8 +12,6 @@ public class Repository extends BaseModel {
 	// 全体权限 'r' 'rw' 'no'
 	@InitValue("no")
 	String allPermission;
-	// 文件夹大小
-	String size;
 	// 备注
 	String mark;
 	/**
@@ -36,14 +34,6 @@ public class Repository extends BaseModel {
 
 	public void setMark(String mark) {
 		this.mark = mark;
-	}
-
-	public String getSize() {
-		return size;
-	}
-
-	public void setSize(String size) {
-		this.size = size;
 	}
 
 	public String getAllPermission() {

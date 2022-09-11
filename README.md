@@ -44,7 +44,6 @@ Windows上倒是有不错的svn服务端软件即VisualSVN, 但一来Windows服�
 
 
 #### 安装说明
-以Ubuntu操作系统为例,
 
 1.安装java运行环境和Subversion
 
@@ -78,9 +77,9 @@ Path : JDK安装目录\bin
 2.下载最新版发行包jar
 
 ```
-Linux: wget -O /home/svnWebUI/svnWebUI.jar http://file.nginxwebui.cn/svnWebUI-1.7.0.jar
+Linux: wget -O /home/svnWebUI/svnWebUI.jar http://file.nginxwebui.cn/svnWebUI-1.7.2.jar
 
-Windows: 直接使用浏览器下载 http://file.nginxwebui.cn/svnWebUI-1.7.0.jar
+Windows: 直接使用浏览器下载 http://file.nginxwebui.cn/svnWebUI-1.7.2.jar
 ```
 
 有新版本只需要修改路径中的版本即可

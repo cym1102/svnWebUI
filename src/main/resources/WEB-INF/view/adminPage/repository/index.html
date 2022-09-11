@@ -55,8 +55,7 @@
 							<th>仓库名</th>
 							<th>url</th>
 							<th>启用</th>
-							<th>仓库大小</th>
-							<th>描述</th>
+							<th style="width: 250px">描述</th>
 							<th>全体授权</th>
 							<th>授权</th>
 							<th>操作</th>
@@ -76,7 +75,6 @@
 								</div>
 							</td>
 							
-							<td>${repositoryExt.size}</td>
 							<td>
 								<#if repositoryExt.mark != null && repositoryExt.mark != "">
 									<a href="javascript:editMark('${repositoryExt.id}')" style="color: #bbbbbb; text-decoration: underline;">${repositoryExt.mark}</a>
