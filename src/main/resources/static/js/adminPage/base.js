@@ -207,6 +207,7 @@ function hasSpec(str){
 	if(str.indexOf("=") > -1 
 	|| str.indexOf("*") > -1
 	|| str.indexOf(":") > -1
+	|| str.indexOf(";") > -1
 	|| str.indexOf("~") > -1
 	|| str.indexOf("\\") > -1
 	|| str.indexOf("/") > -1
@@ -214,6 +215,22 @@ function hasSpec(str){
 	|| str.indexOf(">") > -1
 	|| str.indexOf("|") > -1
 	|| str.indexOf("?") > -1
+	|| str.indexOf("(") > -1
+	|| str.indexOf(")") > -1
+	|| str.indexOf("[") > -1
+	|| str.indexOf("]") > -1
+	|| str.indexOf("{") > -1
+	|| str.indexOf("}") > -1
+	|| str.indexOf("`") > -1
+	|| str.indexOf("!") > -1
+	|| str.indexOf("@") > -1
+	|| str.indexOf("#") > -1
+	|| str.indexOf("$") > -1
+	|| str.indexOf("%") > -1
+	|| str.indexOf("^") > -1
+	|| str.indexOf("&") > -1
+	|| str.indexOf("-") > -1
+	|| str.indexOf("+") > -1
 	){
 		return true;
 	}

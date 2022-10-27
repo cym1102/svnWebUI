@@ -254,72 +254,67 @@ public class RepositoryController extends BaseController {
 		return renderSuccess();
 	}
 
-//	@Mapping("groupDetail")
-//	public JsonResult groupDetail(String id) {
+
+//	@Mapping("loadOver")
+//	public JsonResult loadOver(String id, String dirTemp) {
 //
-//		return renderSuccess(sqlHelper.findById(id, RepositoryGroup.class));
+//		Repository repository = sqlHelper.findById(id, Repository.class);
+//
+//		String rs = "";
+//		String home = homeConfig.home;
+//
+//		if (SystemTool.isWindows()) {
+//
+//			String cmd = "svnadmin.exe load " + (home + File.separator + "repo" + File.separator + repository.getName() + File.separator).replace("/", "\\") + " < " + dirTemp;
+//			FileUtil.writeString(cmd, home + File.separator + "dump.bat", CharsetUtil.GBK);
+//
+//			rs = RuntimeUtil.execForStr(home + File.separator + "dump.bat");
+//		} else {
+//			String sh = "svnadmin load " + (home + File.separator + "repo" + File.separator + repository.getName() + File.separator) + " < " + dirTemp;
+//			FileUtil.writeString(sh, home + File.separator + "dump.sh", CharsetUtil.CHARSET_UTF_8);
+//
+//			rs = RuntimeUtil.execForStr("sh", home + File.separator + "dump.sh");
+//		}
+//		logger.info(rs);
+//		FileUtil.del(dirTemp);
+//
+//		return renderSuccess(rs.replace("\n", "<br>"));
 //	}
 
-	@Mapping("loadOver")
-	public JsonResult loadOver(String id, String dirTemp) {
-
-		Repository repository = sqlHelper.findById(id, Repository.class);
-
-		String rs = "";
-		String home = homeConfig.home;
-
-		if (SystemTool.isWindows()) {
-
-			String cmd = "svnadmin.exe load " + (home + File.separator + "repo" + File.separator + repository.getName() + File.separator).replace("/", "\\") + " < " + dirTemp;
-			FileUtil.writeString(cmd, home + File.separator + "dump.bat", CharsetUtil.GBK);
-
-			rs = RuntimeUtil.execForStr(home + File.separator + "dump.bat");
-		} else {
-			String sh = "svnadmin load " + (home + File.separator + "repo" + File.separator + repository.getName() + File.separator) + " < " + dirTemp;
-			FileUtil.writeString(sh, home + File.separator + "dump.sh", CharsetUtil.CHARSET_UTF_8);
-
-			rs = RuntimeUtil.execForStr("sh", home + File.separator + "dump.sh");
-		}
-		logger.info(rs);
-		FileUtil.del(dirTemp);
-
-		return renderSuccess(rs.replace("\n", "<br>"));
-	}
-
-	@Mapping("dumpOver")
-	public void dumpOver(String id, Context context) throws Exception {
-		Repository repository = sqlHelper.findById(id, Repository.class);
-
-		String rs = "";
-		String home = homeConfig.home;
-		String dumpTemp = null;
-
-		if (SystemTool.isWindows()) {
-
-			dumpTemp = home + File.separator + "temp" + File.separator + repository.getName() + ".dump";
-			String cmd = "svnadmin.exe dump " + (home + File.separator + "repo" + File.separator + repository.getName() + File.separator).replace("/", "\\") + " > " + dumpTemp;
-
-			FileUtil.writeString(cmd, home + File.separator + "dump.bat", CharsetUtil.GBK);
-
-			rs = RuntimeUtil.execForStr(home + File.separator + "dump.bat");
-		} else {
-
-			dumpTemp = home + File.separator + "temp" + File.separator + repository.getName() + ".dump";
-			String sh = "svnadmin dump " + (home + File.separator + "repo" + File.separator + repository.getName() + File.separator) + " > " + dumpTemp;
-
-			FileUtil.writeString(sh, home + File.separator + "dump.sh", CharsetUtil.CHARSET_UTF_8);
-
-			rs = RuntimeUtil.execForStr("sh", home + File.separator + "dump.sh");
-		}
-
-		logger.info(rs);
-
-		if (FileUtil.exist(dumpTemp)) {
-			Context.current().outputAsFile(new File(dumpTemp));
-			FileUtil.del(dumpTemp);
-		}
-
-	}
+//	@Mapping("dumpOver")
+//	public void dumpOver(String id, Context context) throws Exception {
+//		Repository repository = sqlHelper.findById(id, Repository.class);
+//
+//		String rs = "";
+//		String home = homeConfig.home;
+//		String dumpTemp = null;
+//
+//		if (SystemTool.isWindows()) {
+//
+//			dumpTemp = home + File.separator + "temp" + File.separator + repository.getName() + ".dump";
+//			String cmd = "svnadmin.exe dump " + (home + File.separator + "repo" + File.separator + repository.getName() + File.separator).replace("/", "\\") + " > " + dumpTemp;
+//
+//			FileUtil.writeString(cmd, home + File.separator + "dump.bat", CharsetUtil.GBK);
+//
+//			rs = RuntimeUtil.execForStr(home + File.separator + "dump.bat");
+//		} else {
+//
+//			dumpTemp = home + File.separator + "temp" + File.separator + repository.getName() + ".dump";
+//			String sh = "svnadmin dump " + (home + File.separator + "repo" + File.separator + repository.getName() + File.separator) + " > " + dumpTemp;
+//
+//			FileUtil.writeString(sh, home + File.separator + "dump.sh", CharsetUtil.CHARSET_UTF_8);
+//
+//			rs = RuntimeUtil.execForStr("sh", home + File.separator + "dump.sh");
+//		}
+//
+//		logger.info(rs);
+//
+//		if (FileUtil.exist(dumpTemp)) {
+//			Context.current().outputAsFile(new File(dumpTemp));
+//			FileUtil.del(dumpTemp);
+//		}
+//
+//	}
 
 	@Mapping("setEnable")
 	public JsonResult setEnable(Repository repository) {
