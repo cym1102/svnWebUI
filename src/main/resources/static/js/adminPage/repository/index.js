@@ -65,7 +65,7 @@ function add() {
 }
 
 function scan() {
-	if (confirm("是否扫描 " + $("#home").val() + "repo/ 下已存在仓库?")) {
+	if (confirm("请将仓库文件夹放到 " + $("#home").val() + "repo/ 下，再点击确定进行扫描。")) {
 		$.ajax({
 			type: 'POST',
 			url: ctx + '/adminPage/repository/scan',
@@ -245,7 +245,7 @@ function allPermissionOver() {
 
 }
 
-
+/*
 var index;
 function loadBak(id, name) {
 	$("#loadId").val(id);
@@ -294,7 +294,7 @@ function loadOver() {
 function dumpBak(id) {
 	window.open(ctx + '/adminPage/repository/dumpOver?id=' + id);
 }
-
+*/
 
 function editMark(id) {
 	$.ajax({

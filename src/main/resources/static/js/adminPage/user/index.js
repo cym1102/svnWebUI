@@ -74,6 +74,7 @@ function addOver() {
 		layer.msg("姓名为空");
 		return;
 	}
+	
 	if ($("#pass").val() == "") {
 		layer.msg("密码为空");
 		return;
@@ -82,7 +83,10 @@ function addOver() {
 		layer.msg("密码不能包含空格");
 		return;
 	}
-	
+	if (hasSpec($("#pass").val())) {
+		layer.msg("密码不能包含特殊字符");
+		return;
+	}
 
 
 	showLoad();
