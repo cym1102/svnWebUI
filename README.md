@@ -26,8 +26,6 @@ Windows上倒是有不错的svn服务端软件即VisualSVN, 但一来Windows服�
 
 经历几次失败的图形界面配置后, 萌生了写一个现代svn服务端管理软件, 让svn的服务端管理有gitea一般的轻松体验的想法.
 
-需要对接ldap账户体系的, 请移步该项目: https://gitee.com/cym1102/svnWebUI_ldap
-
 #### 技术说明
 
 本项目是基于solon的java项目, 数据库使用h2, 因此服务器上不需要安装任何数据库, 同时也兼容使用mysql
