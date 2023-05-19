@@ -11,10 +11,22 @@ project:
   findPass: false
   
 solon:
-  app.name: svnWebUI
-  view.mapping.html: FreemarkerRender
+  app: 
+    name: svnWebUI
+  view:
+    mapping:
+      html: FreemarkerRender
   logging:
-    "io.undertow":
+    logger:
+      "io.undertow":
+        level: "WARN"
+      "org.xnio":
+       level: "WARN"
+      "o.xnio":
+        level: "WARN"
+      "com.zaxxer.hikari":
+        level: "WARN"
+      "org.jboss":
         level: "WARN"
     appender:
       file:

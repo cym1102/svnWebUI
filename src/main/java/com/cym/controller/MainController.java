@@ -38,11 +38,11 @@ public class MainController extends BaseController {
 	@Mapping("/adminPage/main/upload")
 	public JsonResult upload(Context context, UploadedFile file) {
 		try {
-			File temp = new File(FileUtil.getTmpDir() + "/" + file.name.replace(" ", "_"));
+			File temp = new File(FileUtil.getTmpDir() + "/" + file.getName().replace(" ", "_"));
 			file.transferTo(temp);
 
 			// 移动文件
-			File dest = new File(homeConfig.home + "temp/" + file.name.replace(" ", "_")); 
+			File dest = new File(homeConfig.home + "temp/" + file.getName().replace(" ", "_")); 
 			FileUtil.move(temp, dest, true);
 
 			String path = dest.getPath();

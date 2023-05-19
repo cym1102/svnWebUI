@@ -22,12 +22,12 @@ public class AppFilter implements Filter {
 	@Override
 	public void doFilter(Context ctx, FilterChain chain) throws Throwable {
 		try {
-			if (ctx.path().contains("adminPage") //
-					&& !ctx.path().contains("/adminPage/login") //
-					&& !ctx.path().endsWith(".js") //
-					&& !ctx.path().endsWith(".css") //
-					&& !ctx.path().endsWith(".jpg") //
-					&& !ctx.path().endsWith(".png") //
+			if (ctx.path().toLowerCase().contains("adminPage".toLowerCase()) //
+					&& !ctx.path().toLowerCase().contains("/adminPage/login".toLowerCase()) //
+					&& !ctx.path().toLowerCase().endsWith(".js".toLowerCase()) //
+					&& !ctx.path().toLowerCase().endsWith(".css".toLowerCase()) //
+					&& !ctx.path().toLowerCase().endsWith(".jpg".toLowerCase()) //
+					&& !ctx.path().toLowerCase().endsWith(".png".toLowerCase()) //
 			) {
 				// 检查登录
 				User user = (User) ctx.session("user");
@@ -38,10 +38,10 @@ public class AppFilter implements Filter {
 
 				// 检查权限
 				if (user.getType() == 0) {
-					if (ctx.path().contains("adminPage/config")//
-							|| ctx.path().contains("adminPage/group")//
-							|| ctx.path().contains("adminPage/repository")//
-							|| ctx.path().contains("adminPage/user")//
+					if (ctx.path().toLowerCase().contains("adminPage/config".toLowerCase())//
+							|| ctx.path().toLowerCase().contains("adminPage/group".toLowerCase())//
+							|| ctx.path().toLowerCase().contains("adminPage/repository".toLowerCase())//
+							|| ctx.path().toLowerCase().contains("adminPage/user".toLowerCase())//
 					) {
 						ctx.redirect("/adminPage/info");
 						return;
