@@ -76,7 +76,24 @@ function addAdmin() {
 		layer.msg("两次密码不一致");
 		return;
 	}
-
+	
+	if ($("#adminName").val().indexOf(" ") > -1) {
+		layer.msg("登录名不能包含空格");
+		return;
+	}
+	if (hasSpec($("#adminName").val())) {
+		layer.msg("登录名不能包含特殊字符");
+		return;
+	}
+	
+	if ($("#adminPass").val().indexOf(" ") > -1) {
+		layer.msg("密码不能包含空格");
+		return;
+	}
+	if (hasSpec($("#adminPass").val())) {
+		layer.msg("密码不能包含特殊字符");
+		return;
+	}
 
 	$.ajax({
 		type: 'POST',

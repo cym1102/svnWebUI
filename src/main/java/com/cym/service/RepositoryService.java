@@ -14,6 +14,7 @@ import com.cym.config.HomeConfig;
 import com.cym.ext.GroupExt;
 import com.cym.ext.UserExt;
 import com.cym.model.Group;
+import com.cym.model.GroupGroup;
 import com.cym.model.GroupUser;
 import com.cym.model.Repository;
 import com.cym.model.RepositoryGroup;
@@ -26,11 +27,9 @@ import com.cym.sqlhelper.utils.ConditionAndWrapper;
 import com.cym.sqlhelper.utils.ConditionOrWrapper;
 import com.cym.sqlhelper.utils.SqlHelper;
 import com.cym.utils.BeanExtUtil;
-import com.cym.utils.SystemTool;
 
 import cn.hutool.core.io.FileUtil;
 import cn.hutool.core.io.resource.ClassPathResource;
-import cn.hutool.core.util.RuntimeUtil;
 import cn.hutool.core.util.StrUtil;
 import cn.hutool.core.util.ZipUtil;
 
@@ -190,12 +189,10 @@ public class RepositoryService {
 		return repositoryGroup.getPermission();
 	}
 
-
 	public void delUser(String repositoryUserId) {
 		sqlHelper.deleteById(repositoryUserId, RepositoryUser.class);
 
 	}
-
 
 	public void delGroup(String repositoryGroupId) {
 		sqlHelper.deleteById(repositoryGroupId, RepositoryGroup.class);
@@ -229,18 +226,59 @@ public class RepositoryService {
 
 		List<String> groupIds = sqlHelper.findPropertiesByQuery(new ConditionAndWrapper().eq(GroupUser::getUserId, userId), GroupUser.class, GroupUser::getGroupId);
 
-		List<RepositoryGroup> groups = sqlHelper.findListByQuery(new ConditionAndWrapper().in(RepositoryGroup::getGroupId, groupIds), RepositoryGroup.class);
-		for (RepositoryGroup repositoryGroup : groups) {
+		List<RepositoryGroup> repositoryGroups = sqlHelper.findListByQuery(new ConditionAndWrapper().in(RepositoryGroup::getGroupId, groupIds), RepositoryGroup.class);
+		for (RepositoryGroup repositoryGroup : repositoryGroups) {
 			RepositoryUser repositoryUser = new RepositoryUser();
 			repositoryUser.setUserId(userId);
 			repositoryUser.setRepositoryId(repositoryGroup.getRepositoryId());
 			repositoryUser.setPermission(repositoryGroup.getPermission());
 			repositoryUser.setPath(repositoryGroup.getPath());
 
+			addNoRepeat(list, repositoryUser);
+		}
+
+		addParentGroup(groupIds, list, userId);
+
+		return list;
+	}
+
+	private void addParentGroup(List<String> groupIds, List<RepositoryUser> list, String userId) {
+
+		List<String> parentGroupIds = sqlHelper.findPropertiesByQuery(new ConditionAndWrapper().in(GroupGroup::getSlaveGroupId, groupIds), GroupGroup.class, GroupGroup::getMasterGroupId);
+
+		if (parentGroupIds.size() > 0) {
+			List<RepositoryGroup> repositoryGroups = sqlHelper.findListByQuery(new ConditionAndWrapper().in(RepositoryGroup::getGroupId, parentGroupIds), RepositoryGroup.class);
+			for (RepositoryGroup repositoryGroup : repositoryGroups) {
+				RepositoryUser repositoryUser = new RepositoryUser();
+				repositoryUser.setUserId(userId);
+				repositoryUser.setRepositoryId(repositoryGroup.getRepositoryId());
+				repositoryUser.setPermission(repositoryGroup.getPermission());
+				repositoryUser.setPath(repositoryGroup.getPath());
+
+				addNoRepeat(list, repositoryUser);
+			}
+
+			addParentGroup(parentGroupIds, list, userId);
+		}
+	}
+
+	private void addNoRepeat(List<RepositoryUser> list, RepositoryUser repositoryUser) {
+		boolean hasRepeat = false;
+
+		for (RepositoryUser repositoryUserInList : list) {
+			if (repositoryUserInList.getUserId().equals(repositoryUser.getUserId()) //
+					&& repositoryUserInList.getRepositoryId().equals(repositoryUser.getRepositoryId())//
+					&& repositoryUserInList.getPath().equals(repositoryUser.getPath()) //
+					&& repositoryUserInList.getPermission().equals(repositoryUser.getPermission())) {
+				hasRepeat = true;
+				break;
+			}
+		}
+
+		if (!hasRepeat) {
 			list.add(repositoryUser);
 		}
 
-		return list;
 	}
 
 	public Boolean hasDir(String name) {

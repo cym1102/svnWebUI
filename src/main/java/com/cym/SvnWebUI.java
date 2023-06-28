@@ -1,7 +1,7 @@
 package com.cym;
 
 import org.noear.solon.Solon;
-import org.noear.solon.schedule.annotation.EnableScheduling;
+import org.noear.solon.scheduling.annotation.EnableScheduling;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -25,7 +25,8 @@ public class SvnWebUI {
 				cfg.setSetting("classic_compatible", "true");
 				cfg.setSetting("number_format", "0.##");
 			});
-
+			
+			app.router().caseSensitive(true);
 		});
 	}
 }

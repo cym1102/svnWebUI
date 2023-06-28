@@ -26,7 +26,6 @@ Windows上倒是有不错的svn服务端软件即VisualSVN, 但一来Windows服�
 
 经历几次失败的图形界面配置后, 萌生了写一个现代svn服务端管理软件, 让svn的服务端管理有gitea一般的轻松体验的想法.
 
-
 #### 技术说明
 
 本项目是基于solon的java项目, 数据库使用h2, 因此服务器上不需要安装任何数据库, 同时也兼容使用mysql
@@ -77,9 +76,10 @@ Path : JDK安装目录\bin
 2.下载最新版发行包jar
 
 ```
-Linux: wget -O /home/svnWebUI/svnWebUI.jar http://file.nginxwebui.cn/svnWebUI-1.7.4.jar
+Linux:  mkdir /home/svnWebUI/
+        wget -O /home/svnWebUI/svnWebUI.jar http://file.nginxwebui.cn/svnWebUI-1.8.1.jar
 
-Windows: 直接使用浏览器下载 http://file.nginxwebui.cn/svnWebUI-1.7.4.jar
+Windows: 直接使用浏览器下载 http://file.nginxwebui.cn/svnWebUI-1.8.1.jar 到 D:/home/svnWebUI/svnWebUI.jar
 ```
 
 有新版本只需要修改路径中的版本即可
@@ -179,7 +179,7 @@ Type=simple
 User=root
 Group=root
 WorkingDirectory=/home/svnWebUI
-ExecStart=/usr/bin/java -jar /home/svnWebUI/svnWebUI.jar
+ExecStart=/usr/bin/java -jar -Dfile.encoding=UTF-8 /home/svnWebUI/svnWebUI.jar
 Restart=always
  
 [Install]

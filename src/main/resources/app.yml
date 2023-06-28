@@ -1,8 +1,9 @@
 server:
   port: 6060
   request:
-    maxBodySize: 2048mb
-    maxHeaderSize: 20mb
+    maxBodySize: 200kb
+    maxFileSize: 2048mb
+    maxHeaderSize: 200kb
   
 project:
   sqlPrint: false
@@ -11,10 +12,22 @@ project:
   findPass: false
   
 solon:
-  app.name: svnWebUI
-  view.mapping.html: FreemarkerRender
+  app: 
+    name: svnWebUI
+  view:
+    mapping:
+      html: FreemarkerRender
   logging:
-    "io.undertow":
+    logger:
+      "io.undertow":
+        level: "WARN"
+      "org.xnio":
+       level: "WARN"
+      "o.xnio":
+        level: "WARN"
+      "com.zaxxer.hikari":
+        level: "WARN"
+      "org.jboss":
         level: "WARN"
     appender:
       file:

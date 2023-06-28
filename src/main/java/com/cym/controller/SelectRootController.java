@@ -28,7 +28,7 @@ import cn.hutool.core.util.StrUtil;
 
 @Controller
 @Mapping("/adminPage/selectRoot")
-public class SelectRootController extends BaseController{
+public class SelectRootController extends BaseController {
 	@Inject
 	SvnAdminUtils svnAdminUtils;
 	@Inject
@@ -66,8 +66,23 @@ public class SelectRootController extends BaseController{
 			userName = svnAdminUtils.adminUserName;
 			userPass = svnAdminUtils.adminUserPass;
 		}
-
+		svnUrl = restore(svnUrl);
 		pathUtls.createPath(svnUrl, dir, userName, userPass);
+		return renderSuccess();
+	}
+
+	@Mapping("upload")
+	public JsonResult upload(String svnUrl, String dir, String filePath) {
+		User user = getLoginUser();
+
+		String userName = user.getName();
+		String userPass = user.getPass();
+		if (user.getType() == 1) {
+			userName = svnAdminUtils.adminUserName;
+			userPass = svnAdminUtils.adminUserPass;
+		}
+		svnUrl = restore(svnUrl);
+		pathUtls.upload(svnUrl, dir, filePath, userName, userPass);
 		return renderSuccess();
 	}
 
@@ -81,11 +96,24 @@ public class SelectRootController extends BaseController{
 			userName = svnAdminUtils.adminUserName;
 			userPass = svnAdminUtils.adminUserPass;
 		}
-
+		svnUrl = restore(svnUrl);
 		pathUtls.removePath(svnUrl, dir, userName, userPass);
 		return renderSuccess();
 	}
-	
+
+	// 将多余的路径去除
+	private String restore(String svnUrl) {
+
+		String[] svnUrls = svnUrl.split("/");
+
+		String rsUrl = "";
+		for (int i = 0; i <= 3; i++) {
+			rsUrl += svnUrls[i] + "/";
+		}
+
+		return rsUrl;
+	}
+
 	@Mapping("download")
 	public void download(String url, Context context) throws SVNException, IOException {
 		User user = getLoginUser();

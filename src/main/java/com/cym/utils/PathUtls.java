@@ -1,5 +1,6 @@
 package com.cym.utils;
 
+import java.io.File;
 import java.net.URI;
 import java.net.URISyntaxException;
 import java.util.ArrayList;
@@ -15,6 +16,7 @@ import org.noear.solon.core.handle.Context;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.tmatesoft.svn.core.ISVNDirEntryHandler;
+import org.tmatesoft.svn.core.SVNDepth;
 import org.tmatesoft.svn.core.SVNDirEntry;
 import org.tmatesoft.svn.core.SVNException;
 import org.tmatesoft.svn.core.SVNLogEntry;
@@ -53,6 +55,22 @@ public class PathUtls {
 	HomeConfig homeConfig;
 	@Inject
 	SvnAdminUtils svnAdminUtils;
+
+	public void upload(String svnUrl, String dir, String filePath, String userName, String userPass) {
+		try {
+			svnUrl = transLocalhost(svnUrl);
+			ISVNAuthenticationManager authManager = SVNWCUtil.createDefaultAuthenticationManager(userName, userPass.toCharArray());
+
+			DefaultSVNOptions options = SVNWCUtil.createDefaultOptions(true);
+			SVNClientManager clientManager = SVNClientManager.newInstance(options, authManager);
+
+			File file = new File(filePath);
+			clientManager.getCommitClient().doImport(file, SVNURL.parseURIEncoded(svnUrl + "/" + dir + "/" + file.getName()), "上传文件", null, false, false, SVNDepth.INFINITY);
+
+		} catch (SVNException e) {
+			logger.error(e.getMessage(), e);
+		}
+	}
 
 	public void createPath(String svnUrl, String dir, String userName, String userPass) {
 		try {
@@ -187,4 +205,5 @@ public class PathUtls {
 		}
 		return "localhost";
 	}
+
 }

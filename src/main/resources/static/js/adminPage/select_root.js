@@ -32,6 +32,71 @@ var rootSelect = {
 	}
 }
 
+var load;
+$(function() {
+	layui.use('upload', function() {
+		var upload = layui.upload;
+		upload.render({
+			elem: '#upload',
+			url: '/adminPage/main/upload',
+			accept: 'file',
+			before: function(res) {
+				load = layer.load();
+			},
+			done: function(res) {
+				layer.close(load);
+				// 上传完毕回调
+				if (res.success) {
+					sendFile(res.obj);
+				}
+			},
+			error: function() {
+				layer.close(load);
+				// 请求异常回调
+			}
+		});
+	});
+})
+
+function sendFile(filePath) {
+	// 获取选中的路径
+	var dir = "/";
+	var nodes = rootSelect.zTreeObj.getSelectedNodes();
+	if (nodes.length > 0) {
+		var url = decodeURIComponent(nodes[0].id);
+
+		var relativePaths = [];
+		var urls = url.split("/");
+		for (let i = 4; i < urls.length; i++) {
+			relativePaths.push(urls[i]);
+		}
+
+		dir = relativePaths.join("/") + "/";
+	}
+
+	$.ajax({
+		type: 'POST',
+		url: ctx + '/adminPage/selectRoot/upload',
+		data: {
+			filePath: filePath,
+			svnUrl: svnUrl,
+			dir: dir
+		},
+		dataType: 'json',
+		success: function(data) {
+			if (data.success) {
+				rootSelect.load();
+			} else {
+				layer.msg(data.msg);
+			}
+		},
+		error: function() {
+			layer.alert("出错了,请联系技术人员!");
+		}
+	});
+}
+
+
 function cancelSelect() {
 	rootSelect.zTreeObj.cancelSelectedNode();
 }
@@ -50,11 +115,12 @@ function selectRoot(id, repositoryId) {
 			if (data.success) {
 				$("#selectOver").show();
 				$("#selectRootOver").show();
+				$("#uploadDiv").show();
 				$("#mkdir").show();
 				$("#rmfile").show();
 				$("#download").hide();
 				$("#rmfile").hide();
-				
+
 				showTree(data.obj.url, true);
 			} else {
 				layer.msg(data.msg);
@@ -71,11 +137,13 @@ function seeFile(url, permission) {
 	$("#selectRootOver").hide();
 	$("#download").show();
 	$("#rmfile").show();
-	
+
 	if (permission == 'rw') {
+		$("#uploadDiv").show();
 		$("#mkdir").show();
 		$("#rmfile").show();
 	} else {
+		$("#uploadDiv").hide();
 		$("#mkdir").hide();
 		$("#rmfile").hide();
 	}

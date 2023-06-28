@@ -1,4 +1,4 @@
-var load;
+//var load;
 
 $(function() {
 	form.on('switch(enable)', function(data) {
@@ -20,6 +20,7 @@ $(function() {
 		});
 	});
 	
+	/*
 	layui.use('upload', function() {
 		var upload = layui.upload;
 		upload.render({
@@ -47,7 +48,7 @@ $(function() {
 		});
 
 	});
-
+	*/
 })
 
 
