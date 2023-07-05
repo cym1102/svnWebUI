@@ -38,21 +38,10 @@ public class MainController extends BaseController {
 	@Mapping("/adminPage/main/upload")
 	public JsonResult upload(Context context, UploadedFile file) {
 		try {
-			File temp = new File(FileUtil.getTmpDir() + "/" + file.getName().replace(" ", "_"));
+			File temp = new File(FileUtil.getTmpDir() + "/" + file.getName());
 			file.transferTo(temp);
 
-			// 移动文件
-			File dest = new File(homeConfig.home + "temp/" + file.getName().replace(" ", "_")); 
-			FileUtil.move(temp, dest, true);
-
-			String path = dest.getPath();
-
-			if (SystemTool.isWindows() && !path.contains(":")) {
-				// 获取盘符
-				path = (JarUtil.getCurrentFilePath().split(":")[0] + ":" + path).replace("/", "\\");
-			}
-
-			return renderSuccess(path);
+			return renderSuccess(temp.getPath().replace("\\", "/"));
 		} catch (IllegalStateException | IOException e) {
 			logger.error(e.getMessage(), e);
 		}
