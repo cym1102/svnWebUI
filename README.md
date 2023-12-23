@@ -77,9 +77,9 @@ Path : JDK安装目录\bin
 
 ```
 Linux:  mkdir /home/svnWebUI/
-        wget -O /home/svnWebUI/svnWebUI.jar http://file.nginxwebui.cn/svnWebUI-1.8.1.jar
+        wget -O /home/svnWebUI/svnWebUI.jar http://file.nginxwebui.cn/svnWebUI-1.8.2.jar
 
-Windows: 直接使用浏览器下载 http://file.nginxwebui.cn/svnWebUI-1.8.1.jar 到 D:/home/svnWebUI/svnWebUI.jar
+Windows: 直接使用浏览器下载 http://file.nginxwebui.cn/svnWebUI-1.8.2.jar 到 D:/home/svnWebUI/svnWebUI.jar
 ```
 
 有新版本只需要修改路径中的版本即可
@@ -135,7 +135,7 @@ docker pull cym1102/svnwebui:latest
 3.启动容器: 
 
 ```
-docker run -itd -v /home/svnWebUI:/home/svnWebUI --privileged=true -p 6060:6060 -p 3690:3690 cym1102/svnwebui:latest
+docker run -itd -v /home/svnWebUI:/home/svnWebUI -e BOOT_OPTIONS="--server.port=6060" --privileged=true -p 6060:6060 -p 3690:3690 cym1102/svnwebui:latest
 ```
 
 注意: 
@@ -144,6 +144,7 @@ docker run -itd -v /home/svnWebUI:/home/svnWebUI --privileged=true -p 6060:6060 
 
 2. 容器需要映射路径/home/svnWebUI:/home/svnWebUI, 此路径下存放项目所有数据文件, 包括数据库, 配置文件, 日志等, 升级镜像时, 此目录可保证项目数据不丢失. 请注意备份.
 
+3. -e BOOT_OPTIONS可以填写和jar启动一样的参数
 
 #### 编译说明
 

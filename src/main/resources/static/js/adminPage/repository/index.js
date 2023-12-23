@@ -53,7 +53,7 @@ $(function() {
 
 
 function search() {
-	$("input[name='pageNum']").val(1);
+	$("input[name='curr']").val(1);
 	$("#searchForm").submit();
 }
 

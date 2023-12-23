@@ -26,10 +26,10 @@ public class MainController extends BaseController {
 	static Logger logger = LoggerFactory.getLogger(MainController.class);
 	@Inject
 	InitConfig projectConfig;
-	
+
 	@Inject
 	HomeConfig homeConfig;
-	
+
 	@Mapping("/")
 	public void jump(Context ctx) {
 		ctx.redirect("/adminPage/login");
@@ -38,7 +38,7 @@ public class MainController extends BaseController {
 	@Mapping("/adminPage/main/upload")
 	public JsonResult upload(Context context, UploadedFile file) {
 		try {
-			File temp = new File(FileUtil.getTmpDir() + "/" + file.getName());
+			File temp = new File(FileUtil.getTmpDir() + File.separator + file.getName().replace("..", ""));
 			file.transferTo(temp);
 
 			return renderSuccess(temp.getPath().replace("\\", "/"));
