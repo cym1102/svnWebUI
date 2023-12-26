@@ -36,11 +36,13 @@ public class HttpdUtils {
 	}
 
 	public void start() {
-		RuntimeUtil.exec("httpd -k start");
+		String rs = RuntimeUtil.execForStr("httpd -k start");
+		logger.error("启动结果:" + rs);
 	}
 
 	public void stop() {
 		RuntimeUtil.exec("pkill httpd");
+		FileUtil.del("/run/apache2/httpd.pid"); // 删除pid保证下次重启能正常启动
 	}
 
 }
