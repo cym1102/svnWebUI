@@ -3,6 +3,7 @@ package com.cym.service;
 import java.util.ArrayList;
 import java.util.List;
 
+import cn.hutool.core.text.CharSequenceUtil;
 import org.noear.solon.annotation.Inject;
 import org.noear.solon.aspect.annotation.Service;
 
@@ -29,7 +30,8 @@ public class GroupService {
 		ConditionAndWrapper conditionAndWrapper = new ConditionAndWrapper();
 
 		if (StrUtil.isNotEmpty(keywords)) {
-			conditionAndWrapper.and(new ConditionOrWrapper().like(Group::getName, keywords));
+			String trimKeywords = CharSequenceUtil.trim(keywords,0);
+			conditionAndWrapper.and(new ConditionOrWrapper().like(Group::getName, trimKeywords));
 		}
 
 		Page<Group> pageResp = sqlHelper.findPage(conditionAndWrapper, page, Group.class);

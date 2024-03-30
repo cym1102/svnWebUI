@@ -5,6 +5,7 @@ import java.io.InputStream;
 import java.util.ArrayList;
 import java.util.List;
 
+import cn.hutool.core.text.CharSequenceUtil;
 import org.noear.solon.annotation.Inject;
 import org.noear.solon.aspect.annotation.Service;
 import org.slf4j.Logger;
@@ -45,7 +46,8 @@ public class RepositoryService {
 		ConditionAndWrapper conditionAndWrapper = new ConditionAndWrapper();
 
 		if (StrUtil.isNotEmpty(keywords)) {
-			conditionAndWrapper.and(new ConditionOrWrapper().like(Repository::getName, keywords));
+			String trimKeywords = CharSequenceUtil.trim(keywords,0);
+			conditionAndWrapper.and(new ConditionOrWrapper().like(Repository::getName, trimKeywords));
 		}
 
 		Page pageResp = sqlHelper.findPage(conditionAndWrapper, page, Repository.class);

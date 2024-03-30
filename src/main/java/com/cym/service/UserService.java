@@ -1,5 +1,6 @@
 package com.cym.service;
 
+import cn.hutool.core.text.CharSequenceUtil;
 import org.noear.solon.annotation.Inject;
 import org.noear.solon.aspect.annotation.Service;
 
@@ -33,7 +34,8 @@ public class UserService {
 		ConditionAndWrapper conditionAndWrapper = new ConditionAndWrapper();
 
 		if (StrUtil.isNotEmpty(keywords)) {
-			conditionAndWrapper.and(new ConditionOrWrapper().like(User::getName, keywords));
+			String trimKeyWords = CharSequenceUtil.trim(keywords,0);
+			conditionAndWrapper.and(new ConditionOrWrapper().like(User::getName, trimKeyWords).like(User::getTrueName, trimKeyWords));
 		}
 
 		Page<User> pageResp = sqlHelper.findPage(conditionAndWrapper, page, User.class);

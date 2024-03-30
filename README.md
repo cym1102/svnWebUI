@@ -20,7 +20,7 @@ QQ技术交流群2: 560797506
 
 svnWebUI是一款图形化管理Subversion的配置得工具, 虽说现在已进入git的时代, 但svn依然有不少使用场景, 比如公司内的文档管理与共享, svn的概念比git的少很多, 非常适合非程序员使用.
 
-但众所周知svn的Linux服务端软件即Subversion的用户和权限配置全部依靠手写配置文件完成, 非常繁琐且不便, 已有的几款图像界面软件已经非常古老, 安装麻烦而且依赖环境非常古老, 比如csvn还使用python2作为运行环境.
+但众所周知svn的Linux服务端软件即Subversion的用户和权限配置全部依靠手写配置文件完成, 非常繁琐且不便, 已有的几款图像界面软件已经非常古老, 安装麻烦而且依赖环境非常古老, 比如csvn还使用python2作为环境变量.
 
 Windows上倒是有不错的svn服务端软件即VisualSVN, 但一来Windows服务器少之又少, 第二VisualSVN没有web界面, 每次配置需要开启远程桌面, 安全性不高.
 
@@ -44,7 +44,7 @@ Windows上倒是有不错的svn服务端软件即VisualSVN, 但一来Windows服�
 
 #### 安装说明
 
-1.安装java运行环境和Subversion
+1.安装java环境和Subversion
 
 Ubuntu:
 
@@ -66,7 +66,7 @@ Windows:
 ```
 下载JDK安装包 https://www.oracle.com/java/technologies/downloads/
 下载VisualSVN https://www.visualsvn.com/server/download
-配置JAVA运行环境 
+配置JAVA环境变量 
 JAVA_HOME : JDK安装目录
 Path : JDK安装目录\bin
 重启电脑
