@@ -35,12 +35,6 @@ Windows上倒是有不错的svn服务端软件即VisualSVN, 但一来Windows服�
 使用docker版则无需安装任何其他软件，使用http:\\\\协议进行checkout。
 
 
-```
-演示地址: http://svn.nginxwebui.cn:6060
-用户名: admin
-密码: admin
-```
-
 
 #### 安装说明
 
@@ -64,8 +58,9 @@ yum install subversion
 Windows:
 
 ```
-下载JDK安装包 https://www.oracle.com/java/technologies/downloads/
-下载VisualSVN https://www.visualsvn.com/server/download
+下载并安装JDK安装包 https://www.oracle.com/java/technologies/downloads/
+下载并安装VisualSVN https://www.visualsvn.com/server/download
+在服务管理器中停止并禁用VisualSVN相关服务
 配置JAVA环境变量 
 JAVA_HOME : JDK安装目录
 Path : JDK安装目录\bin
@@ -77,9 +72,9 @@ Path : JDK安装目录\bin
 
 ```
 Linux:  mkdir /home/svnWebUI/
-        wget -O /home/svnWebUI/svnWebUI.jar http://file.nginxwebui.cn/svnWebUI-1.8.3.jar
+        wget -O /home/svnWebUI/svnWebUI.jar http://file.nginxwebui.cn/svnWebUI-1.8.4.jar
 
-Windows: 直接使用浏览器下载 http://file.nginxwebui.cn/svnWebUI-1.8.3.jar 到 D:/home/svnWebUI/svnWebUI.jar
+Windows: 直接使用浏览器下载 http://file.nginxwebui.cn/svnWebUI-1.8.4.jar 到 D:/home/svnWebUI/svnWebUI.jar
 ```
 
 有新版本只需要修改路径中的版本即可

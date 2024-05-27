@@ -2,6 +2,7 @@ package com.cym.service;
 
 import java.io.File;
 import java.io.InputStream;
+import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -46,7 +47,7 @@ public class RepositoryService {
 		ConditionAndWrapper conditionAndWrapper = new ConditionAndWrapper();
 
 		if (StrUtil.isNotEmpty(keywords)) {
-			String trimKeywords = CharSequenceUtil.trim(keywords,0);
+			String trimKeywords = CharSequenceUtil.trim(keywords, 0);
 			conditionAndWrapper.and(new ConditionOrWrapper().like(Repository::getName, trimKeywords));
 		}
 
@@ -82,17 +83,34 @@ public class RepositoryService {
 		if (!FileUtil.exist(dir + File.separator + "db")) {
 			ClassPathResource resource = new ClassPathResource("file/repo.zip");
 			InputStream inputStream = resource.getStream();
-			File temp = new File(homeConfig.home + "temp" + File.separator + "repo.zip");
-			FileUtil.writeFromStream(inputStream, temp);
+//			File temp = new File(homeConfig.home + "temp" + File.separator + "repo.zip");
+//			FileUtil.writeFromStream(inputStream, temp);
 			FileUtil.mkdir(dir);
-			ZipUtil.unzip(temp, new File(dir));
-			FileUtil.del(temp);
+			ZipUtil.unzip(inputStream, new File(dir), StandardCharsets.UTF_8);
+//			FileUtil.del(temp);
 		}
 
 		Repository repository = new Repository();
 		repository.setName(name);
 		sqlHelper.insertOrUpdate(repository);
 	}
+	
+
+	public void copyRepoOver(String copyName, String fromCopyId) {
+		// 复制仓库
+		Repository repositoryFrom = sqlHelper.findById(fromCopyId, Repository.class);
+		String fromDir = homeConfig.home + "repo" + File.separator + repositoryFrom.getName();
+		
+		String toDir = homeConfig.home + "repo" + File.separator + copyName;
+		
+		FileUtil.copyContent(new File(fromDir), new File(toDir), true);
+		
+		Repository repository = new Repository();
+		repository.setName(copyName);
+		sqlHelper.insertOrUpdate(repository);
+	}
+
+	
 
 	public List<UserExt> getUserExts(String id) {
 		List<RepositoryUser> repositoryUsers = sqlHelper.findListByQuery(new ConditionAndWrapper().ne(RepositoryUser::getPermission, "n").eq(RepositoryUser::getRepositoryId, id),
@@ -321,6 +339,32 @@ public class RepositoryService {
 	public List<Repository> getListByAllPermission() {
 
 		return sqlHelper.findListByQuery(new ConditionOrWrapper().eq(Repository::getAllPermission, "r").eq(Repository::getAllPermission, "rw"), Repository.class);
+	}
+
+	public void copyPermission(String toId, String fromId) {
+		Repository repositoryFrom = sqlHelper.findById(fromId, Repository.class);
+		Repository repositoryTo = sqlHelper.findById(toId, Repository.class);
+
+		// 删除目标权限
+		sqlHelper.deleteByQuery(new ConditionAndWrapper().eq(RepositoryGroup::getRepositoryId, toId), RepositoryGroup.class);
+		sqlHelper.deleteByQuery(new ConditionAndWrapper().eq(RepositoryUser::getRepositoryId, toId), RepositoryUser.class);
+		// 全局权限
+		repositoryTo.setAllPermission(repositoryFrom.getAllPermission());
+		sqlHelper.updateById(repositoryTo);
+
+		// 插入其他权限
+		List<RepositoryGroup> repositoryGroups = sqlHelper.findListByQuery(new ConditionAndWrapper().eq(RepositoryGroup::getRepositoryId, fromId), RepositoryGroup.class);
+		for (RepositoryGroup repositoryGroup : repositoryGroups) {
+			repositoryGroup.setRepositoryId(toId);
+			sqlHelper.insert(repositoryGroup);
+		}
+		
+		List<RepositoryUser> repositoryUsers = sqlHelper.findListByQuery(new ConditionAndWrapper().eq(RepositoryUser::getRepositoryId, fromId), RepositoryUser.class);
+		for (RepositoryUser repositoryUser : repositoryUsers) {
+			repositoryUser.setRepositoryId(toId);
+			sqlHelper.insert(repositoryUser);
+		}
+
 	}
 
 }

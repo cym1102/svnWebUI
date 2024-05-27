@@ -81,6 +81,9 @@ public class UserController extends BaseController {
 
 	@Mapping("importOver")
 	public JsonResult importOver(String dirTemp) {
+		if (!dirTemp.replace("\\", "/").contains(FileUtil.getTmpDir().getPath().replace("\\", "/"))) {
+			return renderError("文件路径不合法");
+		}
 
 		List<String> lines = FileUtil.readLines(dirTemp, Charset.forName("UTF-8"));
 		for (String line : lines) {

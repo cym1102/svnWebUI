@@ -1,5 +1,3 @@
-//var load;
-
 $(function() {
 	form.on('switch(enable)', function(data) {
 
@@ -19,36 +17,7 @@ $(function() {
 			}
 		});
 	});
-	
-	/*
-	layui.use('upload', function() {
-		var upload = layui.upload;
-		upload.render({
-			elem: '#upload',
-			url: '/adminPage/main/upload',
-			accept: 'file',
-			before: function(res) {
-				load = layer.load();
-			},
-			done: function(res) {
-				layer.close(load);
-				// 上传完毕回调
-				if (res.success) {
-					var path = res.obj.split('/');
 
-					$("#fileName").html(path[path.length - 1]);
-					$("#dirTemp").val(res.obj);
-				}
-
-			},
-			error: function() {
-				layer.close(load);
-				// 请求异常回调
-			}
-		});
-
-	});
-	*/
 })
 
 
@@ -246,56 +215,6 @@ function allPermissionOver() {
 
 }
 
-/*
-var index;
-function loadBak(id, name) {
-	$("#loadId").val(id);
-	$("#repoName").html(name);
-
-	index = layer.open({
-		type: 1,
-		title: "导入备份",
-		area: ['600px', '400px'], // 宽高
-		content: $('#loadDiv')
-	});
-}
-
-function loadOver() {
-	if ($("#dirTemp").val() == '') {
-		layer.alert("未选择备份文件");
-		return;
-	}
-	showLoad();
-	$.ajax({
-		type: 'POST',
-		url: ctx + '/adminPage/repository/loadOver',
-		data: $('#loadForm').serialize(),
-		dataType: 'json',
-		success: function(data) {
-			if (data.success) {
-				closeLoad();
-				layer.close(index);
-				layer.open({
-					type: 0,
-					area: ['800px', '600px'],
-					content: data.obj
-				});
-			} else {
-				layer.msg(data.msg);
-			}
-
-
-		},
-		error: function() {
-			layer.alert("出错了,请联系技术人员!");
-		}
-	});
-}
-
-function dumpBak(id) {
-	window.open(ctx + '/adminPage/repository/dumpOver?id=' + id);
-}
-*/
 
 function editMark(id) {
 	$.ajax({
@@ -327,7 +246,7 @@ function editMark(id) {
 }
 
 
-function editMarkOver(){
+function editMarkOver() {
 	$.ajax({
 		type: 'POST',
 		url: ctx + '/adminPage/repository/editMark',
@@ -349,11 +268,98 @@ function editMarkOver(){
 	});
 }
 
-function seeLog(url){
+function seeLog(url) {
 	layer.open({
 		type: 2,
 		title: '查看日志 ' + url,
 		area: ['1000px', '630px;'],
 		content: ctx + "/adminPage/seeLog?url=" + url
 	});
+}
+
+function copyPermission(id, name) {
+	$("#toId").val(id);
+	$("#toName").html(name);
+	
+	layer.open({
+		type: 1,
+		title: '权限拷贝',
+		area: ['500px', '400px;'],
+		content: $('#copyPermissionDiv')
+	});
+}
+
+function copyPermissionOver(){
+	if($("#fromId").val() == null){
+		layer.msg("来源仓库未选择");
+		return;
+	}
+	showLoad();
+	$.ajax({
+		type: 'POST',
+		url: ctx + '/adminPage/repository/copyPermissionOver',
+		data: {
+			toId: $("#toId").val(),
+			fromId: $("#fromId").val()
+		},
+		dataType: 'json',
+		success: function(data) {
+			closeLoad();
+			if (data.success) {
+				location.reload();
+			} else {
+				layer.msg(data.msg);
+			}
+		},
+		error: function() {
+			closeLoad();
+			layer.alert("出错了,请联系技术人员!");
+		}
+	});
+	
+}
+
+function copyRepo(id, name){
+	$("#copyName").val("");
+	
+	layer.open({
+		type: 1,
+		title: '复制仓库',
+		area: ['500px', '400px;'],
+		content: $('#copyRepoDiv')
+	});
+}
+
+function copyRepoOver(){
+	if($("#copyName").val() == ''){
+		layer.msg("仓库名未填写");
+		return;
+	}
+	if($("#fromCopyId").val() == null){
+		layer.msg("来源仓库未选择");
+		return;
+	}
+	showLoad();
+	$.ajax({
+		type: 'POST',
+		url: ctx + '/adminPage/repository/copyRepoOver',
+		data: {
+			copyName: $("#copyName").val(),
+			fromCopyId: $("#fromCopyId").val()
+		},
+		dataType: 'json',
+		success: function(data) {
+			closeLoad();
+			if (data.success) {
+				location.reload();
+			} else {
+				layer.msg(data.msg);
+			}
+		},
+		error: function() {
+			closeLoad();
+			layer.alert("出错了,请联系技术人员!");
+		}
+	});
+	
 }

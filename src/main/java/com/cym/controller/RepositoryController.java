@@ -76,11 +76,12 @@ public class RepositoryController extends BaseController {
 				repositoryExt.setMark(repositoryExt.getMark().replace("\n", "<br>").replace(" ", "&nbsp;"));
 			}
 		}
-
+		
 		ModelAndView modelAndView = new ModelAndView("/adminPage/repository/index.html");
 		modelAndView.put("keywords", keywords);
 		modelAndView.put("page", pageExt);
 		modelAndView.put("home", homeConfig.home);
+		modelAndView.put("repositoryList" ,sqlHelper.findAll(Repository.class)); 
 		return modelAndView;
 	}
 
@@ -106,6 +107,9 @@ public class RepositoryController extends BaseController {
 		configService.refresh();
 		return renderSuccess();
 	}
+	
+	
+
 
 	@Mapping("detail")
 	public JsonResult detail(String id) {
@@ -308,4 +312,39 @@ public class RepositoryController extends BaseController {
 		return renderSuccess();
 	}
 
+	@Mapping("copyPermissionOver")
+	public JsonResult copyPermissionOver(String toId, String fromId) {
+		if(toId.equals(fromId)) {
+			return renderError("目标仓库与来源仓库相同");
+		}
+		
+		repositoryService.copyPermission(toId, fromId);
+		
+		configService.refresh();
+		return renderSuccess();
+	}
+	
+	
+	@Mapping("copyRepoOver")
+	public JsonResult copyRepoOver(String copyName, String fromCopyId) {
+		if (StrUtil.isEmpty(copyName)) {
+			return renderError("仓库名为空");
+		}
+		if (isSpecialChar(copyName)) {
+			return renderError("名称包含特殊字符");
+		}
+		Repository repositoryOrg = repositoryService.getByName(copyName, null);
+		if (repositoryOrg != null) {
+			return renderError("此仓库名已存在");
+		}
+
+		if (repositoryService.hasDir(copyName)) {
+			return renderError("该仓库文件夹已存在, 请使用扫描功能添加");
+		}
+		
+		repositoryService.copyRepoOver(copyName, fromCopyId);
+
+		configService.refresh();
+		return renderSuccess();
+	}
 }
