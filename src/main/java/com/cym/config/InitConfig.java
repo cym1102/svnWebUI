@@ -5,7 +5,10 @@ import java.io.File;
 import java.io.IOException;
 import java.nio.charset.Charset;
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
+import java.util.Set;
 
 import org.noear.solon.annotation.Component;
 import org.noear.solon.annotation.Init;
@@ -20,13 +23,19 @@ import com.cym.model.User;
 import com.cym.service.ConfigService;
 import com.cym.service.SettingService;
 import com.cym.service.UserService;
+import com.cym.sqlhelper.config.DataSourceEmbed;
+import com.cym.sqlhelper.config.Table;
+import com.cym.sqlhelper.utils.ConditionAndWrapper;
 import com.cym.sqlhelper.utils.SqlHelper;
 import com.cym.utils.FilePermissionUtil;
 import com.cym.utils.HttpdUtils;
 import com.cym.utils.SystemTool;
+import com.zaxxer.hikari.HikariConfig;
+import com.zaxxer.hikari.HikariDataSource;
 
 import cn.hutool.core.io.FileUtil;
 import cn.hutool.core.io.resource.ClassPathResource;
+import cn.hutool.core.util.ClassUtil;
 import cn.hutool.core.util.RuntimeUtil;
 
 @Component
@@ -42,6 +51,10 @@ public class InitConfig {
 	SettingService settingService;
 	@Inject("${project.findPass}")
 	Boolean findPass;
+	@Inject("${project.beanPackage}")
+	String packageName;
+	@Inject
+	DataSourceEmbed dataSourceEmbed;
 	@Inject
 	SqlHelper sqlHelper;
 	@Inject
@@ -55,6 +68,11 @@ public class InitConfig {
 
 	@Init
 	public void init() {
+		// h2转sqlite
+		if (FileUtil.exist(homeConfig.home + "h2.mv.db")) {
+			transferSql();
+		}
+				
 		// 打印密码
 		if (findPass) {
 			List<User> users = sqlHelper.findAll(User.class);
@@ -131,6 +149,59 @@ public class InitConfig {
 			logger.info(stringBuilder.toString());
 		} catch (IOException e) {
 			logger.info(e.getMessage(), e);
+		}
+	}
+	
+	private void transferSql() {
+		// 关闭sqlite连接
+		dataSourceEmbed.getDataSource().close();
+		// 建立h2连接
+		HikariConfig dbConfig = new HikariConfig();
+		dbConfig.setJdbcUrl("jdbc:h2:" + homeConfig.home + "h2");
+		dbConfig.setUsername("sa");
+		dbConfig.setPassword("");
+		dbConfig.setMaximumPoolSize(1);
+		HikariDataSource dataSourceH2 = new HikariDataSource(dbConfig);
+		dataSourceEmbed.setDataSource(dataSourceH2);
+		// 读取全部数据
+		Map<String, List<?>> map = readAll();
+
+		// 关闭h2连接
+		dataSourceH2.close();
+
+		// 重新建立sqlite连接
+		dataSourceEmbed.init();
+
+		// 导入数据
+		insertAll(map);
+
+		// 重命名h2文件
+		FileUtil.rename(new File(homeConfig.home + "h2.mv.db"), homeConfig.home + "h2.mv.db.bak", true);
+	}
+	
+	private Map<String, List<?>> readAll() {
+		Map<String, List<?>> map = new HashMap<>();
+
+		Set<Class<?>> set = ClassUtil.scanPackage(packageName);
+		for (Class<?> clazz : set) {
+			Table table = clazz.getAnnotation(Table.class);
+			if (table != null) {
+				map.put(clazz.getName(), sqlHelper.findAll(clazz));
+			}
+		}
+
+		return map;
+	}
+
+	private void insertAll(Map<String, List<?>> map) {
+		try {
+			for (String key : map.keySet()) {
+				sqlHelper.deleteByQuery(new ConditionAndWrapper(), Class.forName(key));
+
+				sqlHelper.insertAll(map.get(key));
+			}
+		} catch (Exception e) {
+			logger.error(e.getMessage(), e);
 		}
 	}
 }

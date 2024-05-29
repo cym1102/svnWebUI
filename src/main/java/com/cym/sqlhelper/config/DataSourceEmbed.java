@@ -23,17 +23,19 @@ public class DataSourceEmbed {
 	@Inject("${database.password}")
 	String password;
 
-	DataSource dataSource;
+	HikariDataSource dataSource;
 
 	@Init
 	public void init() {
 		if (databaseType.equalsIgnoreCase("sqlite") || databaseType.equalsIgnoreCase("h2")) {
-			String dbPath = homeConfig.home + "h2";
+			
+			// 建立新的sqlite数据源
 			HikariConfig dbConfig = new HikariConfig();
-			dbConfig.setJdbcUrl(("jdbc:h2:" + dbPath));
-			dbConfig.setUsername("sa");
+			dbConfig.setJdbcUrl(("jdbc:sqlite:" + homeConfig.home + "sqlite.db"));
+			dbConfig.setUsername("");
 			dbConfig.setPassword("");
 			dbConfig.setMaximumPoolSize(1);
+			dbConfig.setDriverClassName("org.sqlite.JDBC");
 			dataSource = new HikariDataSource(dbConfig);
 		} else if (databaseType.equalsIgnoreCase("mysql")) {
 			HikariConfig dbConfig = new HikariConfig();
@@ -46,8 +48,12 @@ public class DataSourceEmbed {
 		}
 	}
 
-	public DataSource getDataSource() {
+	public HikariDataSource getDataSource() {
 		return dataSource;
+	}
+
+	public void setDataSource(HikariDataSource dataSource) {
+		this.dataSource = dataSource;
 	}
 
 }
