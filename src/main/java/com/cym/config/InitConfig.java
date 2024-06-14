@@ -72,7 +72,7 @@ public class InitConfig {
 		if (FileUtil.exist(homeConfig.home + "h2.mv.db")) {
 			transferSql();
 		}
-				
+
 		// 打印密码
 		if (findPass) {
 			List<User> users = sqlHelper.findAll(User.class);
@@ -121,7 +121,7 @@ public class InitConfig {
 
 		// 刷新配置文件
 		configService.refresh();
-		
+
 		// 展示logo
 		showLogo();
 
@@ -151,7 +151,7 @@ public class InitConfig {
 			logger.info(e.getMessage(), e);
 		}
 	}
-	
+
 	private void transferSql() {
 		// 关闭sqlite连接
 		dataSourceEmbed.getDataSource().close();
@@ -178,7 +178,7 @@ public class InitConfig {
 		// 重命名h2文件
 		FileUtil.rename(new File(homeConfig.home + "h2.mv.db"), homeConfig.home + "h2.mv.db.bak", true);
 	}
-	
+
 	private Map<String, List<?>> readAll() {
 		Map<String, List<?>> map = new HashMap<>();
 
@@ -186,7 +186,11 @@ public class InitConfig {
 		for (Class<?> clazz : set) {
 			Table table = clazz.getAnnotation(Table.class);
 			if (table != null) {
-				map.put(clazz.getName(), sqlHelper.findAll(clazz));
+				try {
+					map.put(clazz.getName(), sqlHelper.findAll(clazz));
+				} catch (Exception e) {
+					logger.info(e.getMessage(), e);
+				}
 			}
 		}
 

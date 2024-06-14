@@ -9,10 +9,9 @@
 set -o pipefail
 
 ## 基本信息
-repo="cym1102/svnwebui"
-arch="linux/386,linux/amd64,linux/arm64,linux/arm/v7"
+arch="linux/amd64,linux/arm64"
 ver=$(cat pom.xml | grep -A1 svnWebUI | grep version | grep -oP "\d+\.\d+\.\d+")
-echo "构建镜像：$repo"
+echo "构建镜像：svnwebui"
 echo "构建架构：$arch"
 echo "构建版本：$ver"
 
@@ -34,8 +33,10 @@ docker buildx build \
     --cache-from "type=local,src=/tmp/.buildx-cache" \
     --cache-to "type=local,dest=/tmp/.buildx-cache" \
     --platform "$arch" \
-    --tag ${repo}:${ver} \
-    --tag ${repo}:latest \
+    --tag cym1102/svnwebui:${ver} \
+    --tag cym1102/svnwebui:latest \
+    --tag registry.cn-hangzhou.aliyuncs.com/cym19871102/svnwebui:${ver} \
+    --tag registry.cn-hangzhou.aliyuncs.com/cym19871102/svnwebui:latest \
     --push \
     .
 
