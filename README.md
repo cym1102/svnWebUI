@@ -14,7 +14,7 @@ QQ技术交流群2: 560797506
 
 微信捐赠二维码
 
-<img src="http://www.nginxwebui.cn/img/weixin.png"  height="200" width="200">
+<img src="README/weixin.png"  height="200" width="200">
 
 #### 功能说明
 
@@ -198,39 +198,39 @@ systemctl start svnwebui.service
 
 打开 http://ip:6060 进入主页
 
-![输入图片说明](http://www.nginxwebui.cn/img/svn/注册用户.png "login.jpg")
+![输入图片说明](README/注册用户.png "login.jpg")
 
 首次打开页面, 需要注册管理员账户
 
-![输入图片说明](http://www.nginxwebui.cn/img/svn/登录界面.png "login.jpg")
+![输入图片说明](README/登录界面.png "login.jpg")
 
 注册完毕后, 进入登录页面进行登录
 
-![输入图片说明](http://www.nginxwebui.cn/img/svn/个人管理.png "admin.jpg")
+![输入图片说明](README/个人管理.png "admin.jpg")
 
 个人信息, 可在这个页面查看当前用户的拥有仓库, 并可修改用户密码.
 
-![输入图片说明](http://www.nginxwebui.cn/img/svn/服务管理.png "admin.jpg")
+![输入图片说明](README/服务管理.png "admin.jpg")
 
 服务管理, 可在这个页面查看Subversion服务的开启情况, 并进行停止和重启.
 
-![输入图片说明](http://www.nginxwebui.cn/img/svn/仓库管理.png "admin.jpg")
+![输入图片说明](README/仓库管理.png "admin.jpg")
 
 仓库管理, 可添加仓库及修改仓库, 添加仓库后即可获得仓库的svn地址, 在Subversion服务开启的情况下可直接checkout, 十分方便
 
-![输入图片说明](http://www.nginxwebui.cn/img/svn/用户授权.png "admin.jpg")
+![输入图片说明](README/用户授权.png "admin.jpg")
 
 选择对应的用户对仓库进行授权, 可以授权到某个目录
 
-![输入图片说明](http://www.nginxwebui.cn/img/svn/小组授权.png "admin.jpg")
+![输入图片说明](README/小组授权.png "admin.jpg")
 
 选择对应的小组对仓库进行授权, 可以授权到某个目录
 
-![输入图片说明](http://www.nginxwebui.cn/img/svn/用户管理.png "admin.jpg")
+![输入图片说明](README/用户管理.png "admin.jpg")
 
 用户管理, 可添加和编辑用户, 用户分两种, 管理员和普通用户, 普通用户只能看到自己的信息, 管理员可管理整个平台的信息
 
-![输入图片说明](http://www.nginxwebui.cn/img/svn/分组管理.png "admin.jpg")
+![输入图片说明](README/分组管理.png "admin.jpg")
 
 小组管理, 可添加和编辑小组
 
