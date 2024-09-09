@@ -72,9 +72,9 @@ Path : JDK安装目录\bin
 
 ```
 Linux:  mkdir /home/svnWebUI/
-        wget -O /home/svnWebUI/svnWebUI.jar https://gitee.com/cym1102/svnWebUI/releases/download/1.8.5/svnWebUI-1.8.5.jar
+        wget -O /home/svnWebUI/svnWebUI.jar https://gitee.com/cym1102/svnWebUI/releases/download/1.8.7/svnWebUI-1.8.7.jar
 
-Windows: 直接使用浏览器下载 https://gitee.com/cym1102/svnWebUI/releases/download/1.8.5/svnWebUI-1.8.5.jar 到 D:/home/svnWebUI/svnWebUI.jar
+Windows: 直接使用浏览器下载 https://gitee.com/cym1102/svnWebUI/releases/download/1.8.7/svnWebUI-1.8.7.jar 到 D:/home/svnWebUI/svnWebUI.jar
 ```
 
 有新版本只需要修改路径中的版本即可

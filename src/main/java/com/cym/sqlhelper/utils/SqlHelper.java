@@ -424,7 +424,7 @@ public class SqlHelper extends SqlUtils {
 		if (sort != null) {
 			sql += " " + sort.toString();
 		} else {
-			sql += " ORDER BY id DESC";
+			sql += " ORDER BY CAST(id AS SIGNED) DESC";
 		}
 		sql += " LIMIT " + (page.getCurr() - 1) * page.getLimit() + "," + page.getLimit();
 
@@ -505,7 +505,7 @@ public class SqlHelper extends SqlUtils {
 		if (sort != null) {
 			sql += " " + sort.toString();
 		} else {
-			sql += " ORDER BY id DESC";
+			sql += " ORDER BY CAST(id AS SIGNED) DESC";
 		}
 		sql += " limit 1";
 
@@ -556,7 +556,7 @@ public class SqlHelper extends SqlUtils {
 		if (sort != null) {
 			sql += " " + sort.toString();
 		} else {
-			sql += " ORDER BY id DESC";
+			sql += " ORDER BY CAST(id AS SIGNED) DESC";
 		}
 
 		logQuery(formatSql(sql), values.toArray());
@@ -854,7 +854,7 @@ public class SqlHelper extends SqlUtils {
 	 * @param clazz
 	 * @return
 	 */
-	private <T> List<T> buildObjects(List<Map<String, Object>> queryForList, Class<T> clazz) {
+	public <T> List<T> buildObjects(List<Map<String, Object>> queryForList, Class<T> clazz) {
 		List<T> list = new ArrayList<T>();
 		try {
 

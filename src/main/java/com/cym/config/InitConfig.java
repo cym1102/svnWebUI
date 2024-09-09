@@ -26,6 +26,7 @@ import com.cym.service.UserService;
 import com.cym.sqlhelper.config.DataSourceEmbed;
 import com.cym.sqlhelper.config.Table;
 import com.cym.sqlhelper.utils.ConditionAndWrapper;
+import com.cym.sqlhelper.utils.JdbcTemplate;
 import com.cym.sqlhelper.utils.SqlHelper;
 import com.cym.utils.FilePermissionUtil;
 import com.cym.utils.HttpdUtils;
@@ -37,6 +38,7 @@ import cn.hutool.core.io.FileUtil;
 import cn.hutool.core.io.resource.ClassPathResource;
 import cn.hutool.core.util.ClassUtil;
 import cn.hutool.core.util.RuntimeUtil;
+import cn.hutool.core.util.StrUtil;
 
 @Component
 public class InitConfig {
@@ -57,6 +59,8 @@ public class InitConfig {
 	DataSourceEmbed dataSourceEmbed;
 	@Inject
 	SqlHelper sqlHelper;
+	@Inject
+	JdbcTemplate jdbcTemplate;
 	@Inject
 	HttpdUtils httpdUtils;
 	@Inject
@@ -187,7 +191,9 @@ public class InitConfig {
 			Table table = clazz.getAnnotation(Table.class);
 			if (table != null) {
 				try {
-					map.put(clazz.getName(), sqlHelper.findAll(clazz));
+					List<Map<String, Object>> list = jdbcTemplate.queryForList("SELECT * FROM `" + StrUtil.toUnderlineCase(clazz.getSimpleName()) + "`");
+
+					map.put(clazz.getName(), sqlHelper.buildObjects(list, clazz));
 				} catch (Exception e) {
 					logger.info(e.getMessage(), e);
 				}

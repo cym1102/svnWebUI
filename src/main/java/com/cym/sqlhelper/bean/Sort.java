@@ -64,7 +64,10 @@ public class Sort {
 		for (Order order : orderList) {
 
 			String sql = StrUtil.toUnderlineCase(order.getColumn());
-
+			if (order.getColumn().equalsIgnoreCase("seq") || order.getColumn().equalsIgnoreCase("id")) {
+				sql = "CAST(" + StrUtil.toUnderlineCase(order.getColumn()) + " as SIGNED)";
+			}
+			
 			if (order.getDirection() == Direction.ASC) {
 				sql += " ASC";
 			}

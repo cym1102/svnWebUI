@@ -136,29 +136,33 @@ public class ConfigController extends BaseController {
 		if (SystemTool.inDocker() && "http".equals(protocol)) {
 			httpdUtils.modHttpdPort(port);
 			httpdUtils.start();
-			
+
 			DAVRepositoryFactory.setup();
 
 		} else {
-			String rs = null;
-			if (SystemTool.isWindows()) {
-				// 使用vbs后台运行
-				String cmd = "svnserve.exe -d -r " + (homeConfig.home + "repo").replace("/", "\\") + " --listen-port " + port;
-				List<String> vbs = new ArrayList<>();
-				vbs.add("set ws=WScript.CreateObject(\"WScript.Shell\")");
-				vbs.add("ws.Run \"" + cmd + " \",0");
-				FileUtil.writeLines(vbs, homeConfig.home + "run.vbs", Charset.forName("UTF-8"));
+			try {
+				if (SystemTool.isWindows()) {
+					// 使用vbs后台运行
+					String cmd = "svnserve.exe -d -r " + (homeConfig.home + "repo").replace("/", "\\") + " --listen-port " + port;
+					logger.info(cmd);
+					Runtime.getRuntime().exec(cmd);
+				} else {
+					String cmd = "svnserve -d -r " + homeConfig.home + "repo --listen-port " + port;
+					logger.info(cmd);
+					Runtime.getRuntime().exec(cmd);
+				}
 
-				rs = RuntimeUtil.execForStr("wscript " + homeConfig.home + "run.vbs");
-			} else {
-				rs = RuntimeUtil.execForStr("svnserve -d -r " + homeConfig.home + "repo --listen-port " + port);
+				logger.info("svn启动成功");
+			} catch (Exception e) {
+				logger.error(e.getMessage(), e);
+				logger.info("svn启动失败");
 			}
-			logger.info(rs);
+			
 			SVNRepositoryFactoryImpl.setup();
 		}
-		
+
 		configService.refresh();
-		
+
 		return renderSuccess();
 	}
 
@@ -183,12 +187,10 @@ public class ConfigController extends BaseController {
 		return renderSuccess();
 	}
 
-	
-
 	@Mapping("dataExport")
 	public DownloadedFile dataExport(Context context) throws IOException {
 		AsycPack asycPack = configService.getAsycPack();
-		
+
 		String json = JSONUtil.toJsonPrettyStr(asycPack);
 
 		String date = DateUtil.format(new Date(), "yyyy-MM-dd_HH-mm-ss");
