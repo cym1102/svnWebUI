@@ -3,9 +3,8 @@ package com.cym.service;
 import java.util.ArrayList;
 import java.util.List;
 
-import cn.hutool.core.text.CharSequenceUtil;
+import org.noear.solon.annotation.Component;
 import org.noear.solon.annotation.Inject;
-import org.noear.solon.aspect.annotation.Service;
 
 import com.cym.model.Group;
 import com.cym.model.GroupGroup;
@@ -17,9 +16,10 @@ import com.cym.sqlhelper.utils.ConditionAndWrapper;
 import com.cym.sqlhelper.utils.ConditionOrWrapper;
 import com.cym.sqlhelper.utils.SqlHelper;
 
+import cn.hutool.core.text.CharSequenceUtil;
 import cn.hutool.core.util.StrUtil;
 
-@Service
+@Component
 public class GroupService {
 	private static ArrayList<String> stack = new ArrayList<>();
 

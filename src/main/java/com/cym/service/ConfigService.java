@@ -5,8 +5,8 @@ import java.nio.charset.Charset;
 import java.util.ArrayList;
 import java.util.List;
 
+import org.noear.solon.annotation.Component;
 import org.noear.solon.annotation.Inject;
-import org.noear.solon.aspect.annotation.Service;
 
 import com.cym.config.HomeConfig;
 import com.cym.ext.AsycPack;
@@ -29,7 +29,7 @@ import cn.hutool.core.io.resource.ClassPathResource;
 import cn.hutool.core.util.RuntimeUtil;
 import cn.hutool.core.util.StrUtil;
 
-@Service
+@Component
 public class ConfigService {
 	@Inject
 	SqlHelper sqlHelper;

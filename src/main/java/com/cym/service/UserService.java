@@ -1,8 +1,7 @@
 package com.cym.service;
 
-import cn.hutool.core.text.CharSequenceUtil;
+import org.noear.solon.annotation.Component;
 import org.noear.solon.annotation.Inject;
-import org.noear.solon.aspect.annotation.Service;
 
 import com.cym.model.GroupUser;
 import com.cym.model.RepositoryUser;
@@ -13,9 +12,10 @@ import com.cym.sqlhelper.utils.ConditionOrWrapper;
 import com.cym.sqlhelper.utils.SqlHelper;
 import com.cym.utils.SvnAdminUtils;
 
+import cn.hutool.core.text.CharSequenceUtil;
 import cn.hutool.core.util.StrUtil;
 
-@Service
+@Component
 public class UserService {
 	@Inject
 	SqlHelper sqlHelper;

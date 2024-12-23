@@ -10,7 +10,6 @@ import java.util.Map;
 import java.util.Map.Entry;
 import java.util.Set;
 
-import org.h2.jdbc.JdbcClob;
 import org.noear.solon.annotation.Component;
 import org.noear.solon.annotation.Inject;
 import org.slf4j.Logger;
@@ -37,12 +36,7 @@ public class JdbcTemplate {
 			for (Entity entity : list) {
 				Map<String, Object> map = new HashMap<>();
 				for (Map.Entry entry : entity.entrySet()) {
-					if (entry.getValue() instanceof JdbcClob) {
-						map.put(entry.getKey().toString(), clobToStr((JdbcClob) entry.getValue()));
-					} else {
-						map.put(entry.getKey().toString(), entry.getValue());
-					}
-
+					map.put(entry.getKey().toString(), entry.getValue());
 				}
 				mapList.add(map);
 			}
@@ -54,21 +48,21 @@ public class JdbcTemplate {
 		return null;
 	}
 
-	public String clobToStr(JdbcClob jdbcClob) {
-		try {
-			StringBuilder builder = new StringBuilder();
-			Reader rd = jdbcClob.getCharacterStream();
-			char[] str = new char[1];
-			while (rd.read(str) != -1) {
-				builder.append(new String(str));
-			}
-			return builder.toString();
-		} catch (Exception e) {
-			logger.error(e.getMessage(), e);
-		}
-
-		return null;
-	}
+//	public String clobToStr(JdbcClob jdbcClob) {
+//		try {
+//			StringBuilder builder = new StringBuilder();
+//			Reader rd = jdbcClob.getCharacterStream();
+//			char[] str = new char[1];
+//			while (rd.read(str) != -1) {
+//				builder.append(new String(str));
+//			}
+//			return builder.toString();
+//		} catch (Exception e) {
+//			logger.error(e.getMessage(), e);
+//		}
+//
+//		return null;
+//	}
 
 	public Set<String> queryForColumn(Class clazz) throws SQLException {
 		Set<String> set = new HashSet<>();
