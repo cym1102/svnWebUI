@@ -76,6 +76,8 @@ public class LoginController extends BaseController {
 
 	@Mapping("loginOut")
 	public void loginOut(Context ctx) {
+		Context.current().sessionRemove("user");
+		
 		ctx.redirect("/adminPage/login");
 	}
 
