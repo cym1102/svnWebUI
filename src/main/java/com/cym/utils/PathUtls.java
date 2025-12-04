@@ -1,21 +1,20 @@
 package com.cym.utils;
 
 import java.io.File;
+import java.net.MalformedURLException;
 import java.net.URI;
 import java.net.URISyntaxException;
+import java.net.URL;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.LinkedList;
 import java.util.List;
 
 import org.noear.solon.annotation.Component;
-import org.noear.solon.annotation.Init;
 import org.noear.solon.annotation.Inject;
-import org.noear.solon.annotation.Mapping;
 import org.noear.solon.core.handle.Context;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.tmatesoft.svn.core.ISVNDirEntryHandler;
 import org.tmatesoft.svn.core.SVNDepth;
 import org.tmatesoft.svn.core.SVNDirEntry;
 import org.tmatesoft.svn.core.SVNException;
@@ -26,21 +25,16 @@ import org.tmatesoft.svn.core.internal.wc.DefaultSVNOptions;
 import org.tmatesoft.svn.core.io.SVNRepository;
 import org.tmatesoft.svn.core.io.SVNRepositoryFactory;
 import org.tmatesoft.svn.core.wc.SVNClientManager;
-import org.tmatesoft.svn.core.wc.SVNLogClient;
-import org.tmatesoft.svn.core.wc.SVNRevision;
 import org.tmatesoft.svn.core.wc.SVNWCUtil;
 
 import com.cym.config.HomeConfig;
-import com.cym.config.InitConfig;
 import com.cym.ext.TreeNode;
 import com.cym.service.RepositoryService;
 import com.cym.service.SettingService;
 import com.cym.sqlhelper.bean.Page;
 import com.cym.sqlhelper.utils.SqlHelper;
 
-import cn.hutool.core.io.FileUtil;
 import cn.hutool.core.util.StrUtil;
-import cn.hutool.json.JSONUtil;
 
 @Component
 public class PathUtls {
@@ -56,44 +50,44 @@ public class PathUtls {
 	@Inject
 	SvnAdminUtils svnAdminUtils;
 
-	public void upload(String svnUrl, String dir, String filePath, String userName, String userPass) {
+	public void upload(String url, String filePath, String userName, String userPass) {
 		try {
-			svnUrl = transLocalhost(svnUrl);
+			url = transLocalhost(url);
 			ISVNAuthenticationManager authManager = SVNWCUtil.createDefaultAuthenticationManager(userName, userPass.toCharArray());
 
 			DefaultSVNOptions options = SVNWCUtil.createDefaultOptions(true);
 			SVNClientManager clientManager = SVNClientManager.newInstance(options, authManager);
 
 			File file = new File(filePath);
-			clientManager.getCommitClient().doImport(file, SVNURL.parseURIEncoded(svnUrl + "/" + dir + "/" + file.getName()), "上传文件", null, false, false, SVNDepth.INFINITY);
+			clientManager.getCommitClient().doImport(file, SVNURL.parseURIEncoded(url + "/" + file.getName()), "上传文件", null, false, false, SVNDepth.INFINITY);
 
 		} catch (SVNException e) {
 			logger.error(e.getMessage(), e);
 		}
 	}
 
-	public void createPath(String svnUrl, String dir, String userName, String userPass) {
+	public void createPath(String url, String userName, String userPass) {
 		try {
-			svnUrl = transLocalhost(svnUrl);
+			url = transLocalhost(url);
 			ISVNAuthenticationManager authManager = SVNWCUtil.createDefaultAuthenticationManager(userName, userPass.toCharArray());
 
 			DefaultSVNOptions options = SVNWCUtil.createDefaultOptions(true);
 			SVNClientManager clientManager = SVNClientManager.newInstance(options, authManager);
-			clientManager.getCommitClient().doMkDir(new SVNURL[] { SVNURL.parseURIEncoded(svnUrl + "/" + dir) }, "创建文件夹");
+			clientManager.getCommitClient().doMkDir(new SVNURL[] { SVNURL.parseURIEncoded(url) }, "创建文件夹");
 
 		} catch (SVNException e) {
 			logger.error(e.getMessage(), e);
 		}
 	}
 
-	public void removePath(String svnUrl, String dir, String userName, String userPass) {
+	public void removePath(String url, String userName, String userPass) {
 		try {
-			svnUrl = transLocalhost(svnUrl);
+			url = transLocalhost(url);
 			ISVNAuthenticationManager authManager = SVNWCUtil.createDefaultAuthenticationManager(userName, userPass.toCharArray());
 
 			DefaultSVNOptions options = SVNWCUtil.createDefaultOptions(true);
 			SVNClientManager clientManager = SVNClientManager.newInstance(options, authManager);
-			clientManager.getCommitClient().doDelete(new SVNURL[] { SVNURL.parseURIEncoded(svnUrl + "/" + dir) }, "删除文件");
+			clientManager.getCommitClient().doDelete(new SVNURL[] { SVNURL.parseURIEncoded(url) }, "删除文件");
 
 		} catch (SVNException e) {
 			logger.error(e.getMessage(), e);
@@ -156,10 +150,20 @@ public class PathUtls {
 		return list;
 	}
 
-	private String transLocalhost(String url) {
-		String host = url.split("/")[2].split(":")[0];
-		return url.replace(host, "localhost");
+	private String transLocalhost(String path) {
+//		String host = url.split("/")[2].split(":")[0];
+//		return url.replace(host, "localhost");
 
+		try {
+			URI uri = new URI(path);
+			
+			return path.replace(uri.getHost(), "localhost");
+			
+		} catch (Exception e) {
+			logger.error(e.getMessage(),e);
+		}
+		
+		return path;
 	}
 
 	public String getRelativePath(String url) {

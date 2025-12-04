@@ -1,4 +1,4 @@
-var svnUrl;
+var orgUrl;
 var rootSelect = {
 	id: null,
 	index: null,
@@ -21,7 +21,13 @@ var rootSelect = {
 		check: {
 			enable: true,
 			chkStyle: "checkbox",
-			chkboxType: { "Y": "ps", "N": "ps" }
+			chkboxType: { "Y": "", "N": "" }
+		},
+		callback: {
+			onClick: function(event, treeId, treeNode) {
+				var svnUrl = decodeURIComponent(treeNode.id);
+				$("#svnUrl").html(svnUrl);
+			}
 		}
 	},
 	load: function() {
@@ -60,18 +66,10 @@ $(function() {
 
 function sendFile(filePath) {
 	// 获取选中的路径
-	var dir = "/";
+	var target = $("#svnUrl").html();
 	var nodes = rootSelect.zTreeObj.getSelectedNodes();
 	if (nodes.length > 0) {
-		var url = decodeURIComponent(nodes[0].id);
-
-		var relativePaths = [];
-		var urls = url.split("/");
-		for (let i = 4; i < urls.length; i++) {
-			relativePaths.push(urls[i]);
-		}
-
-		dir = relativePaths.join("/") + "/";
+		target = decodeURIComponent(nodes[0].id);
 	}
 
 	$.ajax({
@@ -79,8 +77,7 @@ function sendFile(filePath) {
 		url: ctx + '/adminPage/selectRoot/upload',
 		data: {
 			filePath: filePath,
-			svnUrl: svnUrl,
-			dir: dir
+			url: target
 		},
 		dataType: 'json',
 		success: function(data) {
@@ -98,6 +95,8 @@ function sendFile(filePath) {
 
 
 function cancelSelect() {
+	$("#svnUrl").html(orgUrl);
+	
 	rootSelect.zTreeObj.cancelSelectedNode();
 }
 
@@ -150,19 +149,20 @@ function seeFile(url, permission) {
 	showTree(url, false);
 }
 
+
 function showTree(url, check) {
-	svnUrl = url;
-	rootSelect.setting.async.url = ctx + '/adminPage/selectRoot/getFileList?url=' + encodeURIComponent(url);
+	$("#svnUrl").html(url);
+	orgUrl = url;
+	rootSelect.setting.async.url = ctx + '/adminPage/selectRoot/getFileList?url=' + encodeURIComponent(url) + "&guid=" + guid();
 	rootSelect.setting.check.enable = check;
 	rootSelect.load();
 	rootSelect.index = layer.open({
 		type: 1,
 		title: "svn目录",
-		area: ['600px', '560px'], // 宽高
+		area: ['800px', '600px'], // 宽高
 		content: $('#rootSelectDiv')
 	});
 }
-
 
 
 function mkdir() {
@@ -171,27 +171,18 @@ function mkdir() {
 		title: '文件夹名称',
 		area: ['300px', '100px'] //自定义文本域宽高
 	}, function(value, index, elem) {
-		// 获取选中的路径
+
+		var target = $("#svnUrl").html() + "/" + value;
 		var nodes = rootSelect.zTreeObj.getSelectedNodes();
 		if (nodes.length > 0) {
-			var url = decodeURIComponent(nodes[0].id);
-
-			var relativePaths = [];
-			var urls = url.split("/");
-			for (let i = 4; i < urls.length; i++) {
-				relativePaths.push(urls[i]);
-			}
-
-			value = relativePaths.join("/") + "/" + value;
+			target = decodeURIComponent(nodes[0].id) + "/" + value;
 		}
-
 
 		$.ajax({
 			type: 'POST',
 			url: ctx + '/adminPage/selectRoot/mkdir',
 			data: {
-				svnUrl: svnUrl,
-				dir: value
+				url: target
 			},
 			dataType: 'json',
 			success: function(data) {
@@ -214,20 +205,12 @@ function mkdir() {
 
 function rmfile() {
 	if (confirm("确认删除文件?")) {
-
+		debugger
 		// 获取选中的路径
 		var value = '';
 		var nodes = rootSelect.zTreeObj.getSelectedNodes();
 		if (nodes.length > 0) {
-			var url = decodeURIComponent(nodes[0].id);
-
-			var relativePaths = [];
-			var urls = url.split("/");
-			for (let i = 4; i < urls.length; i++) {
-				relativePaths.push(urls[i]);
-			}
-
-			value = relativePaths.join("/");
+			value = decodeURIComponent(nodes[0].id);
 		}
 
 		if (value == '') {
@@ -238,8 +221,7 @@ function rmfile() {
 			type: 'POST',
 			url: ctx + '/adminPage/selectRoot/rmfile',
 			data: {
-				svnUrl: svnUrl,
-				dir: value
+				url: value
 			},
 			dataType: 'json',
 			success: function(data) {
@@ -302,4 +284,31 @@ function download() {
 	} else {
 		layer.msg("未选中文件");
 	}
+}
+
+function copyUrl() {
+	var textArea = document.createElement("textarea");
+	textArea.style.position = 'fixed';
+	textArea.style.top = '0';
+	textArea.style.left = '0';
+	textArea.style.width = '2em';
+	textArea.style.height = '2em';
+	textArea.style.padding = '0';
+	textArea.style.border = 'none';
+	textArea.style.outline = 'none';
+	textArea.style.boxShadow = 'none';
+	textArea.style.background = 'transparent';
+	textArea.value = $("#svnUrl").html();
+	document.body.appendChild(textArea);
+	textArea.select();
+
+	try {
+		var successful = document.execCommand('copy');
+		var msg = successful ? '成功复制到剪贴板' : '该浏览器不支持点击复制到剪贴板';
+		layer.msg(msg);
+	} catch (err) {
+		layer.msg('该浏览器不支持点击复制到剪贴板');
+	}
+
+	document.body.removeChild(textArea);
 }

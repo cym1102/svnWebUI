@@ -81,7 +81,7 @@ public class UserController extends BaseController {
 
 	@Mapping("importOver")
 	public JsonResult importOver(String dirTemp) {
-		if (!dirTemp.replace("\\", "/").contains(FileUtil.getTmpDir().getPath().replace("\\", "/"))) {
+		if (!dirTemp.replace("\\", "/").contains(FileUtil.getTmpDir().getPath().replace("\\", "/")) || dirTemp.contains("../")) { 
 			return renderError("文件路径不合法");
 		}
 

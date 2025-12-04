@@ -1,6 +1,7 @@
 package com.cym.controller;
 
 import java.io.IOException;
+import java.net.URI;
 import java.nio.charset.Charset;
 import java.util.List;
 
@@ -57,7 +58,7 @@ public class SelectRootController extends BaseController {
 	}
 
 	@Mapping("mkdir")
-	public JsonResult addFileDir(String svnUrl, String dir) {
+	public JsonResult addFileDir(String url) {
 		User user = getLoginUser();
 
 		String userName = user.getName();
@@ -66,13 +67,16 @@ public class SelectRootController extends BaseController {
 			userName = svnAdminUtils.adminUserName;
 			userPass = svnAdminUtils.adminUserPass;
 		}
-		svnUrl = restore(svnUrl);
-		pathUtls.createPath(svnUrl, dir, userName, userPass);
+//		String baseUrl = getBase(svnUrl); // 获取仓库根目录
+//		String targetUrl = getTarget(svnUrl, dir);// 获取文件所在路径
+		pathUtls.createPath(url, userName, userPass);
 		return renderSuccess();
 	}
 
+
+
 	@Mapping("upload")
-	public JsonResult upload(String svnUrl, String dir, String filePath) {
+	public JsonResult upload(String url, String filePath) {
 		User user = getLoginUser();
 
 		String userName = user.getName();
@@ -81,13 +85,14 @@ public class SelectRootController extends BaseController {
 			userName = svnAdminUtils.adminUserName;
 			userPass = svnAdminUtils.adminUserPass;
 		}
-		svnUrl = restore(svnUrl);
-		pathUtls.upload(svnUrl, dir, filePath, userName, userPass);
+//		String baseUrl = getBase(svnUrl); // 获取仓库根目录
+//		String targetUrl = getTarget(svnUrl, dir);// 获取文件所在路径
+		pathUtls.upload(url, filePath, userName, userPass);
 		return renderSuccess();
 	}
 
 	@Mapping("rmfile")
-	public JsonResult rmfile(String svnUrl, String dir) {
+	public JsonResult rmfile(String url) {
 		User user = getLoginUser();
 
 		String userName = user.getName();
@@ -96,23 +101,36 @@ public class SelectRootController extends BaseController {
 			userName = svnAdminUtils.adminUserName;
 			userPass = svnAdminUtils.adminUserPass;
 		}
-		svnUrl = restore(svnUrl);
-		pathUtls.removePath(svnUrl, dir, userName, userPass);
+//		String baseUrl = getBase(svnUrl); // 获取仓库根目录
+//		String targetUrl = getTarget(svnUrl, dir);// 获取文件所在路径
+		pathUtls.removePath(url, userName, userPass);
 		return renderSuccess();
 	}
 
-	// 将多余的路径去除
-	private String restore(String svnUrl) {
-
-		String[] svnUrls = svnUrl.split("/");
-
-		String rsUrl = "";
-		for (int i = 0; i <= 3; i++) {
-			rsUrl += svnUrls[i] + "/";
-		}
-
-		return rsUrl;
-	}
+//	// 获取仓库根目录
+//	private String getBase(String svnUrl) {
+//
+//		String[] svnUrls = svnUrl.split("/");
+//
+//		String rsUrl = "";
+//		for (int i = 0; i <= 3; i++) {
+//			rsUrl += svnUrls[i] + "/";
+//		}
+//
+//		return rsUrl;
+//	}
+//	
+//	// 获取目录目录
+//	private String getTarget(String svnUrl, String dir) {
+//		String[] svnUrls = svnUrl.split("/");
+//
+//		String rsUrl = "";
+//		for (int i = 4; i < svnUrls.length; i++) {
+//			rsUrl += svnUrls[i] + "/";
+//		}
+//
+//		return rsUrl + dir;
+//	}
 
 	@Mapping("download")
 	public void download(String url, Context context) throws SVNException, IOException {

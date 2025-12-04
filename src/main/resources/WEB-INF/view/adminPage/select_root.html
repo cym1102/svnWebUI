@@ -5,8 +5,12 @@
 	<!-- 弹出框 -->
 	<div id="rootSelectDiv" style="padding: 15px; display: none;">
 		<ul id="rootSelect" class="ztree" style="height: 400px; overflow: auto;" onclick="cancelSelect()"></ul>
-
+		
 		<div class="layui-form" style="text-align: center; margin-top: 20px;">
+			<span id="svnUrl"></span>&nbsp;&nbsp;&nbsp;<a style="color: blue;" href="javascript:copyUrl()">复制</a>
+		</div>
+		
+		<div class="layui-form" style="text-align: center; margin-top: 5px;">
 			<div class="layui-inline" id="selectOver">
 				<button type="button" class="layui-btn layui-btn-sm" onclick="selectOver()">选择选中项</button>
 			</div>

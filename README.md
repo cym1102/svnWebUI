@@ -28,7 +28,7 @@ Windows上倒是有不错的svn服务端软件即VisualSVN, 但一来Windows服�
 
 #### 技术说明
 
-本项目是基于solon的java项目, 数据库使用h2, 因此服务器上不需要安装任何数据库, 同时也兼容使用mysql
+本项目是基于solon的java项目, 数据库使用sqlite, 因此服务器上不需要安装任何数据库, 同时也兼容使用mysql
 
 本地运行本软件，请先安装Subversion，并使用svn:\\\\协议进行checkout。
 
@@ -72,9 +72,9 @@ Path : JDK安装目录\bin
 
 ```
 Linux:  mkdir /home/svnWebUI/
-        wget -O /home/svnWebUI/svnWebUI.jar https://gitee.com/cym1102/svnWebUI/releases/download/1.8.9/svnWebUI-1.8.9.jar
+        wget -O /home/svnWebUI/svnWebUI.jar https://gitee.com/cym1102/svnWebUI/releases/download/1.9.0/svnWebUI-1.9.0.jar
 
-Windows: 直接使用浏览器下载 https://gitee.com/cym1102/svnWebUI/releases/download/1.8.9/svnWebUI-1.8.9.jar 到 D:/home/svnWebUI/svnWebUI.jar
+Windows: 直接使用浏览器下载 https://gitee.com/cym1102/svnWebUI/releases/download/1.9.0/svnWebUI-1.9.0.jar 到 D:/home/svnWebUI/svnWebUI.jar
 ```
 
 有新版本只需要修改路径中的版本即可
@@ -93,7 +93,7 @@ Windows: java -jar -Dfile.encoding=UTF-8 D:/home/svnWebUI/svnWebUI.jar --server.
 
 --project.home 项目配置文件目录，存放仓库文件, 数据库文件等, 默认为/home/svnWebUI/
 
---database.type=mysql 使用其他数据库，不填为使用本地h2数据库
+--database.type=mysql 使用其他数据库，不填为使用本地sqlite数据库
 
 --database.url=jdbc:mysql://ip:port/dbname 数据库url
 
