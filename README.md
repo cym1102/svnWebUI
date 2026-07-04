@@ -59,12 +59,9 @@ Windows:
 
 ```
 下载并安装JDK安装包 https://www.oracle.com/java/technologies/downloads/
-下载并安装VisualSVN https://www.visualsvn.com/server/download
-在服务管理器中停止并禁用VisualSVN相关服务
 配置JAVA环境变量 
 JAVA_HOME : JDK安装目录
 Path : JDK安装目录\bin
-重启电脑
 ```
 
 
@@ -125,6 +122,11 @@ yum install docker
 
 ```
 docker pull cym1102/svnwebui:latest
+
+或者国内源
+
+docker pull registry.cn-hangzhou.aliyuncs.com/cym19871102/svnwebui:latest
+
 ```
 
 3.启动容器: 

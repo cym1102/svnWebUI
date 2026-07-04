@@ -1,6 +1,7 @@
 package com.cym.config;
 
 import java.io.File;
+import java.io.InputStream;
 
 import org.noear.solon.annotation.Component;
 import org.noear.solon.annotation.Init;
@@ -14,7 +15,9 @@ import com.cym.utils.SystemTool;
 import com.cym.utils.ToolUtils;
 
 import cn.hutool.core.io.FileUtil;
+import cn.hutool.core.io.resource.ClassPathResource;
 import cn.hutool.core.util.StrUtil;
+import cn.hutool.core.util.ZipUtil;
 
 @Component
 public class HomeConfig {
@@ -35,9 +38,18 @@ public class HomeConfig {
 			}
 		}
 
-		// windows 加上盘符
+		// windows 加上盘符,并释放Apache-Subversion.zip
 		if (SystemTool.isWindows() && !home.contains(":")) {
 			home = JarUtil.getCurrentFilePath().split(":")[0] + ":" + home;
+
+			if (!FileUtil.exist(home + "/subversion/bin/svnserve.exe")) {
+				ClassPathResource resource = new ClassPathResource("file/subversion.zip");
+				InputStream inputStream = resource.getStream();
+				FileUtil.writeFromStream(inputStream, home + "/subversion.zip");
+				FileUtil.mkdir(home + "/subversion/");
+				ZipUtil.unzip(home + "/subversion.zip", home + "/subversion/");
+				FileUtil.del(home + "/subversion.zip");
+			}
 		}
 
 		// 如果最后没有/, 加上/

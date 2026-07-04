@@ -90,29 +90,31 @@
 							</td>
 							<td>
 								<div class="layui-inline">
-									<button class="layui-btn layui-btn-sm" onclick="allPermission('${repositoryExt.id}','${repositoryExt.name}')">全体授权</button>
+									<button type="button" class="layui-btn layui-btn-sm" onclick="allPermission('${repositoryExt.id}','${repositoryExt.name}')">全体授权</button>
 								</div>
 								<div class="layui-inline">
-									<button class="layui-btn layui-btn-sm" onclick="userPermission('${repositoryExt.id}','${repositoryExt.name}')">用户授权</button>
+									<button type="button" class="layui-btn layui-btn-sm" onclick="userPermission('${repositoryExt.id}','${repositoryExt.name}')">用户授权</button>
 								</div>
 								<div class="layui-inline">
-									<button class="layui-btn layui-btn-sm" onclick="groupPermission('${repositoryExt.id}','${repositoryExt.name}')">小组授权</button>
+									<button type="button" class="layui-btn layui-btn-sm" onclick="groupPermission('${repositoryExt.id}','${repositoryExt.name}')">小组授权</button>
 								</div>
 
 								<div class="layui-inline">
-									<button class="layui-btn layui-btn-sm layui-btn-normal" onclick="copyPermission('${repositoryExt.id}','${repositoryExt.name}')">从其他仓库拷贝授权</button>
+									<button type="button" class="layui-btn layui-btn-sm layui-btn-normal" onclick="copyPermission('${repositoryExt.id}','${repositoryExt.name}')">从其他仓库拷贝授权</button>
 								</div>
 							</td>
 							<td>
 								<div class="layui-inline">
-									<button class="layui-btn layui-btn-sm" onclick="seeFile('${repositoryExt.url}','rw')">查看文件</button>
+									<button type="button" class="layui-btn layui-btn-sm" onclick="seeFile('${repositoryExt.url}','rw')">查看文件</button>
 								</div>
 								<div class="layui-inline">
-									<button class="layui-btn layui-btn-sm" onclick="seeLog('${repositoryExt.url}')">查看日志</button>
+									<button type="button" class="layui-btn layui-btn-sm" onclick="seeLog('${repositoryExt.url}')">查看日志</button>
 								</div>
-
 								<div class="layui-inline">
-									<button class="layui-btn layui-btn-danger layui-btn-sm" onclick="del('${repositoryExt.id}')">删除</button>
+									<button type="button" class="layui-btn layui-btn-sm" onclick="hooks('${repositoryExt.id}')">编辑hooks</button>
+								</div>
+								<div class="layui-inline">
+									<button type="button" class="layui-btn layui-btn-danger layui-btn-sm" onclick="del('${repositoryExt.id}')">删除</button>
 								</div>
 
 							</td>
@@ -273,17 +275,43 @@
 
 
 		<div class="layui-form" id="markDiv" style="padding: 15px; display: none">
-			<input type="hidden" id="repositoryId" name="repositoryId">
-			<div class="layui-form-item">
-				<div class="layui-input-inline" style="width: 100%;">
-					<textarea id="mark" name="mark" class="layui-textarea" style="height: 200px;"></textarea>
+				<input type="hidden" id="repositoryId" name="repositoryId">
+				<div class="layui-form-item">
+					<div class="layui-input-inline" style="width: 100%;">
+						<textarea id="mark" name="mark" class="layui-textarea" style="height: 200px;"></textarea>
+					</div>
+				</div>
+				<div class="layui-form-item" style="text-align: center;">
+					<button type="button" class="layui-btn layui-btn-normal" onclick="editMarkOver()">确定</button>
+					<button type="button" class="layui-btn" onclick="layer.closeAll()">关闭</button>
 				</div>
 			</div>
-			<div class="layui-form-item" style="text-align: center;">
-				<button type="button" class="layui-btn layui-btn-normal" onclick="editMarkOver()">确定</button>
-				<button type="button" class="layui-btn" onclick="layer.closeAll()">关闭</button>
+
+
+			<div class="layui-form" id="hooksDiv" style="padding: 15px; display: none">
+				<input type="hidden" id="hooksRepositoryId">
+				<input type="hidden" id="hooksFileName">
+				<div class="layui-form-item">
+					<label class="layui-form-label">选择文件</label>
+					<div class="layui-input-inline">
+						<select id="hooksFileSelect" lay-filter="hooksFileSelect" lay-search>
+							<option value="">请选择hooks文件</option>
+						</select>
+					</div>
+					<div class="layui-input-inline">
+						<button type="button" class="layui-btn" onclick="loadTmpl()">加载模板</button>
+					</div>
+				</div>
+				<div class="layui-form-item">
+					<div class="layui-input-block" style="margin-left: 0px; margin-right: 0px;">
+						<textarea id="hooksContent" class="layui-textarea" style="height: 400px; font-family: monospace;resize: none;" placeholder="请先选择文件"></textarea>
+					</div>
+				</div>
+				<div class="layui-form-item" style="text-align: center;">
+					<button type="button" class="layui-btn layui-btn-normal" onclick="saveHookContent()">保存</button>
+					<button type="button" class="layui-btn" onclick="layer.closeAll()">关闭</button>
+				</div>
 			</div>
-		</div>
 
 	</div>
 

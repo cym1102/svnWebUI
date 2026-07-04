@@ -32,8 +32,10 @@ import com.cym.utils.BeanExtUtil;
 import cn.hutool.core.io.FileUtil;
 import cn.hutool.core.io.resource.ClassPathResource;
 import cn.hutool.core.text.CharSequenceUtil;
+import cn.hutool.core.util.RuntimeUtil;
 import cn.hutool.core.util.StrUtil;
 import cn.hutool.core.util.ZipUtil;
+import cn.hutool.system.SystemUtil;
 
 @Component
 public class RepositoryService {
@@ -79,38 +81,38 @@ public class RepositoryService {
 	public void insertOrUpdate(String name) {
 
 		// 创建仓库
-		String dir = homeConfig.home + "repo" + File.separator + name;
-		if (!FileUtil.exist(dir + File.separator + "db")) {
-			ClassPathResource resource = new ClassPathResource("file/repo.zip");
-			InputStream inputStream = resource.getStream();
-//			File temp = new File(homeConfig.home + "temp" + File.separator + "repo.zip");
-//			FileUtil.writeFromStream(inputStream, temp);
-			FileUtil.mkdir(dir);
-			ZipUtil.unzip(inputStream, new File(dir), StandardCharsets.UTF_8);
-//			FileUtil.del(temp);
+		String dir = homeConfig.home + "repo/" + name;
+		if (!FileUtil.exist(dir + "/db")) {
+			try {
+				if (SystemUtil.getOsInfo().isWindows()) {
+					RuntimeUtil.execForStr("cmd", "/c", homeConfig.home + "subversion/bin/svnadmin.exe create " + dir);
+				} else {
+					RuntimeUtil.execForStr("svnadmin create " + dir);
+				}
+			} catch (Exception e) {
+				logger.error(e.getMessage(), e);
+				logger.info("仓库创建失败");
+			}
 		}
 
 		Repository repository = new Repository();
 		repository.setName(name);
 		sqlHelper.insertOrUpdate(repository);
 	}
-	
 
 	public void copyRepoOver(String copyName, String fromCopyId) {
 		// 复制仓库
 		Repository repositoryFrom = sqlHelper.findById(fromCopyId, Repository.class);
 		String fromDir = homeConfig.home + "repo" + File.separator + repositoryFrom.getName();
-		
+
 		String toDir = homeConfig.home + "repo" + File.separator + copyName;
-		
+
 		FileUtil.copyContent(new File(fromDir), new File(toDir), true);
-		
+
 		Repository repository = new Repository();
 		repository.setName(copyName);
 		sqlHelper.insertOrUpdate(repository);
 	}
-
-	
 
 	public List<UserExt> getUserExts(String id) {
 		List<RepositoryUser> repositoryUsers = sqlHelper.findListByQuery(new ConditionAndWrapper().ne(RepositoryUser::getPermission, "n").eq(RepositoryUser::getRepositoryId, id),
@@ -358,7 +360,7 @@ public class RepositoryService {
 			repositoryGroup.setRepositoryId(toId);
 			sqlHelper.insert(repositoryGroup);
 		}
-		
+
 		List<RepositoryUser> repositoryUsers = sqlHelper.findListByQuery(new ConditionAndWrapper().eq(RepositoryUser::getRepositoryId, fromId), RepositoryUser.class);
 		for (RepositoryUser repositoryUser : repositoryUsers) {
 			repositoryUser.setRepositoryId(toId);

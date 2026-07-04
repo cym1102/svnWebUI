@@ -54,21 +54,7 @@ public class ConfigController extends BaseController {
 
 	@Mapping("")
 	public ModelAndView index() {
-		boolean hasSvnserve = false;
-
-		if (SystemTool.inDocker()) {
-			hasSvnserve = true;
-		} else {
-			if (SystemTool.isWindows()) {
-				String[] command = { "where svnserve" };
-				String rs = RuntimeUtil.execForStr(command);
-				hasSvnserve = rs.contains("svnserve.exe");
-			} else {
-				String[] command = { "which svnserve" };
-				String rs = RuntimeUtil.execForStr(command);
-				hasSvnserve = rs.contains("svnserve");
-			}
-		}
+		boolean hasSvnserve = configService.hasSvnserve();
 
 		ModelAndView modelAndView = new ModelAndView("/adminPage/config/index.html");
 		modelAndView.put("port", settingService.get("port"));
@@ -78,6 +64,8 @@ public class ConfigController extends BaseController {
 		modelAndView.put("inDocker", SystemTool.inDocker());
 		return modelAndView;
 	}
+
+
 
 	@Mapping("getStatus")
 	public JsonResult getStatus() {
@@ -143,7 +131,7 @@ public class ConfigController extends BaseController {
 			try {
 				if (SystemTool.isWindows()) {
 					// 使用vbs后台运行
-					String cmd = "svnserve.exe -d -r " + (homeConfig.home + "repo").replace("/", "\\") + " --listen-port " + port;
+					String cmd = homeConfig.home + "/subversion/bin/svnserve.exe -d -r " + (homeConfig.home + "repo").replace("/", "\\") + " --listen-port " + port;
 					logger.info(cmd);
 					Runtime.getRuntime().exec(cmd);
 				} else {
@@ -157,7 +145,7 @@ public class ConfigController extends BaseController {
 				logger.error(e.getMessage(), e);
 				logger.info("svn启动失败");
 			}
-			
+
 			SVNRepositoryFactoryImpl.setup();
 		}
 
@@ -177,6 +165,15 @@ public class ConfigController extends BaseController {
 		} else {
 			RuntimeUtil.execForStr("pkill svnserve");
 		}
+
+		return renderSuccess();
+	}
+
+	@Mapping("restart")
+	public JsonResult restart(String port, String host, String protocol) {
+		stop();
+
+		start(port, host, protocol);
 
 		return renderSuccess();
 	}

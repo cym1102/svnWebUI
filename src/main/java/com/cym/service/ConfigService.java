@@ -232,5 +232,22 @@ public class ConfigService {
 		sqlHelper.insertAll(asycPack.getUserList());
 		sqlHelper.insertAll(asycPack.getWebHookList());
 	}
+	
+	public boolean hasSvnserve() {
+		boolean hasSvnserve = false;
+
+		if (SystemTool.inDocker()) {
+			hasSvnserve = true;
+		} else {
+			if (SystemTool.isWindows()) {
+				hasSvnserve = FileUtil.exist(homeConfig.home + "/subversion/bin/svnserve.exe");
+			} else {
+				String[] command = { "which svnserve" };
+				String rs = RuntimeUtil.execForStr(command);
+				hasSvnserve = rs.contains("svnserve");
+			}
+		}
+		return hasSvnserve;
+	}
 
 }

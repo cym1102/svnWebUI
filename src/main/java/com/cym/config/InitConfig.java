@@ -73,9 +73,9 @@ public class InitConfig {
 	@Init
 	public void init() {
 		// h2转sqlite
-		if (FileUtil.exist(homeConfig.home + "h2.mv.db")) {
-			transferSql();
-		}
+//		if (FileUtil.exist(homeConfig.home + "h2.mv.db")) {
+//			transferSql();
+//		}
 
 		// 打印密码
 		if (findPass) {

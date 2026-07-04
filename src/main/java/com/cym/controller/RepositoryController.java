@@ -38,6 +38,7 @@ import cn.hutool.core.io.FileUtil;
 import cn.hutool.core.util.CharsetUtil;
 import cn.hutool.core.util.RuntimeUtil;
 import cn.hutool.core.util.StrUtil;
+import cn.hutool.system.SystemUtil;
 
 @Controller
 @Mapping("/adminPage/repository")
@@ -76,17 +77,21 @@ public class RepositoryController extends BaseController {
 				repositoryExt.setMark(repositoryExt.getMark().replace("\n", "<br>").replace(" ", "&nbsp;"));
 			}
 		}
-		
+
 		ModelAndView modelAndView = new ModelAndView("/adminPage/repository/index.html");
 		modelAndView.put("keywords", keywords);
 		modelAndView.put("page", pageExt);
 		modelAndView.put("home", homeConfig.home);
-		modelAndView.put("repositoryList" ,sqlHelper.findAll(Repository.class)); 
+		modelAndView.put("repositoryList", sqlHelper.findAll(Repository.class));
 		return modelAndView;
 	}
 
 	@Mapping("addOver")
 	public JsonResult addOver(String name) {
+		if (!configService.hasSvnserve()) {
+			return renderError("svn未正确安装");
+		}
+
 		if (StrUtil.isEmpty(name)) {
 			return renderError("仓库名为空");
 		}
@@ -107,9 +112,6 @@ public class RepositoryController extends BaseController {
 		configService.refresh();
 		return renderSuccess();
 	}
-	
-	
-
 
 	@Mapping("detail")
 	public JsonResult detail(String id) {
@@ -198,7 +200,6 @@ public class RepositoryController extends BaseController {
 		return renderSuccess();
 	}
 
-
 	@Mapping("groupPermission")
 	public ModelAndView groupPermission(Page page, String keywords, String repositoryId, String order) {
 		String port = settingService.get("port");
@@ -241,7 +242,7 @@ public class RepositoryController extends BaseController {
 				sqlHelper.insert(repositoryGroup);
 			}
 		}
-	
+
 		configService.refresh();
 		return renderSuccess();
 	}
@@ -252,8 +253,6 @@ public class RepositoryController extends BaseController {
 		configService.refresh();
 		return renderSuccess();
 	}
-
-
 
 	@Mapping("setEnable")
 	public JsonResult setEnable(Repository repository) {
@@ -314,17 +313,16 @@ public class RepositoryController extends BaseController {
 
 	@Mapping("copyPermissionOver")
 	public JsonResult copyPermissionOver(String toId, String fromId) {
-		if(toId.equals(fromId)) {
+		if (toId.equals(fromId)) {
 			return renderError("目标仓库与来源仓库相同");
 		}
-		
+
 		repositoryService.copyPermission(toId, fromId);
-		
+
 		configService.refresh();
 		return renderSuccess();
 	}
-	
-	
+
 	@Mapping("copyRepoOver")
 	public JsonResult copyRepoOver(String copyName, String fromCopyId) {
 		if (StrUtil.isEmpty(copyName)) {
@@ -341,10 +339,90 @@ public class RepositoryController extends BaseController {
 		if (repositoryService.hasDir(copyName)) {
 			return renderError("该仓库文件夹已存在, 请使用扫描功能添加");
 		}
-		
+
 		repositoryService.copyRepoOver(copyName, fromCopyId);
 
 		configService.refresh();
 		return renderSuccess();
+	}
+
+	@Mapping("getHooksList")
+	public JsonResult getHooksList(String id) {
+		Repository repository = sqlHelper.findById(id, Repository.class);
+		if (repository == null) {
+			return renderError("仓库不存在");
+		}
+		String hooksDir = homeConfig.home + "repo" + File.separator + repository.getName() + File.separator + "hooks";
+		if (!FileUtil.exist(hooksDir)) {
+			return renderError("hooks目录不存在");
+		}
+		List<String> fileList = new ArrayList<>();
+		File dir = new File(hooksDir);
+		File[] files = dir.listFiles();
+		if (files != null) {
+			for (File file : files) {
+				if (file.isFile()) {
+					String filePath = file.getName().replace(".tmpl", "");
+					if (SystemUtil.getOsInfo().isWindows()) {
+						filePath += ".bat";
+					}
+
+					fileList.add(filePath);
+				}
+			}
+		}
+		return renderSuccess(fileList);
+	}
+
+	@Mapping("getHookContent")
+	public JsonResult getHookContent(String id, String fileName) {
+		Repository repository = sqlHelper.findById(id, Repository.class);
+		if (repository == null) {
+			return renderError("仓库不存在");
+		}
+		if (StrUtil.isEmpty(fileName) || fileName.contains("..") || fileName.contains("/") || fileName.contains("\\")) {
+			return renderError("文件名不合法");
+		}
+		String filePath = homeConfig.home + "repo" + File.separator + repository.getName() + File.separator + "hooks" + File.separator + fileName;
+
+		if (!FileUtil.exist(filePath)) {
+			return renderSuccess("");
+		} else {
+			String content = FileUtil.readString(filePath, CharsetUtil.CHARSET_UTF_8);
+			return renderSuccess(content);
+		}
+	}
+
+	@Mapping("saveHookContent")
+	public JsonResult saveHookContent(String id, String fileName, String content) {
+		Repository repository = sqlHelper.findById(id, Repository.class);
+		if (repository == null) {
+			return renderError("仓库不存在");
+		}
+		if (StrUtil.isEmpty(fileName) || fileName.contains("..") || fileName.contains("/") || fileName.contains("\\")) {
+			return renderError("文件名不合法");
+		}
+		String filePath = homeConfig.home + "repo" + File.separator + repository.getName() + File.separator + "hooks" + File.separator + fileName;
+		FileUtil.writeString(content, filePath, CharsetUtil.CHARSET_UTF_8);
+		// Linux授权
+		if (!SystemUtil.getOsInfo().isWindows()) {
+			RuntimeUtil.exec("chmod +x " + filePath);
+		}
+
+		return renderSuccess();
+	}
+
+	@Mapping("loadTmpl")
+	public JsonResult loadTmpl(String id, String fileName) {
+		Repository repository = sqlHelper.findById(id, Repository.class);
+		if (repository == null) {
+			return renderError("仓库不存在");
+		}
+		if (StrUtil.isEmpty(fileName) || fileName.contains("..") || fileName.contains("/") || fileName.contains("\\")) {
+			return renderError("文件名不合法");
+		}
+		String filePath = homeConfig.home + "repo" + File.separator + repository.getName() + File.separator + "hooks" + File.separator + fileName.replace(".bat", "") + ".tmpl";
+		String content = FileUtil.readString(filePath, CharsetUtil.CHARSET_UTF_8);
+		return renderSuccess(content);
 	}
 }

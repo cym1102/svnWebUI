@@ -62,6 +62,10 @@
 						<div class="layui-inline" id="stop" style="display: none;">
 							<button type="button" class="layui-btn layui-btn-sm layui-btn-danger" onclick="stop()">停止svn服务</button>
 						</div>
+						
+						<div class="layui-inline" id="stop" style="display: none;">
+							<button type="button" class="layui-btn layui-btn-sm" onclick="restart()">保存并重启svn服务</button>
+						</div>
 					</div>
 				</div>
 				</#if>
@@ -70,11 +74,13 @@
 				<div style="color: gray; padding-left: 30px;">
 					<h3>你还没有安装Subversion, 请先进行安装</h3>
 					<br>
-					<h3>Ubuntu: apt install subversion</h3>
+					<h3>Ubuntu安装命令: apt install subversion</h3>
 					<br>
-					<h3>Centos: yum install subversion</h3>
+					<h3>Centos安装命令: yum install subversion</h3>
+					<!--
 					<br>
 					<h3>Windows: 下载链接 https://www.visualsvn.com/server/download/</h3>
+					-->
 				</div>
 				</#if>
 
