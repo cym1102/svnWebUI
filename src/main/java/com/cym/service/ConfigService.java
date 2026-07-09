@@ -45,7 +45,24 @@ public class ConfigService {
 	@Inject
 	SvnAdminUtils svnAdminUtils;
 
+	// open-API 与 UI 触发的 refresh 共享同一进程内静态锁,串行化"读 SQLite→生成→原子替换"整段,防半截文件与 lost-update
+	private static final Object REFRESH_LOCK = new Object();
+
 	public void refresh() {
+		synchronized (REFRESH_LOCK) {
+			refreshInternal();
+		}
+	}
+
+	// 原子写:先写目标同目录的 .tmp,再 rename 覆盖目标(同分区即原子);tmp 必须落目标同目录,否则跨挂载退化为非原子复制
+	private void writeLinesAtomic(List<String> lines, String target) {
+		File targetFile = new File(target);
+		File tmpFile = new File(targetFile.getParentFile(), targetFile.getName() + ".tmp");
+		FileUtil.writeLines(lines, tmpFile, Charset.forName("UTF-8"));
+		FileUtil.move(tmpFile, targetFile, true);
+	}
+
+	private void refreshInternal() {
 		String passwd = null;
 		if (SystemTool.inDocker() && "http".equals(settingService.get("protocol"))) {
 			passwd = homeConfig.home + "repo/httpdPasswd";
@@ -76,7 +93,7 @@ public class ConfigService {
 				passwdLines.add(user.getName() + " = " + user.getPass());
 			}
 		}
-		FileUtil.writeLines(passwdLines, passwd, Charset.forName("UTF-8"));
+		writeLinesAtomic(passwdLines, passwd);
 
 		// 小组
 		List<String> authzLines = new ArrayList<>();
@@ -152,7 +169,7 @@ public class ConfigService {
 			FileUtil.writeFromStream(resource.getStream(), svnserve_conf);
 		}
 
-		FileUtil.writeLines(authzLines, authz, Charset.forName("UTF-8"));
+		writeLinesAtomic(authzLines, authz);
 
 		// 目录授权
 		if (SystemTool.inDocker() && "http".equals(settingService.get("protocol"))) {
