@@ -256,4 +256,68 @@ java -jar svnWebUI.jar --project.home=/home/svnWebUI/ --project.findPass=true
 
 --project.findPass 为是否打印用户名密码
 
+#### open-API(供后端自动化开号/授权)
+
+本 fork 新增了一组 HTTP open-API,供上游系统(如后端账号编排服务)以编程方式创建 svn 用户、覆盖式收敛其仓库授权、以及注销用户。API 不经过登录会话,依靠请求头令牌鉴权。
+
+##### 令牌注入(env)
+
+令牌通过环境变量 `SVNWEBUI_API_TOKEN` 注入:
+
+```
+docker run -e SVNWEBUI_API_TOKEN=<强随机令牌> ... cym1102/svnwebui
+```
+
+- **未配置(或为空)`SVNWEBUI_API_TOKEN` 时,整个 open-API 处于禁用状态**:任何 `/api/*` 请求一律返回 `success=false`,不读取请求体、不做任何数据库写入、不重写配置文件,svnWebUI 其余现有行为与未启用时完全一致(零副作用)。
+- 请求必须携带请求头 `X-Api-Token`,其值需与 `SVNWEBUI_API_TOKEN` 完全一致;缺失或不匹配时返回 `success=false, status=401`,且**在任何数据库写入之前**即被拒绝(鉴权失败不会产生任何副作用)。
+- 生产环境请务必仅经 HTTPS / 私网暴露本 API(令牌与口令以明文在请求体中传输)。
+
+##### 响应形状(JsonResult)
+
+所有接口 HTTP 状态码恒为 200,业务结果承载于 JSON 响应体(与站内其它接口一致):
+
+```json
+{ "success": true, "status": "200", "msg": null, "obj": null }
+```
+
+- `success`:布尔,业务是否成功(调用方应仅据此判定)。
+- `status`:字符串状态码(如鉴权失败为 `"401"`)。
+- `msg`:失败时的错误描述。
+
+##### POST /api/provision
+
+创建或更新用户,并以**覆盖式收敛**方式重写该用户在指定仓库下的授权(先清空该用户在该仓库的全部旧授权,再按 `paths` 全量写入)。仓库必须已存在(本接口不创建仓库)。
+
+请求头:`X-Api-Token: <令牌>`,`Content-Type: application/json`
+
+请求体:
+
+```json
+{
+  "user": "alice",
+  "pass": "明文口令",
+  "repo": "knowledge-repo",
+  "paths": [
+    { "path": "/knowledge", "permission": "r" },
+    { "path": "/knowledge/alice", "permission": "rw" }
+  ]
+}
+```
+
+- `permission` 取值 `r` / `rw`(与站内一致)。
+- 用户不存在则新建(普通用户 `type=0`、启用 `open=0`);已存在则更新其口令(改密幂等)。
+- 成功后重生成 `passwd` / `authz` 配置文件并返回 `success=true`。
+
+##### POST /api/revoke
+
+硬删用户及其全部授权(级联删除该用户在所有仓库下的 `RepositoryUser` 行),然后重生成配置文件。对不存在的用户调用也返回 `success=true`(幂等)。
+
+请求头:`X-Api-Token: <令牌>`
+
+请求体:
+
+```json
+{ "user": "alice", "repo": "knowledge-repo" }
+```
+
 运行成功后即可打印出全部用户名密码
