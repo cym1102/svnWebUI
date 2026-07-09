@@ -1,11 +1,17 @@
 package com.cym.controller;
 
+import java.io.File;
+import java.nio.charset.StandardCharsets;
+import java.util.ArrayList;
+import java.util.List;
+
 import org.noear.solon.Solon;
 import org.noear.solon.annotation.Controller;
 import org.noear.solon.annotation.Inject;
 import org.noear.solon.annotation.Mapping;
 import org.noear.solon.core.handle.Context;
 
+import com.cym.config.HomeConfig;
 import com.cym.model.Repository;
 import com.cym.model.RepositoryUser;
 import com.cym.model.User;
@@ -18,6 +24,7 @@ import com.cym.utils.BaseController;
 import com.cym.utils.JsonResult;
 import com.cym.utils.SvnAdminUtils;
 
+import cn.hutool.core.io.IoUtil;
 import cn.hutool.core.util.StrUtil;
 import cn.hutool.json.JSONArray;
 import cn.hutool.json.JSONObject;
@@ -45,6 +52,8 @@ public class ApiController extends BaseController {
 	SqlHelper sqlHelper;
 	@Inject
 	SvnAdminUtils svnAdminUtils;
+	@Inject
+	HomeConfig homeConfig;
 
 	/**
 	 * 读取 open-API token。生产以环境变量 SVNWEBUI_API_TOKEN 为准;env 空时回退配置项 svnwebui.api-token(测试注入用)。
@@ -121,7 +130,8 @@ public class ApiController extends BaseController {
 					.eq(RepositoryUser::getRepositoryId, repo.getId()), //
 					RepositoryUser.class);
 
-			// 6. 逐 path 重新写入期望授权
+			// 6. 逐 path 重新写入期望授权;同时收集 rw 目录待预建
+			List<String> rwDirs = new ArrayList<>();
 			JSONArray paths = body.getJSONArray("paths");
 			if (paths != null) {
 				for (int i = 0; i < paths.size(); i++) {
@@ -137,11 +147,18 @@ public class ApiController extends BaseController {
 					ru.setPath(path);
 					ru.setPermission(permission);
 					sqlHelper.insert(ru);
+					if ("rw".equalsIgnoreCase(permission)) {
+						rwDirs.add(path);
+					}
 				}
 			}
 
 			// 7. 重生成 passwd/authz 配置文件
 			configService.refresh();
+
+			// 8. 预建 rw 目录(co-located,file:// 绕 authz)。svnserve 要求对父目录有 rw 才能自建子目录,
+			//    仅授祖先 r 时用户无法自建自己的目录;open-API 与 repo 同机,直接建好目录,用户只需 rw 写文件。
+			ensureDirs(repo.getName(), rwDirs);
 
 			return renderSuccess();
 		} catch (Throwable t) {
@@ -176,6 +193,42 @@ public class ApiController extends BaseController {
 			return renderSuccess();
 		} catch (Throwable t) {
 			return renderError(t.getMessage());
+		}
+	}
+
+	/**
+	 * 预建 rw 目录(与 repo 同机,file:// 直接建、绕 authz、幂等)。
+	 *
+	 * <p>svnserve 语义下:用户仅对父目录有 r 时无法在其下自建子目录(E220004),必须对父目录有 rw——
+	 * 但给父目录 rw 会破坏隔离。故由 open-API 在本机预建用户目录,用户仅需自身目录 rw 即可写文件、
+	 * 且因父目录只有 r 无法建/删同级(隔离保持)。可用 {@code svnwebui.ensure-dir=false} 关闭、
+	 * {@code svnwebui.svn-bin} 指定 svn 客户端。
+	 */
+	private void ensureDirs(String repoName, List<String> rwPaths) throws Exception {
+		if (rwPaths == null || rwPaths.isEmpty()) {
+			return;
+		}
+		if ("false".equalsIgnoreCase(Solon.cfg().get("svnwebui.ensure-dir"))) {
+			return;
+		}
+		String svnBin = StrUtil.blankToDefault(Solon.cfg().get("svnwebui.svn-bin"), "svn");
+		for (String path : rwPaths) {
+			// File.toURI() 对非 ASCII(如中文仓库名)做 %-编码;getRawPath() 取编码后绝对路径
+			File dir = new File(homeConfig.home + "repo/" + repoName + path);
+			String url = "file://" + dir.toURI().getRawPath();
+			ProcessBuilder pb = new ProcessBuilder(svnBin, "mkdir", "--parents", "--non-interactive", "-q",
+					"-m", "auto-provision dir", url);
+			pb.redirectErrorStream(true);
+			Process proc = pb.start();
+			String out = IoUtil.read(proc.getInputStream(), StandardCharsets.UTF_8);
+			int code = proc.waitFor();
+			if (code != 0) {
+				// 目录已存在视为成功(幂等):svn E160020 / "already exists"
+				if (out != null && (out.contains("already exists") || out.contains("160020"))) {
+					continue;
+				}
+				throw new RuntimeException("ensureDir 失败: " + url + " :: " + (out == null ? "" : out.trim()));
+			}
 		}
 	}
 

@@ -71,6 +71,8 @@ public class ApiControllerTest extends HttpTester {
 		sqlHelper.deleteByQuery(new ConditionAndWrapper(), GroupUser.class);
 		sqlHelper.deleteByQuery(new ConditionAndWrapper(), Repository.class);
 		disableToken();
+		// 单测无真实 svn repo,关闭 rw 目录预建(file:// mkdir);建目录能力由灰度/E2E 验证
+		Solon.cfg().put("svnwebui.ensure-dir", "false");
 	}
 
 	// ---- HTTP 辅助 ----
