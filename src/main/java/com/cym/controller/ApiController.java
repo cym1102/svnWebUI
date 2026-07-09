@@ -111,16 +111,24 @@ public class ApiController extends BaseController {
 				return renderError("保留用户名");
 			}
 
+			// 3.5 输入校验(在任何 DB 写之前):user/pass/path/permission 会进入 passwd/authz 文件
+			//     与 file:// 目录路径,拒绝换行/控制符(注入)、路径穿越(..)、authz 段字符,防越权。
+			String pass = body.getStr("pass");
+			String invalid = validate(uname, pass, body.getJSONArray("paths"));
+			if (invalid != null) {
+				return renderError(invalid);
+			}
+
 			// 4. 建号(open=0,普通用户)或改密幂等
 			User u = userService.getByName(uname, null);
 			if (u == null) {
 				u = new User();
 				u.setName(uname);
-				u.setPass(body.getStr("pass"));
+				u.setPass(pass);
 				u.setType(0);
 				sqlHelper.insert(u);
 			} else {
-				u.setPass(body.getStr("pass"));
+				u.setPass(pass);
 				sqlHelper.updateById(u);
 			}
 
@@ -194,6 +202,58 @@ public class ApiController extends BaseController {
 		} catch (Throwable t) {
 			return renderError(t.getMessage());
 		}
+	}
+
+	/**
+	 * 输入校验:user/pass/path/permission 会写入 passwd/authz 文件与 file:// 目录路径,
+	 * 需拒绝会破坏文件格式或越权的输入。合法返 null,非法返错误描述(调用方据此 renderError)。
+	 *
+	 * <ul>
+	 *   <li>user:非空、无换行/控制符、无 {@code / \ 空格 = : # [ ]}(passwd/authz 行与目录分隔符)。</li>
+	 *   <li>pass:无换行/控制符(否则可在 passwd 注入额外行)。</li>
+	 *   <li>path:以 / 开头、无换行/控制符、无 {@code ..}(file:// 路径穿越)、无 {@code [ ]}(authz 段头)。</li>
+	 *   <li>permission:仅 r / rw / no。</li>
+	 * </ul>
+	 */
+	private String validate(String user, String pass, JSONArray paths) {
+		if (hasCtrl(user) || StrUtil.containsAny(user, "/", "\\", " ", "=", ":", "#", "[", "]")) {
+			return "用户名含非法字符";
+		}
+		if (hasCtrl(pass)) {
+			return "口令含非法字符(换行/控制符)";
+		}
+		if (paths != null) {
+			for (int i = 0; i < paths.size(); i++) {
+				JSONObject p = paths.getJSONObject(i);
+				String path = p.getStr("path");
+				String permission = p.getStr("permission");
+				if (StrUtil.isEmpty(path) || StrUtil.isEmpty(permission)) {
+					continue;
+				}
+				if (!path.startsWith("/") || hasCtrl(path) || path.contains("..")
+						|| StrUtil.containsAny(path, "[", "]")) {
+					return "授权路径非法: " + path;
+				}
+				if (!"r".equals(permission) && !"rw".equals(permission) && !"no".equals(permission)) {
+					return "权限非法(仅 r/rw/no): " + permission;
+				}
+			}
+		}
+		return null;
+	}
+
+	/** 是否含换行 / 控制符(0x00-0x1F 或 0x7F);null 视为无。 */
+	private boolean hasCtrl(String s) {
+		if (s == null) {
+			return false;
+		}
+		for (int i = 0; i < s.length(); i++) {
+			char c = s.charAt(i);
+			if (c < 0x20 || c == 0x7f) {
+				return true;
+			}
+		}
+		return false;
 	}
 
 	/**

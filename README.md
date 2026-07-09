@@ -306,7 +306,10 @@ docker run -e SVNWEBUI_API_TOKEN=<强随机令牌> ... cym1102/svnwebui
 
 - `permission` 取值 `r` / `rw`(与站内一致)。
 - 用户不存在则新建(普通用户 `type=0`、启用 `open=0`);已存在则更新其口令(改密幂等)。
-- 成功后重生成 `passwd` / `authz` 配置文件并返回 `success=true`。
+- 成功后重生成 `passwd` / `authz` 配置文件。
+- **rw 目录预建**:成功后对每个 `rw` 授权路径,以本机 `file://`(与仓库同机、绕 authz、幂等)`svn mkdir --parents` 建好目录再返回 `success=true`。
+  原因:svnserve 下用户仅对父目录有 `r` 时无法在其下自建子目录(需父目录 `rw`,但那会破坏隔离);由本 API 预建后,用户仅需对自身目录有 `rw` 即可写文件。此步需服务器安装 **svn 客户端**;可用 `svnwebui.ensure-dir=false` 关闭、`svnwebui.svn-bin` 指定 svn 客户端路径(默认 `svn`)。
+- **输入校验**:`user`/`pass`/`path` 拒绝换行/控制符(防 passwd/authz 注入)、`path` 拒绝 `..`(防路径穿越)与 `[ ]`;非法输入在任何写入前即返回 `success=false`。
 
 ##### POST /api/revoke
 

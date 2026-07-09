@@ -165,6 +165,37 @@ public class ApiControllerTest extends HttpTester {
 	}
 
 	// =========================================================================
+	// 输入校验:非法 user/pass/path/permission 在任何 DB 写之前被拒(防 passwd/authz 注入与路径穿越)
+	// =========================================================================
+	@Test
+	public void invalid_input_rejected_without_db_change() throws Exception {
+		enableToken();
+		createRepo();
+		long usersBefore = userCount();
+		long repoUsersBefore = repoUserCount();
+
+		// 路径穿越 ..
+		assertFalse(post("/api/provision", TOKEN,
+				"{\"user\":\"eve\",\"pass\":\"P\",\"repo\":\"" + REPO + "\",\"paths\":[{\"path\":\"/../evil\",\"permission\":\"rw\"}]}")
+				.getBool("success"), "路径含 .. 应被拒");
+		// 用户名含斜杠
+		assertFalse(post("/api/provision", TOKEN,
+				"{\"user\":\"a/b\",\"pass\":\"P\",\"repo\":\"" + REPO + "\",\"paths\":[{\"path\":\"/a\",\"permission\":\"rw\"}]}")
+				.getBool("success"), "用户名含 / 应被拒");
+		// 口令含换行(passwd 注入)
+		assertFalse(post("/api/provision", TOKEN,
+				"{\"user\":\"eve\",\"pass\":\"P\\ninject = x\",\"repo\":\"" + REPO + "\",\"paths\":[{\"path\":\"/a\",\"permission\":\"rw\"}]}")
+				.getBool("success"), "口令含换行应被拒");
+		// 非法权限
+		assertFalse(post("/api/provision", TOKEN,
+				"{\"user\":\"eve\",\"pass\":\"P\",\"repo\":\"" + REPO + "\",\"paths\":[{\"path\":\"/a\",\"permission\":\"rwx\"}]}")
+				.getBool("success"), "非法权限应被拒");
+
+		assertEquals(usersBefore, userCount(), "非法输入不得改动 User 行数");
+		assertEquals(repoUsersBefore, repoUserCount(), "非法输入不得改动 RepositoryUser 行数");
+	}
+
+	// =========================================================================
 	// SVNWEBUI-4: 覆盖式收敛 —— 预置 /a=rw,/b=rw → provision paths=[{/a,r}] → 仅剩 /a=r
 	// =========================================================================
 	@Test
